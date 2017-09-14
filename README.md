@@ -6,6 +6,8 @@ Consistent simultaneous estimates of DNA methylation and hydroxymethylation usin
 
 Install the R package using the following commands on the R console:
 
+```{r}
 install.packages("devtools")
 devtools::install_github("samarafk/MLML2R")
 library(MLML2R)
+```
