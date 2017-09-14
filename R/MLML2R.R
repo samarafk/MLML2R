@@ -12,7 +12,7 @@
 
 
 
-E5MiLE <- function(
+MLML2R <- function(
   G       = NULL,
   H       = NULL,
   L       = NULL,

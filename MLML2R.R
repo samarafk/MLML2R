@@ -8,11 +8,7 @@
 #' @param U no methylation from BS-conversion.
 #' @param tol convergent tolerance.
 #' @return Returns a list with estimates for proportion of methylation (mC), proportion of hydroxymethylation (hmC), and proportion of no methylation (C).
-
-
-
-
-E5MiLE <- function(
+MLML2R <- function(
   G       = NULL,
   H       = NULL,
   L       = NULL,
