@@ -9,7 +9,7 @@
 #' @param tol convergent tolerance.
 #' @return The returned value is a list with the following components.
 #' @return \item{mC}{estimate for the proportion of methylation.}
-#' @return \item{hmC}{estimate for the proportion of methylation.}
+#' @return \item{hmC}{estimate for the proportion of hydroxymethylation.}
 #' @return \item{C}{estimate for the proportion of unmethylation.}
 
 MLML2R <- function(

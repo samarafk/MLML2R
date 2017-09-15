@@ -27,7 +27,7 @@ The returned value is a list with the following components.
 
 \item{mC}{estimate for the proportion of methylation.}
 
-\item{hmC}{estimate for the proportion of methylation.}
+\item{hmC}{estimate for the proportion of hydroxymethylation.}
 
 \item{C}{estimate for the proportion of unmethylation.}
 }
