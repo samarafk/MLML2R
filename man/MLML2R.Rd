@@ -23,7 +23,13 @@ MLML2R(G = NULL, H = NULL, L = NULL, M = NULL, T = NULL, U = NULL,
 \item{tol}{convergent tolerance.}
 }
 \value{
-Returns a list with estimates for proportion of methylation (mC), proportion of hydroxymethylation (hmC), and proportion of no methylation (C).
+The returned value is a list with the following components.
+
+\item{mC}{estimate for the proportion of methylation.}
+
+\item{hmC}{estimate for the proportion of methylation.}
+
+\item{C}{estimate for the proportion of unmethylation.}
 }
 \description{
 MLE estimates of 5-mC and 5-hmC levels.

@@ -7,10 +7,10 @@
 #' @param T 5-mC+5-hmC from BS-conversion.
 #' @param U no methylation from BS-conversion.
 #' @param tol convergent tolerance.
-#' @return Returns a list with estimates for proportion of methylation (mC), proportion of hydroxymethylation (hmC), and proportion of no methylation (C).
-
-
-
+#' @return The returned value is a list with the following components.
+#' @return \item{mC}{estimate for the proportion of methylation.}
+#' @return \item{hmC}{estimate for the proportion of methylation.}
+#' @return \item{C}{estimate for the proportion of unmethylation.}
 
 MLML2R <- function(
   G       = NULL,
