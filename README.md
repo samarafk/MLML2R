@@ -1,5 +1,5 @@
 # MLML2R
-Consistent simultaneous estimates of DNA methylation and hydroxymethylation using R
+Consistent simultaneous maximum likelihood estimates of DNA methylation and hydroxymethylation using R
 
 
 # How to get started
