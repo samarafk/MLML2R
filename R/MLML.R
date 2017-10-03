@@ -144,6 +144,7 @@ MLML <- function(
     proportions$mC <- pm
     proportions$hmC <- ph
     proportions$C <- pu
+    proportions$methods <- methods
 
     row.names(proportions[[1]]) <- row.names(T)
     colnames(proportions[[1]]) <- colnames(T)
@@ -152,5 +153,5 @@ MLML <- function(
     row.names(proportions[[3]]) <- row.names(T)
     colnames(proportions[[3]]) <- colnames(T)
 
-    return(proportions,methods)
+    return(proportions)
   }
