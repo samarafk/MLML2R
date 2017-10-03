@@ -36,3 +36,7 @@ The returned value is a list with the following components.
 \description{
 MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.
 }
+\references{
+Qu et al. MLML: consistent simultaneous estimates of DNA methylation and hydroxymethylation.
+  Bioinformatics 2013, 29(20) pages 2645--2646.
+}

@@ -12,6 +12,9 @@
 #' @return \item{hmC}{maximum likelihood estimate for the proportion of hydroxymethylation.}
 #' @return \item{C}{maximum likelihood estimate for the proportion of unmethylation.}
 #' @return \item{methods}{the conversion methods used to produce the MLE}
+#' @references
+#'   Qu et al. MLML: consistent simultaneous estimates of DNA methylation and hydroxymethylation.
+#'   Bioinformatics 2013, 29(20) pages 2645--2646.
 
 MLML <- function(
   G       = NULL,
