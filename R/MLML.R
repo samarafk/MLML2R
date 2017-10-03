@@ -11,6 +11,7 @@
 #' @return \item{mC}{maximum likelihood estimate for the proportion of methylation.}
 #' @return \item{hmC}{maximum likelihood estimate for the proportion of hydroxymethylation.}
 #' @return \item{C}{maximum likelihood estimate for the proportion of unmethylation.}
+#' @return \item{methods}{the conversion methods used to produce the MLE}
 
 MLML <- function(
   G       = NULL,
@@ -64,7 +65,7 @@ MLML <- function(
       !is.null(H) &
       !is.null(L) & !is.null(M) &
       !is.null(T) & !is.null(U)) {
-    ######### 3 métodos
+    ######### 3 methods
 
     while (diff > tol) {
       pme_ant <- pme
@@ -78,8 +79,11 @@ MLML <- function(
       diff <- abs(max(diff_pme,diff_phe))
     }
 
+    methods <- c("TAB-conversion +  oxBS-conversion + standard BS-conversion")
+
+
   } else if (is.null(G) || is.null(H)) {
-    ##### ox-seq + bs-seq
+    ##### oxBS-seq + BS-seq
 
     while (diff > tol) {
       pme_ant <- pme
@@ -91,9 +95,12 @@ MLML <- function(
       diff_phe <- abs(max(phe-phe_ant))
       diff <- abs(max(diff_pme,diff_phe))
     }
+    
+    methods <- c("oxBS-conversion + standard BS-conversion")
+
 
   } else if (is.null(M) || is.null(L)) {
-    ##### tab-seq + bs-seq
+    ##### TAB-seq + BS-seq
 
     while (diff > tol) {
       pme_ant <- pme
@@ -107,9 +114,11 @@ MLML <- function(
       diff_phe <- abs(max(phe-phe_ant))
       diff <- abs(max(diff_pme,diff_phe))
     }
+    
+    methods <- c("TAB-conversion + standard BS-conversion")
 
   } else {
-    ##### tab-seq + ox-seq
+    ##### TAB-seq + Ox-seq
 
     while (diff > tol) {
       pme_ant <- pme
@@ -122,10 +131,11 @@ MLML <- function(
       diff_phe <- abs(max(phe-phe_ant))
       diff <- abs(max(diff_pme,diff_phe))
     }
+
+    methods <- c("TAB-conversion +  oxBS-conversion")
+
   }
 
-  #pm <- round(pme, 4)
-  #ph <- round(phe, 4)
   pm <- pme
   ph <- phe
   pu <- (1 - pm - ph)
@@ -142,5 +152,5 @@ MLML <- function(
     row.names(proportions[[3]]) <- row.names(T)
     colnames(proportions[[3]]) <- colnames(T)
 
-    return(proportions)
+    return(proportions,methods)
   }

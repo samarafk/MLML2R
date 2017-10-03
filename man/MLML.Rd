@@ -30,6 +30,8 @@ The returned value is a list with the following components.
 \item{hmC}{maximum likelihood estimate for the proportion of hydroxymethylation.}
 
 \item{C}{maximum likelihood estimate for the proportion of unmethylation.}
+
+\item{methods}{the conversion methods used to produce the MLE}
 }
 \description{
 MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.
