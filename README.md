@@ -212,10 +212,9 @@ save(rgSet,file="rgSet.rds")
 
 ## Preprocessing
 
-First, we removed probes with detection p-value $<0.01$ in any of the 8 arrays. The function `detectionP`  identifies failed positions defined as both the methylated and unmethylated channel reporting background signal levels.
+We refer the reader to the `minfi` package tutorials for more preprocessing options.
 
-
-
+First, we removed probes with detection p-value $<0.01$ in any of the 8 arrays. The function `detectionP` identifies failed positions defined as both the methylated and unmethylated channel reporting background signal levels.
 
 
 ```r
@@ -246,6 +245,15 @@ MSet <- MSet[keep_probes,] # keep good probes
 
 Arrays were then normalized using the SWAN method.
 
+
+From a `MethylSet` it is easy to compute Beta values, defined as
+
+$$Beta = Meth / (Meth + Unmeth + offset)$$
+
+The offset is chosen to avoid dividing with small values. Illumina uses a default of 100. The function `getBeta` from `minfi` package can be used to obtain the Beta values.
+
+
+
 ```r
 MSet.swan<- preprocessSWAN(rgSet, mSet = MSet)
 densityPlot(MSet.swan, sampGroups= pData(rgSet)$method,
@@ -272,11 +280,11 @@ devtools::install_github("samarafk/MLML2R")
 Prepare de input data:
 
 ```r
-MethylatedBS1 <- getMeth(MSet.swan)[,c(1,3,5,6)]
-UnMethylatedBS1 <- getUnmeth(MSet.swan)[,c(1,3,5,6)]
+MethylatedBS <- getMeth(MSet.swan)[,c(1,3,5,6)]
+UnMethylatedBS <- getUnmeth(MSet.swan)[,c(1,3,5,6)]
 
-MethylatedOxBS1 <- getMeth(MSet.swan)[,c(7,8,2,4)]
-UnMethylatedOxBS1 <- getUnmeth(MSet.swan)[,c(7,8,2,4)]
+MethylatedOxBS <- getMeth(MSet.swan)[,c(7,8,2,4)]
+UnMethylatedOxBS <- getUnmeth(MSet.swan)[,c(7,8,2,4)]
 ```
 
 
@@ -286,7 +294,7 @@ Getting the MLE estimates:
 ```r
 library(MLML2R)
 
-results <- MLML(T = MethylatedBS1 , U = UnMethylatedBS1, L = UnMethylatedOxBS1, M = MethylatedOxBS1,tol=0.0001)
+results <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,tol=0.0001)
 save(results,file="results.rds")
 ```
 
@@ -295,7 +303,7 @@ Plot of the results (we have 4 replicates)
 
 
 ```r
-plot(density(results$hmC[,1]),main= "5-hmC - EM")
+plot(density(results$hmC[,1]),main= "5-hmC using MLML")
 lines(density(results$hmC[,2]),col=2)
 lines(density(results$hmC[,3]),col=3)
 lines(density(results$hmC[,4]),col=4)
@@ -304,7 +312,7 @@ lines(density(results$hmC[,4]),col=4)
 ![](README_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
 
 ```r
-plot(density(results$mC[,1]),main= "5-mC - EM")
+plot(density(results$mC[,1]),main= "5-mC using MLML",ylim=c(0,5))
 lines(density(results$mC[,2]),col=2)
 lines(density(results$mC[,3]),col=3)
 lines(density(results$mC[,4]),col=4)
@@ -313,3 +321,21 @@ lines(density(results$mC[,4]),col=4)
 ![](README_files/figure-html/unnamed-chunk-22-2.png)<!-- -->
 
 
+## Naive estimates
+
+
+The naive approach to obtain 5-hmC levels is $\beta_{BS} -  \beta_{OxBS}$. This approach results in negative values for the 5-hmC levels.
+
+
+```r
+beta_BS <- getBeta(MSet.swan)[,c(1,3,5,6)]
+beta_OxBS <- getBeta(MSet.swan)[,c(7,8,2,4)]
+hmC_naive <- beta_BS-beta_OxBS
+
+plot(density(hmC_naive[,1]),main= "5-hmC using naive",ylim=c(0,8))
+lines(density(hmC_naive[,2]),col=2)
+lines(density(hmC_naive[,3]),col=3)
+lines(density(hmC_naive[,4]),col=4)
+```
+
+![](README_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
