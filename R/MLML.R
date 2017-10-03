@@ -1,18 +1,18 @@
-#' MLE estimates of 5-mC and 5-hmC levels.
+#' MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.
 #'
-#' @param G no 5-hmC from TAB-conversion.
-#' @param H 5-hmC from TAB-conversion.
-#' @param L no 5-mC from oxBS-conversion.
-#' @param M 5-mC from oxBS-conversion.
-#' @param T 5-mC+5-hmC from BS-conversion.
-#' @param U no methylation from BS-conversion.
+#' @param G Unmethylated channel (intensities/counts) from TAB-conversion (5-C + 5-mC).
+#' @param H Methylated channel (intensities/counts) from TAB-conversion  (True 5-hmC).
+#' @param L Unmethylated channel (intensities/counts) from oxBS-conversion (5-C + 5-hmC).
+#' @param M Methylated channel (intensities/counts) from oxBS-conversion (True 5-mC).
+#' @param T Methylated channel (intensities/counts) from standard BS-conversion (5-mC+5-hmC).
+#' @param U Unmethylated channel (intensities/counts) from standard BS-conversion (True 5-C).
 #' @param tol convergent tolerance.
 #' @return The returned value is a list with the following components.
-#' @return \item{mC}{estimate for the proportion of methylation.}
-#' @return \item{hmC}{estimate for the proportion of hydroxymethylation.}
-#' @return \item{C}{estimate for the proportion of unmethylation.}
+#' @return \item{mC}{maximum likelihood estimate for the proportion of methylation.}
+#' @return \item{hmC}{maximum likelihood estimate for the proportion of hydroxymethylation.}
+#' @return \item{C}{maximum likelihood estimate for the proportion of unmethylation.}
 
-MLML2R <- function(
+MLML <- function(
   G       = NULL,
   H       = NULL,
   L       = NULL,
