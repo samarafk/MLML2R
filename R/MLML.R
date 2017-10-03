@@ -6,7 +6,7 @@
 #' @param M Methylated channel (intensities/counts) from oxBS-conversion (True 5-mC).
 #' @param T Methylated channel (intensities/counts) from standard BS-conversion (5-mC+5-hmC).
 #' @param U Unmethylated channel (intensities/counts) from standard BS-conversion (True 5-C).
-#' @param tol convergent tolerance.
+#' @param tol convergence tolerance.
 #' @return The returned value is a list with the following components.
 #' @return \item{mC}{maximum likelihood estimate for the proportion of methylation.}
 #' @return \item{hmC}{maximum likelihood estimate for the proportion of hydroxymethylation.}

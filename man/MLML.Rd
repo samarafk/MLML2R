@@ -20,7 +20,7 @@ MLML(G = NULL, H = NULL, L = NULL, M = NULL, T = NULL, U = NULL,
 
 \item{U}{Unmethylated channel (intensities/counts) from standard BS-conversion (True 5-C).}
 
-\item{tol}{convergent tolerance.}
+\item{tol}{convergence tolerance.}
 }
 \value{
 The returned value is a list with the following components.
