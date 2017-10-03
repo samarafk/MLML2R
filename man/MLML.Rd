@@ -5,7 +5,7 @@
 \title{MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.}
 \usage{
 MLML(G = NULL, H = NULL, L = NULL, M = NULL, T = NULL, U = NULL,
-  tol = 0.001)
+  tol = 1e-04)
 }
 \arguments{
 \item{G}{Unmethylated channel (intensities/counts) from TAB-conversion (5-C + 5-mC).}

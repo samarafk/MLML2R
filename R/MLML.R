@@ -20,7 +20,7 @@ MLML <- function(
   M       = NULL,
   T       = NULL,
   U       = NULL,
-  tol = 0.001)
+  tol = 0.0001)
 {
 
   g <- if (is.null(G)) {
