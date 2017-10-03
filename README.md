@@ -16,12 +16,12 @@ library(MLML2R)
 ```
 
 
-Proposed analyses of single-base profiling of either 5-hmC or 5-mC require combining data obtained using bisulfite conversion, oxidative bisulfite conversion or Tet-Assisted bisulfite conversion methods, but doing so naively produces inconsistent estimates of 5-mC or 5-hmC level [(Qu *et al.*, 2013)](10.1093/bioinformatics/btt459). 
+Proposed analyses of single-base profiling of either 5-hmC or 5-mC require combining data obtained using bisulfite conversion, oxidative bisulfite conversion or Tet-Assisted bisulfite conversion methods, but doing so naively produces inconsistent estimates of 5-mC or 5-hmC level [(Qu *et al.*, 2013)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3789553/). 
 
 
 The function `MLML` provides maximum likelihood estimates (MLE) for 5-hmC and 5-mC levels using data from any combination of two of the methods: BS-seq, TAB-seq or oxBS-seq. The function also provides MLE when combining these three methods.
 
-The algorithm implemented in the `MLML` function is based on the Expectation-Maximization (EM) algorithm proposed by [Qu *et al.* (2013)](10.1093/bioinformatics/btt459). In addition, when only two methods are combined, our implementation is optimized, since we derived the exact MLE for 5-mC or 5-hmC levels, and the iterative EM algorithm is not needed. Our improved formulation can, thus, decrease analytic processing time and computational burden, common bottlenecks when processing single-base profiling data from thousands of samples.
+The algorithm implemented in the `MLML` function is based on the Expectation-Maximization (EM) algorithm proposed by [Qu *et al.* (2013)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3789553/). In addition, when only two methods are combined, our implementation is optimized, since we derived the exact MLE for 5-mC or 5-hmC levels, and the iterative EM algorithm is not needed. Our improved formulation can, thus, decrease analytic processing time and computational burden, common bottlenecks when processing single-base profiling data from thousands of samples.
 
 Furthermore, our routine is flexible and can be used with both next generation sequencing and Infinium Methylation microarray data in the R-statistical language.
 
@@ -140,34 +140,6 @@ The file names consists of a GEO identifier (the GSM part) followed by a standar
 We need to identify the samples from different methods: BS-conversion, oxBS-conversion.
 
 
-```
-## https://ftp.ncbi.nlm.nih.gov/geo/series/GSE63nnn/GSE63179/matrix/
-```
-
-```
-## OK
-```
-
-```
-## Found 1 file(s)
-```
-
-```
-## GSE63179_series_matrix.txt.gz
-```
-
-```
-## File stored at:
-```
-
-```
-## /var/folders/3g/q2gv94n12h30f2syd974x15m0000gn/T//Rtmp7bDSVT/GPL16304.soft
-```
-
-```
-## Warning in read.table(file = file, header = header, sep = sep, quote =
-## quote, : not all columns named in 'colClasses' exist
-```
 
 
 
