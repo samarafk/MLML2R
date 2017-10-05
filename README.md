@@ -32,7 +32,7 @@ Furthermore, our routine is flexible and can be used with both next generation s
 
 We will use the dataset from [Field *et al.* (2015)](https://doi.org/10.1371/journal.pone.0118202), which consists of eight DNA samples from the same DNA source treated with oxBS-BS and hybridized to the Infinium 450K array.
 
-The steps shown in this section follows [the vignette](https://kasperdanielhansen.github.io/genbioconductor/html/minfi.html) from `minfi` package.
+The steps shown in this section follows the [vignette](https://kasperdanielhansen.github.io/genbioconductor/html/minfi.html) from `minfi` package.
 
 ## Getting publicly available data
 
