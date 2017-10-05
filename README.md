@@ -1,7 +1,8 @@
-# `MLML2R` package
+# `MLML2R`: and R package for consistent simultaneous maximum likelihood estimates of DNA methylation and hydroxymethylation using R
+Samara F. Kiihl, Maria Tellez-Plaza  
 
 
-## Introduction
+# Introduction
 
 
 This document presents an example of the usage of the `MLML2R` package for R.
@@ -27,10 +28,16 @@ Furthermore, our routine is flexible and can be used with both next generation s
 
 
 
-## Getting the data
+# Preparing dataset
+
+We will use the dataset from [Field *et al.* (2015)](https://doi.org/10.1371/journal.pone.0118202), which consists of eight DNA samples from the same DNA source treated with oxBS-BS and hybridized to the Infinium 450K array.
+
+The steps shown in this section follows [the vignette](https://kasperdanielhansen.github.io/genbioconductor/html/minfi.html) from `minfi` package.
+
+## Getting publicly available data
 
 We start with the steps to get the raw data from the GEO repository.
-The dataset used here is from [Accurate Measurement of 5-Methylcytosine and 5-Hydroxymethylcytosine in Human Cerebellum DNA by Oxidative Bisulfite on an Array (OxBS-Array)](https://doi.org/10.1371/journal.pone.0118202). Data from the paper are available at GEO accession [GSE63179](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE63179).
+The dataset from [Field *et al.* (2015)](https://doi.org/10.1371/journal.pone.0118202) is available at GEO accession [GSE63179](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE63179).
 
 The sample was divided into four BS and four oxBS replicates.
  	
@@ -214,6 +221,15 @@ save(rgSet,file="rgSet.rds")
 
 We refer the reader to the `minfi` package tutorials for more preprocessing options.
 
+
+We need to install the required package bellow:
+
+```r
+source("https://bioconductor.org/biocLite.R")
+biocLite("IlluminaHumanMethylation450kmanifest")
+```
+
+
 First, we removed probes with detection p-value $<0.01$ in any of the 8 arrays. The function `detectionP` identifies failed positions defined as both the methylated and unmethylated channel reporting background signal levels.
 
 
@@ -230,12 +246,6 @@ We kept $83\%$ of the probes according to this criterion.
 
 The `rgSet` object is a class called `RGChannelSet` which represents two color data with a green and a red channel. We will use, as input in the `MLML` funcion, a `MethylSet`, which contains the methylated and unmethylated signals. The most basic way to construct a `MethylSet` is to using the function `preprocessRaw` which uses the array design to match up the different probes and color channels to construct the methylated and unmethylated signals. 
 
-First, we need to install the required package bellow:
-
-```r
-source("https://bioconductor.org/biocLite.R")
-biocLite("IlluminaHumanMethylation450kmanifest")
-```
 
 
 ```r
@@ -263,7 +273,7 @@ main= sprintf('Beta values for filtered probes (n= %s)', nrow(MSet.swan)))
 ![](README_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
 
 
-## Using the `MLML2R` package
+# Using the `MLML2R` package
 
 After all the preprocessing procedures, we now can use the `MLML2R` package to obtain the maximum likelihood estimates for the 5-hmC and 5-mC levels.
 
@@ -303,23 +313,28 @@ Plot of the results (we have 4 replicates)
 
 
 ```r
-plot(density(results$hmC[,1]),main= "5-hmC using MLML")
+par(mfrow =c(1,3)) 
+
+plot(density(results$hmC[,1]),main= "5-hmC using MLML",xlab=" ",xlim=c(0,1))
 lines(density(results$hmC[,2]),col=2)
 lines(density(results$hmC[,3]),col=3)
 lines(density(results$hmC[,4]),col=4)
-```
 
-![](README_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
-
-```r
-plot(density(results$mC[,1]),main= "5-mC using MLML",ylim=c(0,5))
+plot(density(results$mC[,1]),main= "5-mC using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
 lines(density(results$mC[,2]),col=2)
 lines(density(results$mC[,3]),col=3)
 lines(density(results$mC[,4]),col=4)
+
+plot(density(results$C[,1]),main= "5-C using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
+lines(density(results$C[,2]),col=2)
+lines(density(results$C[,3]),col=3)
+lines(density(results$C[,4]),col=4)
 ```
 
-![](README_files/figure-html/unnamed-chunk-22-2.png)<!-- -->
+<img src="README_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
 
+
+# Other methods to obtain the estimates
 
 ## Naive estimates
 
@@ -331,13 +346,104 @@ The naive approach to obtain 5-hmC levels is $\beta_{BS} -  \beta_{OxBS}$. This 
 beta_BS <- getBeta(MSet.swan)[,c(1,3,5,6)]
 beta_OxBS <- getBeta(MSet.swan)[,c(7,8,2,4)]
 hmC_naive <- beta_BS-beta_OxBS
+C_naive <- 1-beta_BS
+mC_naive <- beta_OxBS
+```
 
-plot(density(hmC_naive[,1]),main= "5-hmC using naive",ylim=c(0,8))
+
+
+```r
+par(mfrow =c(1,3)) 
+
+plot(density(hmC_naive[,1]),main= "5-hmC using naive",ylim=c(0,8),xlab=" ",xlim=c(-1,1))
 lines(density(hmC_naive[,2]),col=2)
 lines(density(hmC_naive[,3]),col=3)
 lines(density(hmC_naive[,4]),col=4)
+
+plot(density(mC_naive[,1]),main= "5-mC using naive",ylim=c(0,5),xlab=" ",xlim=c(0,1))
+lines(density(mC_naive[,2]),col=2)
+lines(density(mC_naive[,3]),col=3)
+lines(density(mC_naive[,4]),col=4)
+
+plot(density(C_naive[,1]),main= "5-C using naive",ylim=c(0,5),xlab=" ",xlim=c(0,1))
+lines(density(C_naive[,2]),col=2)
+lines(density(C_naive[,3]),col=3)
+lines(density(C_naive[,4]),col=4)
 ```
 
-![](README_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
+<img src="README_files/figure-html/unnamed-chunk-24-1.png" style="display: block; margin: auto;" />
 
+## `OxyBS` estimates
+
+For the specific case where only ox-BS and BS data are available, `OxyBS` package from [Houseman *et al.* (2016)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4978924/) can be use to obtain estimates.
+
+
+
+
+```r
+library(OxyBS)
+
+# Methylated signals from the BS and oxBS arrays
+methBS <- MethylatedBS
+methOxBS <- MethylatedOxBS
+# Unmethylated signals from the BS and oxBS arrays
+unmethBS <- UnMethylatedBS
+unmethOxBS <- UnMethylatedOxBS
+
+# Calculate Total Signals
+signalBS <- methBS+unmethBS
+signalOxBS <- methOxBS+unmethOxBS
+
+# Calculate Beta Values
+betaBS <- methBS/signalBS
+betaOxBS <- methOxBS/signalOxBS
+
+####################################################
+# 4. Apply fitOxBS function to preprocessed values
+####################################################
+
+# Select the number of CpGs and Subjects to which the method will be applied 
+nCpGs <- dim(unmethOxBS)[1]
+nSpecimens <- dim(unmethOxBS)[2]
+
+# Create container for the OxyBS results
+MethOxy <- array(NA,dim=c(nCpGs,nSpecimens,3))
+dimnames(MethOxy) <- list(
+  rownames(methBS)[1:nCpGs],
+  colnames(methBS)[1:nSpecimens], c("C","5mC","5hmC"))
+
+# Process results (one array at a time, slow)
+for(i in 1:nSpecimens){
+MethOxy[,i,] <-fitOxBS(betaBS[,i],betaOxBS[,i],signalBS[,i],signalOxBS[,i])
+}
+```
+
+
+
+
+
+
+
+Plot of the results (we have 4 replicates)
+
+
+```r
+par(mfrow =c(1,3)) 
+plot(density(MethOxy[,1,3]),main= "5-hmC using OxyBS",xlab="")
+lines(density(MethOxy[,2,3]),col=2)
+lines(density(MethOxy[,3,3]),col=3)
+lines(density(MethOxy[,4,3]),col=4)
+
+plot(density(MethOxy[,1,2]),main= "5-mC using OxyBS",ylim=c(0,5),xlab="")
+lines(density(MethOxy[,2,2]),col=2)
+lines(density(MethOxy[,3,2]),col=3)
+lines(density(MethOxy[,4,2]),col=4)
+
+plot(density(MethOxy[,1,1]),main= "5-C using OxyBS",ylim=c(0,5),xlab="")
+lines(density(MethOxy[,2,1]),col=2)
+lines(density(MethOxy[,3,1]),col=3)
+lines(density(MethOxy[,4,1]),col=4)
+```
+
+<img src="README_files/figure-html/unnamed-chunk-28-1.png" style="display: block; margin: auto;" />
 
