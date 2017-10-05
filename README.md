@@ -1,4 +1,4 @@
-# `MLML2R`: and R package for consistent simultaneous maximum likelihood estimates of DNA methylation and hydroxymethylation using R
+# `MLML2R` package: maximum likelihood estimates of DNA methylation and hydroxymethylation using R
 Samara F. Kiihl, Maria Tellez-Plaza  
 
 
