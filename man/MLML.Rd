@@ -5,7 +5,7 @@
 \title{MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.}
 \usage{
 MLML(G = NULL, H = NULL, L = NULL, M = NULL, T = NULL, U = NULL,
-  tol = 1e-04)
+  tol = 1e-04, exact = FALSE)
 }
 \arguments{
 \item{G}{Unmethylated channel (intensities/counts) from TAB-conversion (5-C + 5-mC).}
@@ -20,7 +20,11 @@ MLML(G = NULL, H = NULL, L = NULL, M = NULL, T = NULL, U = NULL,
 
 \item{U}{Unmethylated channel (intensities/counts) from standard BS-conversion (True 5-C).}
 
-\item{tol}{convergence tolerance.}
+\item{tol}{convergence tolerance; ignored if exact=TRUE}
+
+\item{exact}{logical indicating if the exact constrained MLE should be returned as estimate; 
+ignored when data is available for all the 3 methods: TAB, oxBS and BS.
+If exact=FALSE EM-algorithm is used.}
 }
 \value{
 The returned value is a list with the following components.
@@ -36,7 +40,20 @@ The returned value is a list with the following components.
 \description{
 MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.
 }
+\details{
+The function returns MLE estimates based on EM-algorithm for any 
+ combination of two methods or all three methods. When only two methods are combined, the user 
+ can set the option exact=TRUE to obtain exact constrained MLE.
+ The function assumes that the order of the rows and columns in the input matrices are consistent.
+ In addition, all the input matrices must have the same dimension.
+ Usually, rows represent CpG loci and columns are the samples.
+}
 \references{
 Qu J, Zhou M, Song Q, Hong EE, Smith AD. MLML: consistent simultaneous estimates of DNA methylation and hydroxymethylation.
   Bioinformatics. 2013;29(20):2645-2646. doi:10.1093/bioinformatics/btt459.
+  
+  Zongli Xu, Jack A. Taylor, Yuet-Kin Leung, Shuk-Mei Ho, Liang Niu; 
+  oxBS-MLE: an efficient method to estimate 5-methylcytosine and 5-hydroxymethylcytosine 
+  in paired bisulfite and oxidative bisulfite treated DNA, 
+  Bioinformatics, 2016;32(23):3667–3669. https://doi.org/10.1093/bioinformatics/btw527
 }
