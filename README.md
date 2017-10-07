@@ -230,7 +230,7 @@ biocLite("IlluminaHumanMethylation450kmanifest")
 ```
 
 
-First, we removed probes with detection p-value $<0.01$ in any of the 8 arrays. The function `detectionP` identifies failed positions defined as both the methylated and unmethylated channel reporting background signal levels.
+First, we removed probes with detection p-value <0.01 in any of the 8 arrays. The function `detectionP` identifies failed positions defined as both the methylated and unmethylated channel reporting background signal levels.
 
 
 ```r
@@ -244,33 +244,38 @@ keep_probes <- rowSums(failed) <= maxFail
 We kept $83\%$ of the probes according to this criterion.
 
 
-The `rgSet` object is a class called `RGChannelSet` which represents two color data with a green and a red channel. We will use, as input in the `MLML` funcion, a `MethylSet`, which contains the methylated and unmethylated signals. The most basic way to construct a `MethylSet` is to using the function `preprocessRaw` which uses the array design to match up the different probes and color channels to construct the methylated and unmethylated signals. 
+The `rgSet` object is a class called `RGChannelSet` which represents two color data with a green and a red channel. We will use, as input in the `MLML` funcion, a `MethylSet`, which contains the methylated and unmethylated signals. The most basic way to construct a `MethylSet` is to using the function `preprocessRaw` which uses the array design to match up the different probes and color channels to construct the methylated and unmethylated signals. Here we will use the `preprocessNoob` function, which does the preprocessing and returns a `MethylSet`.
+
+
+
+
+Arrays were then normalized using the Noob/ssNoob preprocessing method for Infinium methylation microarrays.
+
+
+From a `MethylSet` it is easy to compute Beta values, defined as:
+
+Beta = Meth / (Meth + Unmeth + c)
+
+The c constant is chosen to avoid dividing with small values. Illumina uses a default of c=100. The function `getBeta` from `minfi` package can be used to obtain the Beta values.
 
 
 
 ```r
-MSet <- preprocessRaw(rgSet)
-MSet <- MSet[keep_probes,] # keep good probes
+MSet.noob<- preprocessNoob(rgSet[keep_probes,])
 ```
 
-Arrays were then normalized using the SWAN method.
-
-
-From a `MethylSet` it is easy to compute Beta values, defined as
-
-$$Beta = Meth / (Meth + Unmeth + offset)$$
-
-The offset is chosen to avoid dividing with small values. Illumina uses a default of 100. The function `getBeta` from `minfi` package can be used to obtain the Beta values.
-
-
+```
+## [preprocessNoob] Applying R/G ratio flip to fix dye bias...
+```
 
 ```r
-MSet.swan<- preprocessSWAN(rgSet, mSet = MSet)
-densityPlot(MSet.swan, sampGroups= pData(rgSet)$method,
-main= sprintf('Beta values for filtered probes (n= %s)', nrow(MSet.swan)))
+densityPlot(MSet.noob, sampGroups= pData(rgSet)$method,
+main= sprintf('Beta values for filtered probes (n= %s)', nrow(MSet.noob)))
 ```
 
 ![](README_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
+
+
 
 
 # Using the `MLML2R` package
@@ -289,23 +294,27 @@ devtools::install_github("samarafk/MLML2R")
 
 Prepare de input data:
 
-```r
-MethylatedBS <- getMeth(MSet.swan)[,c(1,3,5,6)]
-UnMethylatedBS <- getUnmeth(MSet.swan)[,c(1,3,5,6)]
 
-MethylatedOxBS <- getMeth(MSet.swan)[,c(7,8,2,4)]
-UnMethylatedOxBS <- getUnmeth(MSet.swan)[,c(7,8,2,4)]
+
+```r
+MethylatedBS <- getMeth(MSet.noob)[,c(1,3,5,6)]
+UnMethylatedBS <- getUnmeth(MSet.noob)[,c(1,3,5,6)]
+
+MethylatedOxBS <- getMeth(MSet.noob)[,c(7,8,2,4)]
+UnMethylatedOxBS <- getUnmeth(MSet.noob)[,c(7,8,2,4)]
 ```
 
 
-Getting the MLE estimates:
+
+
+
+Getting the MLE estimates using EM-algorithm:
 
 
 ```r
 library(MLML2R)
-
-results <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,tol=0.0001)
-save(results,file="results.rds")
+results_em <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,tol=0.0001)
+save(results_em,file="results_em.rds")
 ```
 
 
@@ -315,36 +324,69 @@ Plot of the results (we have 4 replicates)
 ```r
 par(mfrow =c(1,3)) 
 
-plot(density(results$hmC[,1]),main= "5-hmC using MLML",xlab=" ",xlim=c(0,1))
-lines(density(results$hmC[,2]),col=2)
-lines(density(results$hmC[,3]),col=3)
-lines(density(results$hmC[,4]),col=4)
+plot(density(results_em$hmC[,1]),main= "5-hmC using MLML",xlab=" ",xlim=c(0,1))
+lines(density(results_em$hmC[,2]),col=2)
+lines(density(results_em$hmC[,3]),col=3)
+lines(density(results_em$hmC[,4]),col=4)
 
-plot(density(results$mC[,1]),main= "5-mC using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
-lines(density(results$mC[,2]),col=2)
-lines(density(results$mC[,3]),col=3)
-lines(density(results$mC[,4]),col=4)
+plot(density(results_em$mC[,1]),main= "5-mC using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
+lines(density(results_em$mC[,2]),col=2)
+lines(density(results_em$mC[,3]),col=3)
+lines(density(results_em$mC[,4]),col=4)
 
-plot(density(results$C[,1]),main= "5-C using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
-lines(density(results$C[,2]),col=2)
-lines(density(results$C[,3]),col=3)
-lines(density(results$C[,4]),col=4)
+plot(density(results_em$C[,1]),main= "5-C using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
+lines(density(results_em$C[,2]),col=2)
+lines(density(results_em$C[,3]),col=3)
+lines(density(results_em$C[,4]),col=4)
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-25-1.png" style="display: block; margin: auto;" />
 
+
+Getting the constrained exact MLE estimates:
+
+
+```r
+library(MLML2R)
+results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,exact=TRUE)
+save(results_exact,file="results_exact.rds")
+```
+
+
+Plot of the results (we have 4 replicates)
+
+
+```r
+par(mfrow =c(1,3)) 
+
+plot(density(results_exact$hmC[,1]),main= "5-hmC using MLML",xlab=" ",xlim=c(0,1))
+lines(density(results_exact$hmC[,2]),col=2)
+lines(density(results_exact$hmC[,3]),col=3)
+lines(density(results_exact$hmC[,4]),col=4)
+
+plot(density(results_exact$mC[,1]),main= "5-mC using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
+lines(density(results_exact$mC[,2]),col=2)
+lines(density(results_exact$mC[,3]),col=3)
+lines(density(results_exact$mC[,4]),col=4)
+
+plot(density(results_exact$C[,1]),main= "5-C using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
+lines(density(results_exact$C[,2]),col=2)
+lines(density(results_exact$C[,3]),col=3)
+lines(density(results_exact$C[,4]),col=4)
+```
+
+<img src="README_files/figure-html/unnamed-chunk-27-1.png" style="display: block; margin: auto;" />
 
 # Other methods to obtain the estimates
 
 ## Naive estimates
 
-
 The naive approach to obtain 5-hmC levels is $\beta_{BS} -  \beta_{OxBS}$. This approach results in negative values for the 5-hmC levels.
 
 
 ```r
-beta_BS <- getBeta(MSet.swan)[,c(1,3,5,6)]
-beta_OxBS <- getBeta(MSet.swan)[,c(7,8,2,4)]
+beta_BS <- getBeta(MSet.noob)[,c(1,3,5,6)]
+beta_OxBS <- getBeta(MSet.noob)[,c(7,8,2,4)]
 hmC_naive <- beta_BS-beta_OxBS
 C_naive <- 1-beta_BS
 mC_naive <- beta_OxBS
@@ -371,7 +413,8 @@ lines(density(C_naive[,3]),col=3)
 lines(density(C_naive[,4]),col=4)
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-24-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-29-1.png" style="display: block; margin: auto;" />
+
 
 ## `OxyBS` estimates
 
@@ -423,7 +466,6 @@ MethOxy[,i,] <-fitOxBS(betaBS[,i],betaOxBS[,i],signalBS[,i],signalOxBS[,i])
 
 
 
-
 Plot of the results (we have 4 replicates)
 
 
@@ -445,5 +487,37 @@ lines(density(MethOxy[,3,1]),col=3)
 lines(density(MethOxy[,4,1]),col=4)
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-28-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-33-1.png" style="display: block; margin: auto;" />
 
+
+## Comparison of 5-hmC estimates from different methods
+
+
+
+```r
+library(GGally)
+# data for replicate 1 is shown
+df <- data.frame(x = as.numeric(results_exact$hmC[,1]),y=as.numeric(results_em$hmC[,1]),
+                 z = as.numeric(MethOxy[,1,3]),w=as.numeric(hmC_naive[,1]))
+ggpairs(df, title = "5-hmc estimates",  
+  axisLabels = "show",columnLabels=c("Exact MLE","EM","OxyBS","Naive"))
+```
+
+<img src="README_files/figure-html/unnamed-chunk-34-1.png" style="display: block; margin: auto;" />
+
+
+
+```r
+library(ggplot2)
+ggplot(df,aes(x=x,y=z)) + geom_point(alpha = 0.3) + xlab("Exact MLE") +
+  ylab("OxyBS")
+```
+
+<img src="README_files/figure-html/unnamed-chunk-35-1.png" style="display: block; margin: auto;" />
+
+```r
+ggplot(df,aes(x=y,y=z)) + geom_point(alpha = 0.3) + xlab("EM") +
+  ylab("OxyBS")
+```
+
+<img src="README_files/figure-html/unnamed-chunk-35-2.png" style="display: block; margin: auto;" />
