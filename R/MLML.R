@@ -154,8 +154,8 @@ MLML <- function(G       = NULL,
     
     if (exact)
     {
-      pme = m / (m + l)
-      phe = h / (h + g)
+      pme = ifelse(m/(m+l)<=g/(h+g),m/(m+l),(g+m)/(g+h+m+l))
+      phe = ifelse(m/(m+l)<=g/(h+g),h/(h+g),(h+l)/(g+h+m+l)) 
     } else {
       while (diff > tol) {
         pme_ant <- pme
