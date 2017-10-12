@@ -69,8 +69,16 @@ MLML <- function(G       = NULL,
   } else {
     round(T)
   }
+
+  four <-function(x1,x2,x3,x4){
+    return(identical(x1,x2) & identical(x1,x3) & identical(x1,x4))
+  }
   
-  pme <- 0.5
+  six <-function(x1,x2,x3,x4,x5,x6){
+    return(identical(x1,x2) & identical(x1,x3) & identical(x1,x4) & identical(x1,x5) & identical(x1,x6))
+  }
+  
+  pme <- 0.3
   phe <- 0.5
   diff <- 1
   
@@ -82,6 +90,10 @@ MLML <- function(G       = NULL,
       !is.null(L) & !is.null(M) &
       !is.null(T) & !is.null(U)) {
     ######### 3 methods
+
+      if (!six(rownames(L),rownames(M),rownames(T),
+                        rownames(U),rownames(G),rownames(H))){stop("Row names are inconsistent")}
+    else {
     
     while (diff > tol) {
       pme_ant <- pme
@@ -94,6 +106,7 @@ MLML <- function(G       = NULL,
       diff_phe <- abs(max(phe - phe_ant))
       diff <- abs(max(diff_pme, diff_phe))
     }
+}
     
     methods <-
       c("TAB-conversion +  oxBS-conversion + standard BS-conversion")
@@ -101,6 +114,10 @@ MLML <- function(G       = NULL,
     
   } else if (is.null(G) || is.null(H)) {
     ##### oxBS-seq + BS-seq
+
+if (!four(rownames(L),rownames(M),rownames(T),
+                        rownames(U))){stop("Row names are inconsistent")}
+    else {
     
     if (exact)
     {
@@ -120,12 +137,18 @@ MLML <- function(G       = NULL,
       }
       
     }
+
+}
     
     methods <- c("oxBS-conversion + standard BS-conversion")
     
     
   } else if (is.null(M) || is.null(L)) {
     ##### TAB-seq + BS-seq
+
+       if (!four(rownames(G),rownames(H),rownames(T),
+                        rownames(U))){stop("Row names are inconsistent")}
+    else {
     
     if (exact)
     {
@@ -146,11 +169,16 @@ MLML <- function(G       = NULL,
         diff <- abs(max(diff_pme, diff_phe))
       }
     }
+}
     methods <- c("TAB-conversion + standard BS-conversion")
     
     
   } else {
     ##### TAB-seq + Ox-seq
+
+      if (!four(rownames(G),rownames(H),rownames(M),
+                        rownames(L))){stop("Row names are inconsistent")}
+    else {
     
     if (exact)
     {
@@ -169,6 +197,7 @@ MLML <- function(G       = NULL,
         diff <- abs(max(diff_pme, diff_phe))
       }
     }
+}
     methods <- c("TAB-conversion +  oxBS-conversion")
     
     
