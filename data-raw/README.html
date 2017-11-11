@@ -263,7 +263,12 @@ a &lt;- sample(1:dim(MethylatedBS)[1],100,replace=FALSE)
 MethylatedBS &lt;- MethylatedBS[a,1:2]
 UnMethylatedBS &lt;- UnMethylatedBS[a,1:2]
 MethylatedOxBS &lt;- MethylatedOxBS[a,1:2]
-UnMethylatedOxBS &lt;- UnMethylatedOxBS[a,1:2]</code></pre>
+UnMethylatedOxBS &lt;- UnMethylatedOxBS[a,1:2]
+
+colnames(MethylatedBS) &lt;- c(&quot;sample1&quot;,&quot;sample2&quot;)
+colnames(UnMethylatedBS) &lt;- c(&quot;sample1&quot;,&quot;sample2&quot;)
+colnames(MethylatedOxBS) &lt;- c(&quot;sample1&quot;,&quot;sample2&quot;)
+colnames(UnMethylatedOxBS) &lt;- c(&quot;sample1&quot;,&quot;sample2&quot;)</code></pre>
 </div>
 
 

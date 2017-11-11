@@ -277,6 +277,11 @@ MethylatedBS <- MethylatedBS[a,1:2]
 UnMethylatedBS <- UnMethylatedBS[a,1:2]
 MethylatedOxBS <- MethylatedOxBS[a,1:2]
 UnMethylatedOxBS <- UnMethylatedOxBS[a,1:2]
+
+colnames(MethylatedBS) <- c("sample1","sample2")
+colnames(UnMethylatedBS) <- c("sample1","sample2")
+colnames(MethylatedOxBS) <- c("sample1","sample2")
+colnames(UnMethylatedOxBS) <- c("sample1","sample2")
 ```
 
 
