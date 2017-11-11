@@ -1,0 +1,234 @@
+---
+title: "Example data for `MLML2R` package"
+output:
+  html_document:
+    keep_md: yes
+    toc: true
+    number_sections: true
+---
+
+
+
+
+
+# Getting publicly available data
+
+
+We will use the dataset from [Field *et al.* (2015)](https://doi.org/10.1371/journal.pone.0118202), which consists of eight DNA samples from the same DNA source treated with oxBS-BS and hybridized to the Infinium 450K array.
+
+The steps shown in this section follows the [vignette](https://kasperdanielhansen.github.io/genbioconductor/html/minfi.html) from `minfi` package.
+
+We start with the steps to get the raw data from the GEO repository.
+The dataset from [Field *et al.* (2015)](https://doi.org/10.1371/journal.pone.0118202) is available at GEO accession [GSE63179](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE63179).
+
+The sample was divided into four BS and four oxBS replicates.
+ 	
+Platform used: GPL16304	Illumina HumanMethylation450 BeadChip [UBC enhanced annotation v1.0]
+
+Samples:
+
+* GSM1543269	brain-BS-1
+* GSM1543270	brain-oxBS-3
+* GSM1543271	brain-BS-2
+* GSM1543272	brain-oxBS-4
+* GSM1543273	brain-BS-3
+* GSM1543274	brain-BS-4
+* GSM1543275	brain-oxBS-1
+* GSM1543276	brain-oxBS-2
+
+
+
+This example has the following dependencies:
+
+```{r,warning=FALSE,message=FALSE}
+library(minfi)
+library(GEOquery)
+```
+
+Use the following commands to install these packages in R:
+```{r,echo=TRUE,eval=FALSE}
+source("http://www.bioconductor.org/biocLite.R")
+biocLite(c("minfi", "GEOquery"))
+```
+
+
+```{r,echo=FALSE}
+if(! file.exists("GSE63179/GSE63179_RAW.tar"))
+{
+getGEOSuppFiles("GSE63179")
+untar("GSE63179/GSE63179_RAW.tar", exdir = "GSE63179/idat")
+head(list.files("GSE63179/idat", pattern = "idat"))
+}
+```
+
+
+```{r,echo=TRUE,eval=FALSE}
+getGEOSuppFiles("GSE63179")
+untar("GSE63179/GSE63179_RAW.tar", exdir = "GSE63179/idat")
+head(list.files("GSE63179/idat", pattern = "idat"))
+```
+
+
+Decompress the compressed IDAT files:
+
+```{r,message=FALSE,warning=FALSE}
+idatFiles <- list.files("GSE63179/idat", pattern = "idat.gz$", full = TRUE)
+sapply(idatFiles, gunzip, overwrite = TRUE)
+```
+
+
+Now we read the IDAT files in the directory:
+
+```{r}
+rgSet <- read.metharray.exp("GSE63179/idat")
+rgSet
+```
+
+```{r}
+pData(rgSet)
+```
+
+```{r}
+sampleNames(rgSet)
+```
+
+The file names consists of a GEO identifier (the GSM part) followed by a standard IDAT naming convention with a 10 digit number which is an array identifier followed by an identifier of the form R01C01. This is because each array actually allows for the hybridization of 12 samples in a 6x2 arrangement. The 9373551079_R01C01 means row 1 and column 1 on chip 9373551079. 
+
+We need to identify the samples from different methods: BS-conversion, oxBS-conversion.
+
+```{r,echo=FALSE}
+if (!file.exists("pD.rds"))
+{
+geoMat <- getGEO("GSE63179")
+pD.all <- pData(geoMat[[1]])
+pD <- pD.all[, c("title", "geo_accession", "characteristics_ch1.1", "characteristics_ch1.2","characteristics_ch1.3")]
+save(pD,file="pD.rds")
+}
+```
+
+
+```{r,eval=FALSE}
+geoMat <- getGEO("GSE63179")
+pD.all <- pData(geoMat[[1]])
+pD <- pD.all[, c("title", "geo_accession", "characteristics_ch1.1", "characteristics_ch1.2","characteristics_ch1.3")]
+pD
+```
+
+```{r,echo=FALSE}
+load("pD.rds")
+pD
+```
+
+```{r}
+names(pD)[c(3,4,5)] <- c("gender", "age","method")
+pD$gender <- sub("^gender: ", "", pD$gender)
+pD$age <- sub("^age: ", "", pD$age)
+pD$method <- sub("^bisulfite_proc: ","",pD$method)
+```
+
+We now need to merge this pheno data into the methylation data. The following are commands to make sure we have the same row identifier in both datasets before merging.
+
+```{r}
+sampleNames(rgSet) <- sapply(sampleNames(rgSet),function(x) strsplit(x,"_")[[1]][1])
+rownames(pD) <- pD$geo_accession
+pD <- pD[sampleNames(rgSet),]
+pData(rgSet) <- as(pD,"DataFrame")
+rgSet
+
+save(rgSet,file="rgSet.rds")
+```
+
+
+# Preprocessing
+
+We refer the reader to the `minfi` package tutorials for more preprocessing options.
+
+
+We need to install the required package bellow:
+```{r,eval=FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite("IlluminaHumanMethylation450kmanifest")
+```
+
+
+First, we removed probes with detection p-value <0.01 in any of the 8 arrays. The function `detectionP` identifies failed positions defined as both the methylated and unmethylated channel reporting background signal levels.
+
+```{r,message=FALSE}
+detP <- detectionP(rgSet)
+failed <- detP >0.01
+## Keep probes which failed in at most maxFail arrays (0 = the probe passed in all arrays)
+maxFail<- 0
+keep_probes <- rowSums(failed) <= maxFail
+```
+
+We kept $`r round(mean(keep_probes)*100,0)`\%$ of the probes according to this criterion.
+
+
+The `rgSet` object is a class called `RGChannelSet` which represents two color data with a green and a red channel. We will use, as input in the `MLML` funcion, a `MethylSet`, which contains the methylated and unmethylated signals. The most basic way to construct a `MethylSet` is to using the function `preprocessRaw` which uses the array design to match up the different probes and color channels to construct the methylated and unmethylated signals. Here we will use the `preprocessNoob` function, which does the preprocessing and returns a `MethylSet`.
+
+
+```{r,message=FALSE,eval=FALSE,echo=FALSE}
+MSet <- preprocessRaw(rgSet)
+MSet <- MSet[keep_probes,] # keep good probes
+```
+
+Arrays were then normalized using the Noob/ssNoob preprocessing method for Infinium methylation microarrays.
+
+
+From a `MethylSet` it is easy to compute Beta values, defined as:
+
+Beta = Meth / (Meth + Unmeth + c)
+
+The c constant is chosen to avoid dividing with small values. Illumina uses a default of c=100. The function `getBeta` from `minfi` package can be used to obtain the Beta values.
+
+
+```{r,echo=TRUE,message=FALSE}
+MSet.noob<- preprocessNoob(rgSet[keep_probes,])
+```
+
+
+```{r,echo=FALSE,eval=FALSE}
+MSet.swan<- preprocessSWAN(rgSet, mSet = MSet)
+densityPlot(MSet.swan, sampGroups= pData(rgSet)$method,
+main= sprintf('Beta values for filtered probes (n= %s)', nrow(MSet.swan)))
+```
+
+
+Prepare de input data:
+```{r,echo=FALSE,eval=FALSE}
+MethylatedBS <- getMeth(MSet.swan)[,c(1,3,5,6)]
+UnMethylatedBS <- getUnmeth(MSet.swan)[,c(1,3,5,6)]
+
+MethylatedOxBS <- getMeth(MSet.swan)[,c(7,8,2,4)]
+UnMethylatedOxBS <- getUnmeth(MSet.swan)[,c(7,8,2,4)]
+```
+
+```{r,echo=TRUE}
+MethylatedBS <- getMeth(MSet.noob)[,c(1,3,5,6)]
+UnMethylatedBS <- getUnmeth(MSet.noob)[,c(1,3,5,6)]
+
+MethylatedOxBS <- getMeth(MSet.noob)[,c(7,8,2,4)]
+UnMethylatedOxBS <- getUnmeth(MSet.noob)[,c(7,8,2,4)]
+```
+
+Only a small sample of CpGs and 2 replicates will be used in the example data.
+
+```{r}
+set.seed(112017)
+
+a <- sample(1:dim(MethylatedBS)[1],100,replace=FALSE)
+
+MethylatedBS <- MethylatedBS[a,1:2]
+UnMethylatedBS <- UnMethylatedBS[a,1:2]
+MethylatedOxBS <- MethylatedOxBS[a,1:2]
+UnMethylatedOxBS <- UnMethylatedOxBS[a,1:2]
+```
+
+
+```{r,echo=FALSE}
+save(MethylatedBS,file="MethylatedBS.rda")
+save(UnMethylatedBS,file="UnMethylatedBS.rda")
+save(MethylatedOxBS,file="MethylatedOxBS.rda")
+save(UnMethylatedOxBS,file="UnMethylatedOxBS.rda")
+```
+
