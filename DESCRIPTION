@@ -12,7 +12,7 @@ Description: An implementation of the EM algorithm to obtain MLE estimates of
     the levels of 5-mC and 5-hmC in the DNA using information from BS-conversion,
     TAB-conversion, and oxBS-conversion methods. One can use information from all
     three methods or any combination of two of them.
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
