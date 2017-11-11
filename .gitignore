@@ -9,8 +9,6 @@ data-raw/GSE63179/GSE63179_RAW.tar
 
 data-raw/GSE63179/GSE63179_matrixSignalIntensities.txt.gz
 
-*.gz
-
 data-raw/GSE63179/idat/GSM1543269_9373551079_R01C01_Grn.idat
 
 data-raw/GSE63179/idat/GSM1543269_9373551079_R01C01_Red.idat
