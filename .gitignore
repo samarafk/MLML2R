@@ -22,3 +22,7 @@ data-raw/rgSet.rds
 data-raw/pD.rds
 
 data-raw/GSE63179/filelist.txt
+
+data-raw/GSE63179/idat/GPL16304_Gene_features_Metadata.txt.gz
+
+data-raw/GSE63179/idat/GPL16304_Gene_features_PlatformTable.txt.gz
