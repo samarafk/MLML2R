@@ -22,7 +22,7 @@ MLML(G = NULL, H = NULL, L = NULL, M = NULL, T = NULL, U = NULL,
 
 \item{tol}{convergence tolerance; ignored if exact=TRUE}
 
-\item{exact}{logical indicating if the exact constrained MLE should be returned as estimate; 
+\item{exact}{logical indicating if the exact constrained MLE should be returned as estimate;
 ignored when data is available for all the 3 methods: TAB, oxBS and BS.
 If exact=FALSE EM-algorithm is used.}
 }
@@ -41,19 +41,43 @@ The returned value is a list with the following components.
 MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.
 }
 \details{
-The function returns MLE estimates based on EM-algorithm for any 
- combination of two methods or all three methods. When only two methods are combined, the user 
+The function returns MLE estimates based on EM-algorithm for any
+ combination of two methods or all three methods. When only two methods are combined, the user
  can set the option exact=TRUE to obtain exact constrained MLE.
  The function assumes that the order of the rows and columns in the input matrices are consistent.
  In addition, all the input matrices must have the same dimension.
  Usually, rows represent CpG loci and columns are the samples.
 }
+\examples{
+library(MLML2R)
+# load the example datasets from BS and oxBS methods
+data(MethylatedBS)
+data(MethylatedOxBS)
+data(UnMethylatedBS)
+data(UnMethylatedOxBS)
+
+# obtain MLE via EM-algorithm:
+results_em <- MLML(T = MethylatedBS , U = UnMethylatedBS,
+L = UnMethylatedOxBS, M = MethylatedOxBS,tol=0.0001)
+
+# obtain constrained exact MLE:
+results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS,
+L = UnMethylatedOxBS, M = MethylatedOxBS,exact=TRUE)
+
+}
 \references{
 Qu J, Zhou M, Song Q, Hong EE, Smith AD. MLML: consistent simultaneous estimates of DNA methylation and hydroxymethylation.
   Bioinformatics. 2013;29(20):2645-2646. doi:10.1093/bioinformatics/btt459.
-  
-  Zongli Xu, Jack A. Taylor, Yuet-Kin Leung, Shuk-Mei Ho, Liang Niu; 
-  oxBS-MLE: an efficient method to estimate 5-methylcytosine and 5-hydroxymethylcytosine 
-  in paired bisulfite and oxidative bisulfite treated DNA, 
+
+  Zongli Xu, Jack A. Taylor, Yuet-Kin Leung, Shuk-Mei Ho, Liang Niu;
+  oxBS-MLE: an efficient method to estimate 5-methylcytosine and 5-hydroxymethylcytosine
+  in paired bisulfite and oxidative bisulfite treated DNA,
   Bioinformatics, 2016;32(23):3667–3669. https://doi.org/10.1093/bioinformatics/btw527
+}
+\author{
+Samara Kiihl samara@ime.unicamp.br;
+Maria Jose Garrido;
+Arce Domingo-Relloso;
+Jose Bermudez;
+Maria Tellez-Plaza.
 }
