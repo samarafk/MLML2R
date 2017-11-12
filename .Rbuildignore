@@ -2,3 +2,5 @@
 ^\.Rproj\.user$
 ^cran-comments\.md$
 ^data-raw$
+^README\.md$
+^README_files$
