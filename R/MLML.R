@@ -23,19 +23,42 @@
 #' @return \item{methods}{the conversion methods used to produce the MLE}
 #' @examples
 #' library(MLML2R)
-#' # load the example datasets from BS and oxBS methods
-#' data(MethylatedBS)
-#' data(MethylatedOxBS)
-#' data(UnMethylatedBS)
-#' data(UnMethylatedOxBS)
+#' # load the example datasets from BS, oxBS and TAB methods
+#' data(MethylatedBS_sim)
+#' data(MethylatedOxBS_sim)
+#' data(UnMethylatedBS_sim)
+#' data(UnMethylatedOxBS_sim)
+#' data(MethylatedTAB_sim)
+#' data(UnMethylatedTAB_sim)
 #'
-#' # obtain MLE via EM-algorithm:
-#' results_em <- MLML(T = MethylatedBS , U = UnMethylatedBS,
-#' L = UnMethylatedOxBS, M = MethylatedOxBS,tol=0.0001)
+#' # obtain MLE via EM-algorithm for BS+oxBS:
+#' results_em <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
+#' L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,tol=0.0001)
 #'
-#' # obtain constrained exact MLE:
-#' results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS,
-#' L = UnMethylatedOxBS, M = MethylatedOxBS,exact=TRUE)
+#' # obtain constrained exact MLE for BS+oxBS:
+#' results_exact <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
+#' L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,exact=TRUE)
+#' 
+#' # obtain MLE via EM-algorithm for BS+TAB:
+#' results_em <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
+#' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,tol=0.0001)
+#' 
+#' # obtain constrained exact MLE for BS+TAB:
+#' results_exact <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
+#' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,exact=TRUE)
+#' 
+#' # obtain MLE via EM-algorithm for oxBS+TAB:
+#' results_em <- MLML(L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,
+#' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,tol=0.0001)
+#' 
+#' # obtain constrained exact MLE for oxBS+TAB:
+#' results_exact <- MLML(L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,
+#' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,exact=TRUE)
+#' 
+#' # obtain MLE via EM-algorithm for BS+oxBS+TAB:
+#' results_em <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
+#' L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,
+#' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,tol=0.0001)
 #'
 #' @author
 #' Samara Kiihl samara@ime.unicamp.br;

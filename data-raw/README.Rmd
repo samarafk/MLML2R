@@ -237,3 +237,36 @@ save(MethylatedOxBS,file="MethylatedOxBS.rda")
 save(UnMethylatedOxBS,file="UnMethylatedOxBS.rda")
 ```
 
+```{r}
+N_BS <- round(MethylatedBS+UnMethylatedBS)
+
+N_OxBS <- round(MethylatedOxBS+UnMethylatedOxBS)
+
+N_TAB <- pmax(N_BS,N_OxBS)
+
+p_m=.3
+p_h=0.2
+p_u=.5
+
+set.seed(2017)
+MethylatedBS_sim <- apply(N_BS, c(1,2), function(x) sum(rbinom(n=x, size=1, prob=(p_m+p_h))))
+                          
+UnMethylatedBS_sim <- N_BS - MethylatedBS_sim
+
+MethylatedOxBS_sim <- apply(N_OxBS, c(1,2), function(x) sum(rbinom(n=x, size=1, prob=p_m)))
+                            
+UnMethylatedOxBS_sim <- N_OxBS - MethylatedOxBS_sim
+
+MethylatedTAB_sim <- apply(N_TAB, c(1,2), function(x) sum(rbinom(n=x, size=1, prob=p_h)))
+                           
+UnMethylatedTAB_sim <- N_TAB - MethylatedTAB_sim
+
+
+save(MethylatedBS_sim,file="MethylatedBS_sim.rda")
+save(UnMethylatedBS_sim,file="UnMethylatedBS_sim.rda")
+save(MethylatedOxBS_sim,file="MethylatedOxBS_sim.rda")
+save(UnMethylatedOxBS_sim,file="UnMethylatedOxBS_sim.rda")
+save(MethylatedTAB_sim,file="MethylatedTAB_sim.rda")
+save(UnMethylatedTAB_sim,file="UnMethylatedTAB_sim.rda")
+
+```

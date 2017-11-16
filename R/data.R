@@ -6,7 +6,7 @@
 #'
 #' 100 x 2 matrix (CpGs in the rows and  Samples in the columns).
 #'
-"MethylatedBS"
+"MethylatedBS_sim"
 
 #' Methylated counts from oxBS
 #'
@@ -16,7 +16,17 @@
 #'
 #' 100 x 2 matrix (CpGs in the rows and  Samples in the columns).
 #'
-"MethylatedOxBS"
+"MethylatedOxBS_sim"
+
+#' Methylated counts from TAB
+#'
+#' A matrix of counts after preprocessing corresponding to 100 CpGs and 2 samples.
+#'
+#' @format
+#'
+#' 100 x 2 matrix (CpGs in the rows and  Samples in the columns).
+#'
+"MethylatedTAB_sim"
 
 #' Unmethylated counts from oxBS
 #'
@@ -26,7 +36,7 @@
 #'
 #' 100 x 2 matrix (CpGs in the rows and  Samples in the columns).
 #'
-"UnMethylatedOxBS"
+"UnMethylatedOxBS_sim"
 
 #' Unmethylated counts from BS
 #'
@@ -36,4 +46,14 @@
 #'
 #' 100 x 2 matrix (CpGs in the rows and  Samples in the columns).
 #'
-"UnMethylatedBS"
+"UnMethylatedBS_sim"
+
+#' Unmethylated counts from TAB
+#'
+#' A matrix of counts after preprocessing corresponding to 100 CpGs and 2 samples.
+#'
+#' @format
+#'
+#' 100 x 2 matrix (CpGs in the rows and  Samples in the columns).
+#'
+"UnMethylatedTAB_sim"
