@@ -1,0 +1,75 @@
+---
+title: "Simulation"
+output: html_document
+---
+
+
+```{r}
+set.seed(2017)
+
+n_cpg <- 1000
+
+counts <- sample(1000:5000,3*n_cpg)
+
+N_BS <- counts[1:1000]
+
+N_OxBS <- counts[1001:2000]
+
+N_TAB <- counts[2001:3000]
+
+p_m=.8
+p_h=0.01
+p_u=1-p_m-p_h
+
+MethylatedBS <- sapply(N_BS, function(x) rbinom(n=1, size=x, prob=(p_m+p_h)))
+                          
+UnMethylatedBS <- N_BS - MethylatedBS
+
+MethylatedOxBS <- sapply(N_OxBS, function(x) rbinom(n=1, size=x, prob=p_m))
+                            
+UnMethylatedOxBS <- N_OxBS - MethylatedOxBS
+
+MethylatedTAB <- sapply(N_TAB, function(x) rbinom(n=1, size=x, prob=p_h))
+                           
+UnMethylatedTAB <- N_TAB - MethylatedTAB
+
+# mean squared error
+MSE <- function(estimated,parameter){
+  mean((estimated-parameter)^2)
+}
+
+# realtive error
+RE <- function(estimated,parameter){
+  mean(abs(estimated-parameter)/parameter)
+}
+
+library(MLML2R)
+
+# obtain MLE via EM-algorithm for BS+oxBS:
+results_em <- MLML(T = MethylatedBS, U = UnMethylatedBS,
+L = UnMethylatedOxBS, M = MethylatedOxBS,tol=0.0001)
+
+sqrt(MSE(results_em$hmC,p_h))
+RE(results_em$hmC,p_h)
+
+# obtain constrained exact MLE for BS+oxBS:
+results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS,
+L = UnMethylatedOxBS, M = MethylatedOxBS,exact=TRUE)
+
+sqrt(MSE(results_exact$hmC,p_h))
+RE(results_exact$hmC,p_h)
+
+# obtain naive estimates
+
+beta_BS <- MethylatedBS/(MethylatedBS+UnMethylatedBS)
+beta_OxBS <- MethylatedOxBS/(MethylatedOxBS+UnMethylatedOxBS)
+
+hmC_naive <- beta_BS-beta_OxBS #5-hmC naive estimate
+sqrt(MSE(hmC_naive,p_h))
+RE(hmC_naive,p_h)
+
+
+plot(density(hmC_naive),main= "5-hmC",xlab="",ylim=c(0,60))
+lines(density(results_exact$hmC),col=2)
+lines(density(results_em$hmC),col=3)
+```
