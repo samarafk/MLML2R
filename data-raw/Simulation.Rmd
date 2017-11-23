@@ -5,33 +5,23 @@ output: html_document
 
 
 ```{r}
+library(MLML2R)
+library(OxyBS)
+
 set.seed(2017)
 
-n_cpg <- 1000
+n_cpg <- 10000
 
-counts <- sample(1000:5000,3*n_cpg)
+counts <- sample(1000:5000,3*n_cpg,replace=TRUE)
 
-N_BS <- counts[1:1000]
+N_BS <- counts[1:10000]
 
-N_OxBS <- counts[1001:2000]
+N_OxBS <- counts[10001:20000]
 
-N_TAB <- counts[2001:3000]
+N_TAB <- counts[10001:30000]
 
-p_m=.8
-p_h=0.01
-p_u=1-p_m-p_h
-
-MethylatedBS <- sapply(N_BS, function(x) rbinom(n=1, size=x, prob=(p_m+p_h)))
-                          
-UnMethylatedBS <- N_BS - MethylatedBS
-
-MethylatedOxBS <- sapply(N_OxBS, function(x) rbinom(n=1, size=x, prob=p_m))
-                            
-UnMethylatedOxBS <- N_OxBS - MethylatedOxBS
-
-MethylatedTAB <- sapply(N_TAB, function(x) rbinom(n=1, size=x, prob=p_h))
-                           
-UnMethylatedTAB <- N_TAB - MethylatedTAB
+#MethylatedTAB <- sapply(N_TAB, function(x) rbinom(n=1, size=x, prob=p_h))
+#UnMethylatedTAB <- N_TAB - MethylatedTAB
 
 # mean squared error
 MSE <- function(estimated,parameter){
@@ -43,33 +33,48 @@ RE <- function(estimated,parameter){
   mean(abs(estimated-parameter)/parameter)
 }
 
-library(MLML2R)
 
-# obtain MLE via EM-algorithm for BS+oxBS:
-results_em <- MLML(T = MethylatedBS, U = UnMethylatedBS,
-L = UnMethylatedOxBS, M = MethylatedOxBS,tol=0.0001)
+true_parameters <- data.frame(p_m=c(.8,.8,.5,.5,.3,.3,.1,.1,.01,.01), p_h=c(.1,.01,.4,.01,.01,.1,.8,.01,.9,.3))
+true_parameters
+RE_result <- matrix(NA,ncol=4,nrow=dim(true_parameters)[1])
+RMSE_result <- matrix(NA,ncol=4,nrow=dim(true_parameters)[1])
 
-sqrt(MSE(results_em$hmC,p_h))
-RE(results_em$hmC,p_h)
+for (i in 1:dim(true_parameters)[1])
+{
+  p_m=true_parameters$p_m[i]
+  p_h=true_parameters$p_h[i]
+  
+  MethylatedBS <- sapply(N_BS, function(x) rbinom(n=1, size=x, prob=(p_m+p_h)))
+  UnMethylatedBS <- N_BS - MethylatedBS
 
-# obtain constrained exact MLE for BS+oxBS:
-results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS,
-L = UnMethylatedOxBS, M = MethylatedOxBS,exact=TRUE)
+  MethylatedOxBS <- sapply(N_OxBS, function(x) rbinom(n=1, size=x, prob=p_m))
+  UnMethylatedOxBS <- N_OxBS - MethylatedOxBS
+  
+  beta_BS <- MethylatedBS/(MethylatedBS+UnMethylatedBS)
+  beta_OxBS <- MethylatedOxBS/(MethylatedOxBS+UnMethylatedOxBS)
+  
 
-sqrt(MSE(results_exact$hmC,p_h))
-RE(results_exact$hmC,p_h)
+  result_OxyBS <- fitOxBS(betaBS=beta_BS,betaOxBS=beta_OxBS,signalBS=N_BS,signalOxBS=N_OxBS)
+  results_em <- MLML(T = MethylatedBS, U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,tol=0.00001)
+  results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS,L = UnMethylatedOxBS, M = MethylatedOxBS,exact=TRUE)
+  hmC_naive <- beta_BS-beta_OxBS
+  
 
-# obtain naive estimates
+  RE_result[i,1] <- RE(results_em$hmC,p_h)
+  RE_result[i,2] <- RE(results_exact$hmC,p_h)
+  RE_result[i,3] <- RE(result_OxyBS[,3],p_h)
+  RE_result[i,4] <- RE(hmC_naive,p_h)
+  
+  RMSE_result[i,1] <- sqrt(MSE(results_em$hmC,p_h))
+  RMSE_result[i,2] <- sqrt(MSE(results_exact$hmC,p_h))
+  RMSE_result[i,3] <- sqrt(MSE(result_OxyBS[,3],p_h))
+  RMSE_result[i,4] <- sqrt(MSE(hmC_naive,p_h))
 
-beta_BS <- MethylatedBS/(MethylatedBS+UnMethylatedBS)
-beta_OxBS <- MethylatedOxBS/(MethylatedOxBS+UnMethylatedOxBS)
+}
 
-hmC_naive <- beta_BS-beta_OxBS #5-hmC naive estimate
-sqrt(MSE(hmC_naive,p_h))
-RE(hmC_naive,p_h)
+RE_result
+
+RMSE_result
 
 
-plot(density(hmC_naive),main= "5-hmC",xlab="",ylim=c(0,60))
-lines(density(results_exact$hmC),col=2)
-lines(density(results_em$hmC),col=3)
 ```
