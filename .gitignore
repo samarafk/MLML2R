@@ -26,3 +26,15 @@ data-raw/GSE63179/filelist.txt
 data-raw/GSE63179/idat/GPL16304_Gene_features_Metadata.txt.gz
 
 data-raw/GSE63179/idat/GPL16304_Gene_features_PlatformTable.txt.gz
+
+data-raw/example2/GSE73895/GSE73895_RAW.tar
+
+data-raw/example2/GSE73895/idat/GPL13534_450K_Manifest_header_Descriptions.xlsx.gz
+
+data-raw/example2/GSE73895/idat/GPL13534_HumanMethylation450_15017482_v.1.1.bpm.txt.gz
+
+data-raw/example2/GSE73895/idat/GPL13534_HumanMethylation450_15017482_v.1.1.csv.gz
+
+data-raw/example2/GSE73895/idat/GPL13534_HumanMethylation450_15017482_v.1.2.bpm.gz
+
+data-raw/example2/GSE73895/filelist.txt

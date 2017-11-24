@@ -1,0 +1,373 @@
+---
+title: "`MLML2R`: an R package for maximum likelihood estimates of DNA methylation and hydroxymethylation"
+author: Samara F. Kiihl, Maria Tellez-Plaza
+output:
+  html_document:
+    keep_md: yes
+    toc: true
+    number_sections: true
+---
+
+
+# Introduction
+
+
+This document presents an example of the usage of the `MLML2R` package for R.
+
+Install the R package using the following commands on the R console:
+
+```{r,echo=TRUE,eval=FALSE}
+install.packages("devtools")
+devtools::install_github("samarafk/MLML2R")
+library(MLML2R)
+```
+
+
+Proposed analyses of single-base profiling of either 5-hmC or 5-mC require combining data obtained using bisulfite conversion, oxidative bisulfite conversion or Tet-Assisted bisulfite conversion methods, but doing so naively produces inconsistent estimates of 5-mC or 5-hmC level [(Qu *et al.*, 2013)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3789553/). 
+
+
+The function `MLML` provides maximum likelihood estimates (MLE) for 5-hmC and 5-mC levels using data from any combination of two of the methods: BS-seq, TAB-seq or oxBS-seq. The function also provides MLE when combining these three methods.
+
+The algorithm implemented in the `MLML` function is based on the Expectation-Maximization (EM) algorithm proposed by [Qu *et al.* (2013)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3789553/). In addition, when only two methods are combined, our implementation is optimized, since we derived the constrained exact MLE in analytical form for 5-mC or 5-hmC levels, and the iterative EM algorithm is not needed. Our improved formulation can, thus, decrease analytic processing time and computational burden, common bottlenecks when processing single-base profiling data from thousands of samples.
+
+Furthermore, our routine is flexible and can be used with both next generation sequencing and Infinium Methylation microarray data in the R-statistical language.
+
+
+
+# Preparing dataset
+
+We will use the dataset from [Johnson *et al.* (2016)](https://www.ncbi.nlm.nih.gov/pubmed/27886174), which consists of 30 DNA samples from glioblastoma tumors treated with oxBS-BS and hybridized to the Infinium 450K array.
+
+The steps shown in this section follows the [vignette](https://kasperdanielhansen.github.io/genbioconductor/html/minfi.html) from `minfi` package.
+
+## Getting publicly available data
+
+We start with the steps to get the raw data from the GEO repository.
+The dataset from [Johnson *et al.* (2016)](https://www.ncbi.nlm.nih.gov/pubmed/27886174) is available at GEO accession [GSE73895](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE73895).
+
+The sample was divided into four BS and four oxBS replicates.
+ 	
+Platform used: 	GPL13534	Illumina HumanMethylation450 BeadChip (HumanMethylation450_15017482)
+
+
+
+This example has the following dependencies:
+
+```{r,warning=FALSE,message=FALSE}
+library(minfi)
+library(GEOquery)
+```
+
+Use the following commands to install these packages in R:
+```{r,echo=TRUE,eval=FALSE}
+source("http://www.bioconductor.org/biocLite.R")
+biocLite(c("minfi", "GEOquery"))
+```
+
+
+
+```{r,echo=FALSE}
+if(! file.exists("GSE73895/GSE73895_RAW.tar"))
+{
+getGEOSuppFiles("GSE73895")
+untar("GSE73895/GSE73895_RAW.tar", exdir = "GSE73895/idat")
+head(list.files("GSE73895/idat", pattern = "idat"))
+}
+```
+
+
+```{r,echo=TRUE,eval=FALSE}
+getGEOSuppFiles("GSE73895")
+untar("GSE73895/GSE73895_RAW.tar", exdir = "GSE73895/idat")
+head(list.files("GSE73895/idat", pattern = "idat"))
+```
+
+
+Decompress the compressed IDAT files:
+
+```{r,message=FALSE,warning=FALSE}
+idatFiles <- list.files("GSE73895/idat", pattern = "idat.gz$", full = TRUE)
+sapply(idatFiles, gunzip, overwrite = TRUE)
+```
+
+
+Now we read the IDAT files in the directory:
+
+```{r}
+rgSet <- read.metharray.exp("GSE73895/idat")
+rgSet
+```
+
+```{r}
+pData(rgSet)
+```
+
+```{r}
+sampleNames(rgSet)
+```
+
+The file names consists of a GEO identifier (the GSM part) followed by a standard IDAT naming convention with a 10 digit number which is an array identifier followed by an identifier of the form R01C01. This is because each array actually allows for the hybridization of 12 samples in a 6x2 arrangement. The 3999941120_R03C01 means row 3 and column 1 on chip 3999941120. 
+
+We need to identify the samples from different methods: BS-conversion, oxBS-conversion.
+
+```{r,echo=FALSE}
+if (!file.exists("pD.rds"))
+{
+geoMat <- getGEO("GSE73895")
+pD.all <- pData(geoMat[[1]])
+pD <- pD.all[, c("title", "geo_accession", "characteristics_ch1.1", "characteristics_ch1.2","characteristics_ch1.3")]
+save(pD,file="pD.rds")
+}
+```
+
+
+```{r,eval=FALSE}
+geoMat <- getGEO("GSE73895")
+pD.all <- pData(geoMat[[1]])
+pD <- pD.all[, c("title", "geo_accession", "characteristics_ch1", "characteristics_ch1.2","characteristics_ch1.3")]
+pD
+```
+
+```{r,echo=FALSE}
+load("pD.rds")
+pD
+```
+
+```{r}
+names(pD)[c(1,3,4,5)] <- c("method","gender","survival_months","age_years")
+pD$gender <- sub("^gender: ", "", pD$gender)
+pD$age_years <- as.numeric(sub("^subject age: ", "", pD$age_years))
+pD$survival_months <- as.numeric(sapply(pD$survival_months, function(x) strsplit(as.character(x),":")[[1]][2]))
+pD$method <- sapply(pD$method, function(x) strsplit(as.character(x),"_")[[1]][3])
+```
+
+We now need to merge this pheno data into the methylation data. The following are commands to make sure we have the same row identifier in both datasets before merging.
+
+```{r}
+sampleNames(rgSet) <- sapply(sampleNames(rgSet),function(x) strsplit(x,"_")[[1]][1])
+rownames(pD) <- pD$geo_accession
+pD <- pD[sampleNames(rgSet),]
+pData(rgSet) <- as(pD,"DataFrame")
+rgSet
+```
+
+
+## Preprocessing
+
+We refer the reader to the `minfi` package tutorials for more preprocessing options.
+
+
+We need to install the required package bellow:
+```{r,eval=FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite("IlluminaHumanMethylation450kmanifest")
+```
+
+The `rgSet` object is a class called `RGChannelSet` which represents two color data with a green and a red channel. We will use, as input in the `MLML` funcion, a `MethylSet`, which contains the methylated and unmethylated signals. The most basic way to construct a `MethylSet` is to using the function `preprocessRaw` which uses the array design to match up the different probes and color channels to construct the methylated and unmethylated signals. Here we will use the `preprocessNoob` function, which does the preprocessing and returns a `MethylSet`.
+
+
+Arrays were then normalized using the Noob/ssNoob preprocessing method for Infinium methylation microarrays.
+
+
+From a `MethylSet` it is easy to compute Beta values, defined as:
+
+Beta = Meth / (Meth + Unmeth + c)
+
+The c constant is chosen to avoid dividing with small values. Illumina uses a default of c=100. The function `getBeta` from `minfi` package can be used to obtain the Beta values.
+
+
+```{r,echo=TRUE,message=FALSE}
+MSet.noob<- preprocessNoob(rgSet)
+densityPlot(MSet.noob, sampGroups= pData(rgSet)$method,
+main= sprintf('Beta values', nrow(MSet.noob)))
+```
+
+
+# Using the `MLML2R` package
+
+After all the preprocessing procedures, we now can use the `MLML2R` package to obtain the maximum likelihood estimates for the 5-hmC and 5-mC levels.
+
+Install the R package using the following commands on the R console:
+
+
+```{r,eval=FALSE}
+install.packages("devtools")
+devtools::install_github("samarafk/MLML2R")
+```
+
+
+Prepare de input data:
+
+
+```{r,echo=TRUE}
+BS_index <- which(pData(rgSet)$method=="BS")
+oxBS_index <- which(pData(rgSet)$method=="oxBS")
+
+
+MethylatedBS <- getMeth(MSet.noob)[,BS_index]
+UnMethylatedBS <- getUnmeth(MSet.noob)[,BS_index]
+
+MethylatedOxBS <- getMeth(MSet.noob)[,oxBS_index]
+UnMethylatedOxBS <- getUnmeth(MSet.noob)[,oxBS_index]
+```
+
+
+
+Getting the MLE estimates using EM-algorithm:
+
+```{r}
+library(MLML2R)
+results_em <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,tol=0.0001)
+```
+```{r,fig.align='center',fig.height=3,fig.width=9}
+par(mfrow =c(1,3)) 
+densityPlot(results_em$hmC,main= "5-hmC using EM-algortihm")
+densityPlot(results_em$mC,main= "5-mC using EM-algortihm")
+densityPlot(results_em$C,main= "5-C using EM-algortihm")
+```
+
+
+Getting the constrained exact MLE estimates:
+
+```{r}
+library(MLML2R)
+results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,exact=TRUE)
+```
+
+```{r,fig.align='center',fig.height=3,fig.width=9}
+par(mfrow =c(1,3)) 
+densityPlot(results_em$hmC,main= "5-hmC using constrained exact MLE")
+densityPlot(results_em$mC,main= "5-mC using constrained exact MLE")
+densityPlot(results_em$C,main= "5-C using constrained exact MLE")
+```
+
+
+Comparing the two methods:
+
+```{r}
+all.equal(results_exact$hmC,results_em$hmC)
+cor(results_exact$hmC,results_em$hmC)
+
+library(microbenchmark)
+mbm = microbenchmark(
+  EM = MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, 
+            M = MethylatedOxBS,tol=0.0001),
+  EXACT = MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, 
+               M = MethylatedOxBS,exact=TRUE)
+)
+mbm
+```
+
+# Other methods to obtain the estimates
+
+## Naive estimates
+
+The naive approach to obtain 5-hmC levels is $\beta_{BS} -  \beta_{OxBS}$. This approach results in negative values for the 5-hmC levels.
+
+```{r,echo=TRUE}
+beta_BS <- getBeta(MSet.noob)[,BS_index]
+beta_OxBS <- getBeta(MSet.noob)[,oxBS_index]
+hmC_naive <- beta_BS-beta_OxBS
+C_naive <- 1-beta_BS
+mC_naive <- beta_OxBS
+```
+
+
+```{r,fig.align='center',fig.height=3,fig.width=9}
+par(mfrow =c(1,3)) 
+densityPlot(hmC_naive,main= "5-hmC using naive method")
+densityPlot(mC_naive,main= "5-mC using naive method")
+densityPlot(C_naive,main= "5-C using naive method")
+```
+
+
+## `OxyBS` estimates
+
+For the specific case where only ox-BS and BS data are available, `OxyBS` package from [Houseman *et al.* (2016)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4978924/) can be use to obtain estimates.
+
+
+
+```{r,echo=TRUE,eval=FALSE}
+library(OxyBS)
+
+# Methylated signals from the BS and oxBS arrays
+methBS <- MethylatedBS
+methOxBS <- MethylatedOxBS
+# Unmethylated signals from the BS and oxBS arrays
+unmethBS <- UnMethylatedBS
+unmethOxBS <- UnMethylatedOxBS
+
+# Calculate Total Signals
+signalBS <- methBS+unmethBS
+signalOxBS <- methOxBS+unmethOxBS
+
+# Calculate Beta Values
+betaBS <- methBS/signalBS
+betaOxBS <- methOxBS/signalOxBS
+
+####################################################
+# 4. Apply fitOxBS function to preprocessed values
+####################################################
+
+# Select the number of CpGs and Subjects to which the method will be applied 
+nCpGs <- dim(unmethOxBS)[1]
+nSpecimens <- dim(unmethOxBS)[2]
+
+# Create container for the OxyBS results
+MethOxy <- array(NA,dim=c(nCpGs,nSpecimens,3))
+dimnames(MethOxy) <- list(
+  rownames(methBS)[1:nCpGs],
+  colnames(methBS)[1:nSpecimens], c("C","5mC","5hmC"))
+
+# Process results (one array at a time, slow)
+for(i in 1:nSpecimens){
+MethOxy[,i,] <-fitOxBS(betaBS[,i],betaOxBS[,i],signalBS[,i],signalOxBS[,i])
+}
+```
+
+```{r,echo=FALSE,eval=FALSE}
+save(MethOxy,file="MethOxy.rds")
+```
+
+
+
+
+```{r,echo=FALSE,eval=TRUE}
+load("MethOxy.rds")
+```
+
+Plot of the results (we have 4 replicates)
+
+```{r,fig.align='center',fig.height=3,fig.width=9}
+
+par(mfrow =c(1,3)) 
+densityPlot(MethOxy[,,3]),main= "5-hmC using OxyBS",xlab="")
+densityPlot(MethOxy[,,2]),main= "5-mC using OxyBS",xlab="")
+densityPlot(MethOxy[,,1]),main= "5-C using OxyBS",xlab="")
+```
+
+
+## Comparison of 5-hmC estimates from different methods
+
+
+```{r,message=FALSE,warning=FALSE,fig.align='center'}
+library(GGally)
+# data for replicate 1 is shown
+df <- data.frame(x = as.numeric(results_exact$hmC[,1]),y=as.numeric(results_em$hmC[,1]),
+                 z = as.numeric(MethOxy[,1,3]),w=as.numeric(hmC_naive[,1]))
+ggpairs(df, title = "5-hmc estimates",  
+  axisLabels = "show",columnLabels=c("Exact MLE","EM","OxyBS","Naive"))
+```
+
+
+```{r,message=FALSE,warning=FALSE,fig.align='center',fig.height=5}
+library(ggplot2)
+ggplot(df,aes(x=x,y=z)) + geom_point(alpha = 0.3) + xlab("Exact MLE") +
+  ylab("OxyBS")
+
+ggplot(df,aes(x=y,y=z)) + geom_point(alpha = 0.3) + xlab("EM") +
+  ylab("OxyBS")
+
+```
+
+
