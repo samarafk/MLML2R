@@ -38,3 +38,5 @@ data-raw/example2/GSE73895/idat/GPL13534_HumanMethylation450_15017482_v.1.1.csv.
 data-raw/example2/GSE73895/idat/GPL13534_HumanMethylation450_15017482_v.1.2.bpm.gz
 
 data-raw/example2/GSE73895/filelist.txt
+
+data-raw/example2/MethOxy.rds
