@@ -246,16 +246,6 @@ Comparing the two methods:
 
 ```{r}
 all.equal(results_exact$hmC,results_em$hmC)
-cor(results_exact$hmC,results_em$hmC)
-
-library(microbenchmark)
-mbm = microbenchmark(
-  EM = MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, 
-            M = MethylatedOxBS,tol=0.0001),
-  EXACT = MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, 
-               M = MethylatedOxBS,exact=TRUE)
-)
-mbm
 ```
 
 # Other methods to obtain the estimates
@@ -336,14 +326,22 @@ save(MethOxy,file="MethOxy.rds")
 load("MethOxy.rds")
 ```
 
+```{r}
+all.equal(MethOxy[,,3],results_exact$hmC)
+all.equal(MethOxy[,,2],results_exact$mC)
+all.equal(MethOxy[,,1],results_exact$C)
+
+```
+
+
 Plot of the results (we have 4 replicates)
 
 ```{r,fig.align='center',fig.height=3,fig.width=9}
 
 par(mfrow =c(1,3)) 
-densityPlot(MethOxy[,,3]),main= "5-hmC using OxyBS",xlab="")
-densityPlot(MethOxy[,,2]),main= "5-mC using OxyBS",xlab="")
-densityPlot(MethOxy[,,1]),main= "5-C using OxyBS",xlab="")
+densityPlot(MethOxy[,,3],main= "5-hmC using OxyBS",xlab="")
+densityPlot(MethOxy[,,2],main= "5-mC using OxyBS",xlab="")
+densityPlot(MethOxy[,,1],main= "5-C using OxyBS",xlab="")
 ```
 
 
