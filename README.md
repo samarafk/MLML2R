@@ -1,4 +1,4 @@
-# `MLML2R`: MLML2R: An R Package for Maximum Likelihood Estimation of DNA Methylation and Hydroxymethylation Proportions
+# `MLML2R`: An R Package for Maximum Likelihood Estimation of DNA Methylation and Hydroxymethylation Proportions
 
 Samara F. Kiihl, Maria Tellez-Plaza  
 
