@@ -62,21 +62,21 @@ Samples:
 
 
 
-This example has the following dependencies:
+To start this example we will need the following packages:
 
 ```{r,warning=FALSE,message=FALSE}
 library(minfi)
 library(GEOquery)
 ```
 
-Use the following commands to install these packages in R:
+which can be installed in R using the commands:
 ```{r,echo=TRUE,eval=FALSE}
 source("http://www.bioconductor.org/biocLite.R")
 biocLite(c("minfi", "GEOquery"))
 ```
 
-
-
+It is usually best practice to start the analysis from the raw data, which in the case of the 450K array is a .IDAT file.
+The raw files from \cite{10.1371/journal.pone.0118202} are deposited in GEO and can be downloaded by doing:
 ```{r,echo=FALSE}
 if(! file.exists("GSE63179/GSE63179_RAW.tar"))
 {
@@ -159,8 +159,6 @@ rownames(pD) <- pD$geo_accession
 pD <- pD[sampleNames(rgSet),]
 pData(rgSet) <- as(pD,"DataFrame")
 rgSet
-
-save(rgSet,file="rgSet.rds")
 ```
 
 
@@ -192,11 +190,6 @@ We kept $`r round(mean(keep_probes)*100,0)`\%$ of the probes according to this c
 The `rgSet` object is a class called `RGChannelSet` which represents two color data with a green and a red channel. We will use, as input in the `MLML` funcion, a `MethylSet`, which contains the methylated and unmethylated signals. The most basic way to construct a `MethylSet` is to using the function `preprocessRaw` which uses the array design to match up the different probes and color channels to construct the methylated and unmethylated signals. Here we will use the `preprocessNoob` function, which does the preprocessing and returns a `MethylSet`.
 
 
-```{r,message=FALSE,eval=FALSE,echo=FALSE}
-MSet <- preprocessRaw(rgSet)
-MSet <- MSet[keep_probes,] # keep good probes
-```
-
 Arrays were then normalized using the Noob/ssNoob preprocessing method for Infinium methylation microarrays.
 
 
@@ -213,12 +206,6 @@ densityPlot(MSet.noob, sampGroups= pData(rgSet)$method,
 main= sprintf('Beta values for filtered probes (n= %s)', nrow(MSet.noob)))
 ```
 
-
-```{r,echo=FALSE,eval=FALSE}
-MSet.swan<- preprocessSWAN(rgSet, mSet = MSet)
-densityPlot(MSet.swan, sampGroups= pData(rgSet)$method,
-main= sprintf('Beta values for filtered probes (n= %s)', nrow(MSet.swan)))
-```
 
 # Using the `MLML2R` package
 
@@ -261,13 +248,12 @@ Getting the MLE estimates using EM-algorithm:
 ```{r}
 library(MLML2R)
 results_em <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,tol=0.0001)
-save(results_em,file="results_em.rds")
 ```
 
 
 Plot of the results (we have 4 replicates)
 
-```{r,fig.align='center',fig.height=3,fig.width=9}
+```{r,fig.align='center',fig.height=3,fig.width=9,echo=FALSE}
 par(mfrow =c(1,3)) 
 
 plot(density(results_em$hmC[,1]),main= "5-hmC using MLML",xlab=" ",xlim=c(0,1))
@@ -292,13 +278,12 @@ Getting the constrained exact MLE estimates:
 ```{r}
 library(MLML2R)
 results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,exact=TRUE)
-save(results_exact,file="results_exact.rds")
 ```
 
 
 Plot of the results (we have 4 replicates)
 
-```{r,fig.align='center',fig.height=3,fig.width=9}
+```{r,fig.align='center',fig.height=3,fig.width=9,echo=FALSE}
 par(mfrow =c(1,3)) 
 
 plot(density(results_exact$hmC[,1]),main= "5-hmC using MLML",xlab=" ",xlim=c(0,1))
@@ -332,7 +317,7 @@ mC_naive <- beta_OxBS
 ```
 
 
-```{r,fig.align='center',fig.height=3,fig.width=9}
+```{r,fig.align='center',fig.height=3,fig.width=9,echo=FALSE}
 par(mfrow =c(1,3)) 
 
 plot(density(hmC_naive[,1]),main= "5-hmC using naive",ylim=c(0,8),xlab=" ",xlim=c(-1,1))
@@ -426,21 +411,42 @@ lines(density(MethOxy[,3,1]),col=3)
 lines(density(MethOxy[,4,1]),col=4)
 ```
 
+## `oxBS.MLE` estimates
+
+`ENmix` package had the function `oxBS.MLE` from [Xu *et al.* (2016)](https://www.ncbi.nlm.nih.gov/pubmed/27522082) that can be uses to obtain estimates for the specific case where ox-BS and BS data are available.
+
+
+```{r,eval=TRUE,echo=TRUE,message=FALSE}
+beta_BS <- getBeta(MSet.noob)[,c(1,3,5,6)]
+beta_OxBS <- getBeta(MSet.noob)[,c(7,8,2,4)]
+N_BS <- getCN(MSet.noob)[,c(1,3,5,6)]
+N_OxBS <- getCN(MSet.noob)[,c(7,8,2,4)]
+colnames(beta_BS) <- c("rep1","rep2","rep3","rep4")
+colnames(beta_OxBS) <- c("rep1","rep2","rep3","rep4")
+colnames(N_BS) <- c("rep1","rep2","rep3","rep4")
+colnames(N_OxBS) <- c("rep1","rep2","rep3","rep4")
+
+library(ENmix)
+oxBSMLEresults <- oxBS.MLE(beta.BS=beta_BS,beta.oxBS=beta_OxBS,
+                           N.BS=N_BS,N.oxBS=N_OxBS)
+```
+
 
 ## Comparison of 5-hmC estimates from different methods
 
 
-```{r,message=FALSE,warning=FALSE,fig.align='center'}
+```{r,message=FALSE,warning=FALSE,fig.align='center',echo=FALSE}
 library(GGally)
 # data for replicate 1 is shown
 df <- data.frame(x = as.numeric(results_exact$hmC[,1]),y=as.numeric(results_em$hmC[,1]),
-                 z = as.numeric(MethOxy[,1,3]),w=as.numeric(hmC_naive[,1]))
-ggpairs(df, title = "5-hmc estimates",  
-  axisLabels = "show",columnLabels=c("Exact MLE","EM","OxyBS","Naive"))
+                 z = as.numeric(oxBSMLEresults[[2]][,1]),t=as.numeric(MethOxy[,1,3]),w=as.numeric(hmC_naive[,1]))
+g <- ggpairs(df, title = " ",
+   axisLabels = "show", columnLabels = c("MLML - exact","MLML - EM","oxBS.MLE","OxyBS","Naive"))
+g
 ```
 
 
-```{r,message=FALSE,warning=FALSE,fig.align='center',fig.height=5}
+```{r,message=FALSE,warning=FALSE,fig.align='center',fig.height=5,echo=FALSE,eval=FALSE}
 library(ggplot2)
 ggplot(df,aes(x=x,y=z)) + geom_point(alpha = 0.3) + xlab("Exact MLE") +
   ylab("OxyBS")
@@ -449,3 +455,56 @@ ggplot(df,aes(x=y,y=z)) + geom_point(alpha = 0.3) + xlab("EM") +
   ylab("OxyBS")
 
 ```
+
+## Comparison of processing times from different methods
+
+```{r,eval=FALSE,echo=TRUE}
+library(OxyBS)
+library(microbenchmark)
+library(MLML2R)
+signalBS <- MethylatedBS+UnMethylatedBS
+signalOxBS <- MethylatedOxBS+UnMethylatedOxBS
+betaBS <- MethylatedBS/signalBS
+betaOxBS <- MethylatedOxBS/signalOxBS
+
+nCpGs <- dim(UnMethylatedOxBS)[1]
+nSpecimens <- dim(UnMethylatedOxBS)[2]
+MethOxy1 <- array(NA,dim=c(nCpGs,nSpecimens,3))
+dimnames(MethOxy1) <- list(
+  rownames(MethylatedBS)[1:nCpGs],
+  colnames(MethylatedBS)[1:nSpecimens], c("C","5mC","5hmC"))
+
+oxyBS <- function()
+{
+  for(i in 1:nSpecimens){
+MethOxy1[,i,] <-fitOxBS(betaBS[,i],betaOxBS[,i],signalBS[,i],signalOxBS[,i])
+  }
+}
+
+mbm = microbenchmark(
+  EXACT = MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, 
+               M = MethylatedOxBS,exact=TRUE),
+  EM = MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, 
+            M = MethylatedOxBS,tol=0.00001),
+  oxBSMLE = oxBS.MLE(beta.BS=beta_BS,beta.oxBS=beta_OxBS,
+                     N.BS=N_BS,N.oxBS=N_OxBS),
+  oxyBS_res = oxyBS(),
+  times=1)
+```
+
+```{r,eval=FALSE,echo=FALSE}
+save(mbm,file="mbm.rds")
+```
+
+```{r,eval=TRUE,echo=FALSE}
+load("mbm.rds")
+```
+
+
+| Method    |      Function           |  Package | Time (Seconds)                             |
+|-----------|:-----------------------:|---------:|-------------------------------------------:|
+| Iterative |  `MLML` (`tol=0.00001`) | `MLML2R` | `r round(mbm$time[mbm$expr=="EM"]/(1e9),3)`  |
+| Iterative |  `fitOxBS`              | `OxyBS`  | `r round(mbm$time[mbm$expr=="oxyBS_res"]/(1e9),3)`  |
+| Closed-form analytical |  `MLML` (`exact=TRUE`) | `MLML2R` | `r round(mbm$time[mbm$expr=="EXACT"]/(1e9),3)`  |
+| Closed-form analytical |  `oxBS.MLE` | `ENmix` | `r round(mbm$time[mbm$expr=="oxBSMLE"]/(1e9),3)`  |
+
