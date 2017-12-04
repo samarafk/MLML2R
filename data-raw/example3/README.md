@@ -17,7 +17,8 @@ This document presents an example of the usage of the `MLML2R` package for R.
 
 Install the R package using the following commands on the R console:
 
-```{r,echo=TRUE,eval=FALSE}
+
+```r
 install.packages("devtools")
 devtools::install_github("samarafk/MLML2R")
 library(MLML2R)
@@ -32,36 +33,24 @@ Furthermore, our routine is flexible and can be used with both next generation s
 
 
 
-# True proportion
+# BS+oxBS+TAB data
 
 
-```{r}
+```r
 library(MLML2R)
 ```
 
 
 True proportions used in the data simulation.
 
-```{r,echo=FALSE,fig.align='center',fig.height=3,fig.width=9}
-
-par(mfrow =c(1,3))
-
-plot(density(true_parameters_sim2$p_h),main= "True 5-hmC",xlab=" ",xlim=c(0,1),ylim=c(0,15))
-
-plot(density(true_parameters_sim2$p_m),main= "True 5-mC",xlab=" ",xlim=c(0,1),ylim=c(0,5))
-
-plot(density(true_parameters_sim2$p_u),main= "True 5-C",ylim=c(0,5),xlab=" ",xlim=c(0,1))
-```
+<img src="README_files/figure-html/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
 
 
-Dataset used in this example was simulated from the above true proportions.
-
-
-# BS+oxBS+TAB data
+Dataset: simulated from the above true proportions.
 
 
 
-```{r}
+```r
 # via EM algortihm
 results_em <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
                    L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
@@ -73,27 +62,63 @@ results_lag <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
                    G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2)
 ```
 
-```{r,echo=FALSE,fig.align='center',fig.height=8,fig.width=8}
-plot(results_em$hmC,results_lag$hmC)
+<img src="README_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
+
+
+```r
+all.equal(results_em$hmC,results_lag$hmC)
 ```
 
-```{r}
-all.equal(results_em$hmC,results_lag$hmC)
+```
+## [1] "Mean relative difference: 1.371669e-05"
+```
 
+```r
 all.equal(results_em$C,results_lag$C)
+```
 
+```
+## [1] "Mean relative difference: 2.519594e-06"
+```
+
+```r
 all.equal(results_em$hmC[,1],true_parameters_sim2$p_h)
+```
 
+```
+## [1] "names for target but not for current"
+## [2] "Mean relative difference: 0.04164895"
+```
+
+```r
 all.equal(results_em$mC[,1],true_parameters_sim2$p_m)
+```
 
+```
+## [1] "names for target but not for current"
+## [2] "Mean relative difference: 0.01735317"
+```
 
+```r
 all.equal(results_lag$hmC[,1],true_parameters_sim2$p_h)
+```
 
+```
+## [1] "names for target but not for current"
+## [2] "Mean relative difference: 0.04165114"
+```
+
+```r
 all.equal(results_lag$mC[,1],true_parameters_sim2$p_m)
 ```
 
-```{r}
+```
+## [1] "names for target but not for current"
+## [2] "Mean relative difference: 0.01737099"
+```
 
+
+```r
 library(microbenchmark)
 mbm = microbenchmark(
    lagrange = MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
@@ -104,9 +129,19 @@ mbm = microbenchmark(
                             G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2,tol=0.0001,iterative = TRUE),
    times=10)
 mbm
+```
 
+```
+## Unit: milliseconds
+##      expr       min         lq      mean    median       uq       max
+##  lagrange   9.06795   9.943138  18.07209  10.11922  10.6544  51.02015
+##        EM 233.78401 241.766093 280.20072 277.18624 283.3125 402.67803
+##  neval
+##     10
+##     10
+```
 
-
+```r
 T = MethylatedBS_sim2
 U = UnMethylatedBS_sim2
 L = UnMethylatedOxBS_sim2
@@ -120,71 +155,19 @@ results_oxBS_TAB_BS_exact <- list()
 results_oxBS_TAB_BS_exact$mC <- M/(U+H+M)
 results_oxBS_TAB_BS_exact$hmC <- H/(U+H+M)
 results_oxBS_TAB_BS_exact$C <- U/(U+H+M)
-
-
-```{r,echo=FALSE,fig.align='center',fig.height=3,fig.width=9}
-
-par(mfrow =c(1,3))
-
-plot(density(results_oxBS_TAB_BS_exact$hmC[,1]),main= "5-hmC using exact unconstrained",xlab=" ",ylim=c(0,15),xlim=c(0,1))
-lines(density(results_oxBS_TAB_BS_exact$hmC[,2]),col=2)
-
-
-plot(density(results_oxBS_TAB_BS_exact$mC[,1]),main= "5-mC using exact unconstrained",xlab=" ",ylim=c(0,5),xlim=c(0,1))
-lines(density(results_oxBS_TAB_BS_exact$mC[,2]),col=2)
-
-
-plot(density(results_oxBS_TAB_BS_exact$C[,1]),main= "5-C using exact unconstrained",ylim=c(0,5),xlab=" ",xlim=c(0,1))
-lines(density(results_oxBS_TAB_BS_exact$C[,2]),col=2)
 ```
+<img src="README_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
 
 
 
-```{r,echo=FALSE,fig.align='center',fig.height=3,fig.width=9}
+<img src="README_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
 
-par(mfrow =c(1,3))
 
-plot(density(results_lag$hmC[,1]),main= "5-hmC using Lagrange",xlab=" ",xlim=c(0,1),ylim=c(0,15))
-lines(density(results_lag$hmC[,2]),col=2)
+<img src="README_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
 
-plot(density(results_lag$mC[,1]),main= "5-mC using Lagrange",xlab=" ",xlim=c(0,1),ylim=c(0,5))
-lines(density(results_lag$mC[,2]),col=2)
 
-plot(density(results_lag$C[,1]),main= "5-C using Lagrange",ylim=c(0,5),xlab=" ",xlim=c(0,1))
-lines(density(results_lag$C[,2]),col=2)
+
 ```
-
-
-```{r,echo=FALSE,fig.align='center',fig.height=3,fig.width=9}
-
-par(mfrow =c(1,3))
-
-plot(density(results_em$hmC[,1]),main= "5-hmC using EM",xlab=" ",xlim=c(0,1),ylim=c(0,15))
-lines(density(results_em$hmC[,2]),col=2)
-
-plot(density(results_em$mC[,1]),main= "5-mC using EM",xlab=" ",xlim=c(0,1),ylim=c(0,5))
-lines(density(results_em$mC[,2]),col=2)
-
-plot(density(results_em$C[,1]),main= "5-C using EM",ylim=c(0,5),xlab=" ",xlim=c(0,1))
-lines(density(results_em$C[,2]),col=2)
+## [1] "Mean relative difference: 0.2567573"
 ```
-
-
-```{r,echo=FALSE,fig.align='center'}
-all.equal(results_em$hmC,results_oxBS_TAB_BS_exact$hmC)
-```
-
-
-
-# BS+oxBS data
-
-
-# BS+TAB data
-
-
-
-# TAB+oxBS data
-
-
-
 
