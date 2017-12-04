@@ -33,7 +33,8 @@ Furthermore, our routine is flexible and can be used with both next generation s
 
 
 
-# BS+oxBS+TAB data
+# True proportion
+
 
 
 ```r
@@ -41,12 +42,16 @@ library(MLML2R)
 ```
 
 
-True proportions used in the data simulation.
+True proportions used in the data simulation (`true_parameters_sim2` dataset).
 
 <img src="README_files/figure-html/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
 
 
-Dataset: simulated from the above true proportions.
+Dataset used in this example was simulated from the above true proportions.
+
+
+# BS+oxBS+TAB data
+
 
 
 
@@ -133,9 +138,9 @@ mbm
 
 ```
 ## Unit: milliseconds
-##      expr       min         lq      mean    median       uq       max
-##  lagrange   9.06795   9.943138  18.07209  10.11922  10.6544  51.02015
-##        EM 233.78401 241.766093 280.20072 277.18624 283.3125 402.67803
+##      expr        min         lq      mean    median        uq       max
+##  lagrange   9.688392   9.835388  22.48343  10.51562  49.94725  52.31685
+##        EM 277.275773 280.259731 286.23858 282.63753 285.45536 320.14820
 ##  neval
 ##     10
 ##     10
@@ -167,7 +172,85 @@ results_oxBS_TAB_BS_exact$C <- U/(U+H+M)
 
 
 
-```
-## [1] "Mean relative difference: 0.2567573"
+
+# BS+oxBS data
+
+
+```r
+# obtain MLE via EM-algorithm for BS+oxBS:
+results_em <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
+L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,iterative=TRUE,tol=0.0001)
+
+# obtain constrained exact MLE for BS+oxBS:
+results_exact <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
+L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2)
+
+all.equal(results_em$hmC,results_exact$hmC)
 ```
 
+```
+## [1] "Mean relative difference: 0.001189797"
+```
+
+<img src="README_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
+
+
+<img src="README_files/figure-html/unnamed-chunk-13-1.png" style="display: block; margin: auto;" />
+
+
+# BS+TAB data
+
+
+
+```r
+# obtain MLE via EM-algorithm for BS+TAB:
+results_em <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
+G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2,tol=0.0001)
+
+# obtain constrained exact MLE for BS+TAB:
+results_exact <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
+G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2)
+
+all.equal(results_em$hmC,results_exact$hmC)
+```
+
+```
+## [1] TRUE
+```
+
+
+
+<img src="README_files/figure-html/unnamed-chunk-15-1.png" style="display: block; margin: auto;" />
+
+
+<img src="README_files/figure-html/unnamed-chunk-16-1.png" style="display: block; margin: auto;" />
+
+
+
+# TAB+oxBS data
+
+
+
+```r
+# obtain MLE via EM-algorithm for oxBS+TAB:
+results_em <- MLML(L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
+G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2,iterative=TRUE,tol=0.0001)
+
+# obtain constrained exact MLE for oxBS+TAB:
+results_exact <- MLML(L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
+G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2)
+
+all.equal(results_em$hmC,results_exact$hmC)
+```
+
+```
+## [1] "Attributes: < Component \"dimnames\": Component 2: target is NULL, current is character >"
+## [2] "Mean relative difference: 5.673549e-06"
+```
+
+
+
+<img src="README_files/figure-html/unnamed-chunk-18-1.png" style="display: block; margin: auto;" />
+
+
+<img src="README_files/figure-html/unnamed-chunk-19-1.png" style="display: block; margin: auto;" />
