@@ -36,7 +36,27 @@ Furthermore, our routine is flexible and can be used with both next generation s
 
 ```{r}
 library(MLML2R)
+```
 
+
+True proportions used in the data simulation.
+
+```{r,echo=FALSE,fig.align='center',fig.height=3,fig.width=9}
+
+par(mfrow =c(1,3))
+
+plot(density(true_parameters_sim2$p_h),main= "True 5-hmC",xlab=" ",xlim=c(0,1),ylim=c(0,15))
+
+plot(density(true_parameters_sim2$p_h),main= "True 5-mC",xlab=" ",xlim=c(0,1),ylim=c(0,5))
+
+plot(density(true_parameters_sim2$p_u),main= "True 5-C",ylim=c(0,5),xlab=" ",xlim=c(0,1))
+```
+
+
+Dataset: simulated from the above true proportions.
+
+
+```{r}
 # via EM algortihm
 results_em <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
                    L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,

@@ -458,7 +458,7 @@ ggplot(df,aes(x=y,y=z)) + geom_point(alpha = 0.3) + xlab("EM") +
 
 ## Comparison of processing times from different methods
 
-```{r,eval=TRUE,echo=TRUE}
+```{r,eval=FALSE,echo=TRUE}
 library(OxyBS)
 library(microbenchmark)
 library(MLML2R)
