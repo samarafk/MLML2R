@@ -5,7 +5,7 @@
 \title{MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.}
 \usage{
 MLML(G = NULL, H = NULL, L = NULL, M = NULL, T = NULL, U = NULL,
-  tol = 1e-04, exact = FALSE)
+  iterative = FALSE, tol = 1e-05)
 }
 \arguments{
 \item{G}{Unmethylated channel (intensities/counts) from TAB-conversion (5-C + 5-mC).}
@@ -20,11 +20,12 @@ MLML(G = NULL, H = NULL, L = NULL, M = NULL, T = NULL, U = NULL,
 
 \item{U}{Unmethylated channel (intensities/counts) from standard BS-conversion (True 5-C).}
 
-\item{tol}{convergence tolerance; ignored if exact=TRUE}
+\item{iterative}{logical. If iterative=TRUE EM-algorithm is used. For the combination of
+two methods, iterative=FALSE returns the exact constrained MLE using the the pool-adjacent-violators
+algorithm (PAVA). When all three methods are combined, iterative=FALSE returns the
+constrained MLE using Lagrange multiplier.}
 
-\item{exact}{logical indicating if the exact constrained MLE should be returned as estimate;
-ignored when data is available for all the 3 methods: TAB, oxBS and BS.
-If exact=FALSE EM-algorithm is used.}
+\item{tol}{convergence tolerance; considered only if iterative=TRUE}
 }
 \value{
 The returned value is a list with the following components.
@@ -41,12 +42,10 @@ The returned value is a list with the following components.
 MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.
 }
 \details{
-The function returns MLE estimates based on EM-algorithm for any
- combination of two methods or all three methods. When only two methods are combined, the user
- can set the option exact=TRUE to obtain exact constrained MLE.
- The function assumes that the order of the rows and columns in the input matrices are consistent.
- In addition, all the input matrices must have the same dimension.
- Usually, rows represent CpG loci and columns are the samples.
+The function returns MLE estimates (binomial model assumed).
+ When iterative=TRUE, the MLE are obtained via EM-algorithm. The function assumes that the order of the
+ rows and columns in the input matrices are consistent. In addition, all the input matrices
+ must have the same dimension. Usually, rows represent CpG loci and columns are the samples.
 }
 \examples{
 library(MLML2R)
@@ -60,11 +59,11 @@ data(UnMethylatedTAB_sim)
 
 # obtain MLE via EM-algorithm for BS+oxBS:
 results_em <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
-L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,tol=0.0001)
+L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,iterative=TRUE,tol=0.0001)
 
 # obtain constrained exact MLE for BS+oxBS:
 results_exact <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
-L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,exact=TRUE)
+L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim)
 
 # obtain MLE via EM-algorithm for BS+TAB:
 results_em <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
@@ -72,30 +71,38 @@ G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,tol=0.0001)
 
 # obtain constrained exact MLE for BS+TAB:
 results_exact <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
-G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,exact=TRUE)
+G = UnMethylatedTAB_sim, H = MethylatedTAB_sim)
 
 # obtain MLE via EM-algorithm for oxBS+TAB:
 results_em <- MLML(L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,
-G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,tol=0.0001)
+G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,iterative=TRUE,tol=0.0001)
 
 # obtain constrained exact MLE for oxBS+TAB:
 results_exact <- MLML(L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,
-G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,exact=TRUE)
+G = UnMethylatedTAB_sim, H = MethylatedTAB_sim)
 
 # obtain MLE via EM-algorithm for BS+oxBS+TAB:
 results_em <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
 L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,
-G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,tol=0.0001)
+G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,iterative=TRUE,tol=0.0001)
+
+#' # obtain MLE via Lagrange multiplier for BS+oxBS+TAB:
+results_exact <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
+L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,
+G = UnMethylatedTAB_sim, H = MethylatedTAB_sim)
 
 }
 \references{
 Qu J, Zhou M, Song Q, Hong EE, Smith AD. MLML: consistent simultaneous estimates of DNA methylation and hydroxymethylation.
   Bioinformatics. 2013;29(20):2645-2646. doi:10.1093/bioinformatics/btt459.
 
+  Ayer M, Brunk HD, Ewing GM, Reid WT, Silverman E. An Empirical Distribution Function for Sampling with Incomplete Information.
+  Ann. Math. Statist. 1955, 26(4), 641–647. doi:10.1214/aoms/1177728423.
+
   Zongli Xu, Jack A. Taylor, Yuet-Kin Leung, Shuk-Mei Ho, Liang Niu;
   oxBS-MLE: an efficient method to estimate 5-methylcytosine and 5-hydroxymethylcytosine
   in paired bisulfite and oxidative bisulfite treated DNA,
-  Bioinformatics, 2016;32(23):3667–3669. https://doi.org/10.1093/bioinformatics/btw527
+  Bioinformatics, 2016;32(23):3667–3669.
 }
 \author{
 Samara Kiihl samara@ime.unicamp.br;

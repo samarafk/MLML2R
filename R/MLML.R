@@ -6,16 +6,15 @@
 #' @param M Methylated channel (intensities/counts) from oxBS-conversion (True 5-mC).
 #' @param T Methylated channel (intensities/counts) from standard BS-conversion (5-mC+5-hmC).
 #' @param U Unmethylated channel (intensities/counts) from standard BS-conversion (True 5-C).
-#' @param tol convergence tolerance; ignored if exact=TRUE
-#' @param exact logical indicating if the exact constrained MLE should be returned as estimate;
-#'  ignored when data is available for all the 3 methods: TAB, oxBS and BS.
-#'  If exact=FALSE EM-algorithm is used.
-#' @details The function returns MLE estimates based on EM-algorithm for any
-#'  combination of two methods or all three methods. When only two methods are combined, the user
-#'  can set the option exact=TRUE to obtain exact constrained MLE.
-#'  The function assumes that the order of the rows and columns in the input matrices are consistent.
-#'  In addition, all the input matrices must have the same dimension.
-#'  Usually, rows represent CpG loci and columns are the samples.
+#' @param iterative logical. If iterative=TRUE EM-algorithm is used. For the combination of
+#'  two methods, iterative=FALSE returns the exact constrained MLE using the the pool-adjacent-violators
+#'  algorithm (PAVA). When all three methods are combined, iterative=FALSE returns the
+#'  constrained MLE using Lagrange multiplier.
+#' @param tol convergence tolerance; considered only if iterative=TRUE
+#' @details The function returns MLE estimates (binomial model assumed).
+#'  When iterative=TRUE, the MLE are obtained via EM-algorithm. The function assumes that the order of the
+#'  rows and columns in the input matrices are consistent. In addition, all the input matrices
+#'  must have the same dimension. Usually, rows represent CpG loci and columns are the samples.
 #' @return The returned value is a list with the following components.
 #' @return \item{mC}{maximum likelihood estimate for the proportion of methylation.}
 #' @return \item{hmC}{maximum likelihood estimate for the proportion of hydroxymethylation.}
@@ -33,32 +32,37 @@
 #'
 #' # obtain MLE via EM-algorithm for BS+oxBS:
 #' results_em <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
-#' L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,tol=0.0001)
+#' L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,iterative=TRUE,tol=0.0001)
 #'
 #' # obtain constrained exact MLE for BS+oxBS:
 #' results_exact <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
-#' L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,exact=TRUE)
-#' 
+#' L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim)
+#'
 #' # obtain MLE via EM-algorithm for BS+TAB:
 #' results_em <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
 #' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,tol=0.0001)
-#' 
+#'
 #' # obtain constrained exact MLE for BS+TAB:
 #' results_exact <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
-#' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,exact=TRUE)
-#' 
+#' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim)
+#'
 #' # obtain MLE via EM-algorithm for oxBS+TAB:
 #' results_em <- MLML(L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,
-#' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,tol=0.0001)
-#' 
+#' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,iterative=TRUE,tol=0.0001)
+#'
 #' # obtain constrained exact MLE for oxBS+TAB:
 #' results_exact <- MLML(L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,
-#' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,exact=TRUE)
-#' 
+#' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim)
+#'
 #' # obtain MLE via EM-algorithm for BS+oxBS+TAB:
 #' results_em <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
 #' L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,
-#' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,tol=0.0001)
+#' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim,iterative=TRUE,tol=0.0001)
+#'
+#' #' # obtain MLE via Lagrange multiplier for BS+oxBS+TAB:
+#' results_exact <- MLML(T = MethylatedBS_sim , U = UnMethylatedBS_sim,
+#' L = UnMethylatedOxBS_sim, M = MethylatedOxBS_sim,
+#' G = UnMethylatedTAB_sim, H = MethylatedTAB_sim)
 #'
 #' @author
 #' Samara Kiihl samara@ime.unicamp.br;
@@ -71,10 +75,13 @@
 #'   Qu J, Zhou M, Song Q, Hong EE, Smith AD. MLML: consistent simultaneous estimates of DNA methylation and hydroxymethylation.
 #'   Bioinformatics. 2013;29(20):2645-2646. doi:10.1093/bioinformatics/btt459.
 #'
+#'   Ayer M, Brunk HD, Ewing GM, Reid WT, Silverman E. An Empirical Distribution Function for Sampling with Incomplete Information.
+#'   Ann. Math. Statist. 1955, 26(4), 641–647. doi:10.1214/aoms/1177728423.
+#'
 #'   Zongli Xu, Jack A. Taylor, Yuet-Kin Leung, Shuk-Mei Ho, Liang Niu;
 #'   oxBS-MLE: an efficient method to estimate 5-methylcytosine and 5-hydroxymethylcytosine
 #'   in paired bisulfite and oxidative bisulfite treated DNA,
-#'   Bioinformatics, 2016;32(23):3667–3669. https://doi.org/10.1093/bioinformatics/btw527
+#'   Bioinformatics, 2016;32(23):3667–3669.
 
 MLML <- function(G       = NULL,
                  H       = NULL,
@@ -82,8 +89,8 @@ MLML <- function(G       = NULL,
                  M       = NULL,
                  T       = NULL,
                  U       = NULL,
-                 tol = 0.0001,
-                 exact = FALSE)
+                 iterative = FALSE,
+                 tol=0.00001)
 {
   g <- if (is.null(G)) {
     NULL
@@ -140,6 +147,25 @@ MLML <- function(G       = NULL,
       if (!six(rownames(L),rownames(M),rownames(T),
                         rownames(U),rownames(G),rownames(H))){stop("Row names are inconsistent")}
     else {
+      if (!iterative)
+      {
+        pm0 <- pm <- m/(m+l)
+        ph0 <- ph <- h/(h+g)
+        pc0 <- pc <- u/(u+t)
+        Vm <- pm*(1-pm)/(m+l)
+        Vh <- ph*(1-ph)/(h+g)
+        Vc <- pc*(1-pc)/(u+t)
+        lam <- (1-pm0-ph0-pc0)/(Vm+Vh+Vc)
+        pm <- pm0 + lam*Vm
+        ph <- ph0 + lam*Vh
+        pc <- pc0 + lam*Vc
+        Vm <- pm*(1-pm)/(m+l)
+        Vh <- ph*(1-ph)/(h+g)
+        Vc <- pc*(1-pc)/(u+t)
+        lam <- (1-pm0-ph0-pc0)/(Vm+Vh+Vc)
+        pme <- pm0 + lam*Vm
+        phe <- ph0 + lam*Vh
+      } else {
 
     while (diff > tol) {
       pme_ant <- pme
@@ -152,6 +178,7 @@ MLML <- function(G       = NULL,
       diff_phe <- abs(max(phe - phe_ant))
       diff <- abs(max(diff_pme, diff_phe))
     }
+      }
 }
 
     methods <-
@@ -165,7 +192,7 @@ if (!four(rownames(L),rownames(M),rownames(T),
                         rownames(U))){stop("Row names are inconsistent")}
     else {
 
-    if (exact)
+    if (!iterative)
     {
       pme = ifelse(t / (t + u) >= m / (m + l) , m / (m + l) , (m + t) / (m + l +
                                                                            u + t))
@@ -196,7 +223,7 @@ if (!four(rownames(L),rownames(M),rownames(T),
                         rownames(U))){stop("Row names are inconsistent")}
     else {
 
-    if (exact)
+    if (!iterative)
     {
       pme = ifelse(t / (t + u) >= h / (g + h) , t / (t + u) - h / (g + h) , 0)
       phe = ifelse(t / (t + u) >= h / (g + h) , h / (g + h), (h + t) / (g +
@@ -226,7 +253,7 @@ if (!four(rownames(L),rownames(M),rownames(T),
                         rownames(L))){stop("Row names are inconsistent")}
     else {
 
-    if (exact)
+    if (!iterative)
     {
       pme = ifelse(m/(m+l)<=g/(h+g),m/(m+l),(g+m)/(g+h+m+l))
       phe = ifelse(m/(m+l)<=g/(h+g),h/(h+g),(h+l)/(g+h+m+l))

@@ -247,7 +247,7 @@ Getting the MLE estimates using EM-algorithm:
 
 ```{r}
 library(MLML2R)
-results_em <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,tol=0.0001)
+results_em <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,tol=0.0001,iterative=TRUE)
 ```
 
 
@@ -256,17 +256,17 @@ Plot of the results (we have 4 replicates)
 ```{r,fig.align='center',fig.height=3,fig.width=9,echo=FALSE}
 par(mfrow =c(1,3)) 
 
-plot(density(results_em$hmC[,1]),main= "5-hmC using MLML",xlab=" ",xlim=c(0,1))
+plot(density(results_em$hmC[,1]),main= "5-hmC using MLML-EM",xlab=" ",xlim=c(0,1))
 lines(density(results_em$hmC[,2]),col=2)
 lines(density(results_em$hmC[,3]),col=3)
 lines(density(results_em$hmC[,4]),col=4)
 
-plot(density(results_em$mC[,1]),main= "5-mC using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
+plot(density(results_em$mC[,1]),main= "5-mC using MLML-EM",ylim=c(0,5),xlab=" ",xlim=c(0,1))
 lines(density(results_em$mC[,2]),col=2)
 lines(density(results_em$mC[,3]),col=3)
 lines(density(results_em$mC[,4]),col=4)
 
-plot(density(results_em$C[,1]),main= "5-C using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
+plot(density(results_em$C[,1]),main= "5-C using MLML-EM",ylim=c(0,5),xlab=" ",xlim=c(0,1))
 lines(density(results_em$C[,2]),col=2)
 lines(density(results_em$C[,3]),col=3)
 lines(density(results_em$C[,4]),col=4)
@@ -277,7 +277,7 @@ Getting the constrained exact MLE estimates:
 
 ```{r}
 library(MLML2R)
-results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,exact=TRUE)
+results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS)
 ```
 
 
@@ -286,17 +286,17 @@ Plot of the results (we have 4 replicates)
 ```{r,fig.align='center',fig.height=3,fig.width=9,echo=FALSE}
 par(mfrow =c(1,3)) 
 
-plot(density(results_exact$hmC[,1]),main= "5-hmC using MLML",xlab=" ",xlim=c(0,1))
+plot(density(results_exact$hmC[,1]),main= "5-hmC using MLML-exact constrained",xlab=" ",xlim=c(0,1))
 lines(density(results_exact$hmC[,2]),col=2)
 lines(density(results_exact$hmC[,3]),col=3)
 lines(density(results_exact$hmC[,4]),col=4)
 
-plot(density(results_exact$mC[,1]),main= "5-mC using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
+plot(density(results_exact$mC[,1]),main= "5-mC using MLML-exact constrained",ylim=c(0,5),xlab=" ",xlim=c(0,1))
 lines(density(results_exact$mC[,2]),col=2)
 lines(density(results_exact$mC[,3]),col=3)
 lines(density(results_exact$mC[,4]),col=4)
 
-plot(density(results_exact$C[,1]),main= "5-C using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
+plot(density(results_exact$C[,1]),main= "5-C using MLML-exact constrained",ylim=c(0,5),xlab=" ",xlim=c(0,1))
 lines(density(results_exact$C[,2]),col=2)
 lines(density(results_exact$C[,3]),col=3)
 lines(density(results_exact$C[,4]),col=4)
@@ -458,7 +458,7 @@ ggplot(df,aes(x=y,y=z)) + geom_point(alpha = 0.3) + xlab("EM") +
 
 ## Comparison of processing times from different methods
 
-```{r,eval=FALSE,echo=TRUE}
+```{r,eval=TRUE,echo=TRUE}
 library(OxyBS)
 library(microbenchmark)
 library(MLML2R)
@@ -483,16 +483,16 @@ MethOxy1[,i,] <-fitOxBS(betaBS[,i],betaOxBS[,i],signalBS[,i],signalOxBS[,i])
 
 mbm = microbenchmark(
   EXACT = MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, 
-               M = MethylatedOxBS,exact=TRUE),
+               M = MethylatedOxBS),
   EM = MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, 
-            M = MethylatedOxBS,tol=0.00001),
+            M = MethylatedOxBS,tol=0.00001,iterative=TRUE),
   oxBSMLE = oxBS.MLE(beta.BS=beta_BS,beta.oxBS=beta_OxBS,
                      N.BS=N_BS,N.oxBS=N_OxBS),
   oxyBS_res = oxyBS(),
   times=1)
 ```
 
-```{r,eval=FALSE,echo=FALSE}
+```{r,eval=TRUE,echo=FALSE}
 save(mbm,file="mbm.rds")
 ```
 
@@ -503,8 +503,8 @@ load("mbm.rds")
 
 | Method    |      Function           |  Package | Time (Seconds)                             |
 |-----------|:-----------------------:|---------:|-------------------------------------------:|
-| Iterative |  `MLML` (`tol=0.00001`) | `MLML2R` | `r round(mbm$time[mbm$expr=="EM"]/(1e9),3)`  |
+| Iterative |  `MLML` (`tol=0.00001,iterative=TRUE`) | `MLML2R` | `r round(mbm$time[mbm$expr=="EM"]/(1e9),3)`  |
 | Iterative |  `fitOxBS`              | `OxyBS`  | `r round(mbm$time[mbm$expr=="oxyBS_res"]/(1e9),3)`  |
-| Closed-form analytical |  `MLML` (`exact=TRUE`) | `MLML2R` | `r round(mbm$time[mbm$expr=="EXACT"]/(1e9),3)`  |
+| Closed-form analytical |  `MLML` (`iterative=FALSE`) | `MLML2R` | `r round(mbm$time[mbm$expr=="EXACT"]/(1e9),3)`  |
 | Closed-form analytical |  `oxBS.MLE` | `ENmix` | `r round(mbm$time[mbm$expr=="oxBSMLE"]/(1e9),3)`  |
 
