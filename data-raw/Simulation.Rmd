@@ -34,6 +34,9 @@ RE <- function(estimated,parameter){
 }
 
 
+
+
+
 true_parameters <- data.frame(p_m=c(.8,.8,.5,.5,.3,.3,.1,.1,.01,.01), p_h=c(.1,.01,.4,.01,.01,.1,.8,.01,.9,.3))
 true_parameters
 RE_result <- matrix(NA,ncol=4,nrow=dim(true_parameters)[1])

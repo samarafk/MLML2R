@@ -63,7 +63,7 @@ Samples:
 
 
 
-This example has the following dependencies:
+To start this example we will need the following packages:
 
 
 ```r
@@ -71,15 +71,15 @@ library(minfi)
 library(GEOquery)
 ```
 
-Use the following commands to install these packages in R:
+which can be installed in R using the commands:
 
 ```r
 source("http://www.bioconductor.org/biocLite.R")
 biocLite(c("minfi", "GEOquery"))
 ```
 
-
-
+It is usually best practice to start the analysis from the raw data, which in the case of the 450K array is a .IDAT file.
+The raw files from \cite{10.1371/journal.pone.0118202} are deposited in GEO and can be downloaded by doing:
 
 
 
@@ -219,10 +219,6 @@ rgSet
 ##   annotation: ilmn12.hg19
 ```
 
-```r
-save(rgSet,file="rgSet.rds")
-```
-
 
 ## Preprocessing
 
@@ -254,8 +250,6 @@ We kept $83\%$ of the probes according to this criterion.
 The `rgSet` object is a class called `RGChannelSet` which represents two color data with a green and a red channel. We will use, as input in the `MLML` funcion, a `MethylSet`, which contains the methylated and unmethylated signals. The most basic way to construct a `MethylSet` is to using the function `preprocessRaw` which uses the array design to match up the different probes and color channels to construct the methylated and unmethylated signals. Here we will use the `preprocessNoob` function, which does the preprocessing and returns a `MethylSet`.
 
 
-
-
 Arrays were then normalized using the Noob/ssNoob preprocessing method for Infinium methylation microarrays.
 
 
@@ -280,9 +274,7 @@ densityPlot(MSet.noob, sampGroups= pData(rgSet)$method,
 main= sprintf('Beta values for filtered probes (n= %s)', nrow(MSet.noob)))
 ```
 
-![](README_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
-
-
+![](README_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
 
 
 # Using the `MLML2R` package
@@ -321,33 +313,12 @@ Getting the MLE estimates using EM-algorithm:
 ```r
 library(MLML2R)
 results_em <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,tol=0.0001)
-save(results_em,file="results_em.rds")
 ```
 
 
 Plot of the results (we have 4 replicates)
 
-
-```r
-par(mfrow =c(1,3)) 
-
-plot(density(results_em$hmC[,1]),main= "5-hmC using MLML",xlab=" ",xlim=c(0,1))
-lines(density(results_em$hmC[,2]),col=2)
-lines(density(results_em$hmC[,3]),col=3)
-lines(density(results_em$hmC[,4]),col=4)
-
-plot(density(results_em$mC[,1]),main= "5-mC using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
-lines(density(results_em$mC[,2]),col=2)
-lines(density(results_em$mC[,3]),col=3)
-lines(density(results_em$mC[,4]),col=4)
-
-plot(density(results_em$C[,1]),main= "5-C using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
-lines(density(results_em$C[,2]),col=2)
-lines(density(results_em$C[,3]),col=3)
-lines(density(results_em$C[,4]),col=4)
-```
-
-<img src="README_files/figure-html/unnamed-chunk-25-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-23-1.png" style="display: block; margin: auto;" />
 
 
 Getting the constrained exact MLE estimates:
@@ -356,33 +327,12 @@ Getting the constrained exact MLE estimates:
 ```r
 library(MLML2R)
 results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,exact=TRUE)
-save(results_exact,file="results_exact.rds")
 ```
 
 
 Plot of the results (we have 4 replicates)
 
-
-```r
-par(mfrow =c(1,3)) 
-
-plot(density(results_exact$hmC[,1]),main= "5-hmC using MLML",xlab=" ",xlim=c(0,1))
-lines(density(results_exact$hmC[,2]),col=2)
-lines(density(results_exact$hmC[,3]),col=3)
-lines(density(results_exact$hmC[,4]),col=4)
-
-plot(density(results_exact$mC[,1]),main= "5-mC using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
-lines(density(results_exact$mC[,2]),col=2)
-lines(density(results_exact$mC[,3]),col=3)
-lines(density(results_exact$mC[,4]),col=4)
-
-plot(density(results_exact$C[,1]),main= "5-C using MLML",ylim=c(0,5),xlab=" ",xlim=c(0,1))
-lines(density(results_exact$C[,2]),col=2)
-lines(density(results_exact$C[,3]),col=3)
-lines(density(results_exact$C[,4]),col=4)
-```
-
-<img src="README_files/figure-html/unnamed-chunk-27-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-25-1.png" style="display: block; margin: auto;" />
 
 # Other methods to obtain the estimates
 
@@ -400,27 +350,7 @@ mC_naive <- beta_OxBS
 ```
 
 
-
-```r
-par(mfrow =c(1,3)) 
-
-plot(density(hmC_naive[,1]),main= "5-hmC using naive",ylim=c(0,8),xlab=" ",xlim=c(-1,1))
-lines(density(hmC_naive[,2]),col=2)
-lines(density(hmC_naive[,3]),col=3)
-lines(density(hmC_naive[,4]),col=4)
-
-plot(density(mC_naive[,1]),main= "5-mC using naive",ylim=c(0,5),xlab=" ",xlim=c(0,1))
-lines(density(mC_naive[,2]),col=2)
-lines(density(mC_naive[,3]),col=3)
-lines(density(mC_naive[,4]),col=4)
-
-plot(density(C_naive[,1]),main= "5-C using naive",ylim=c(0,5),xlab=" ",xlim=c(0,1))
-lines(density(C_naive[,2]),col=2)
-lines(density(C_naive[,3]),col=3)
-lines(density(C_naive[,4]),col=4)
-```
-
-<img src="README_files/figure-html/unnamed-chunk-29-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-27-1.png" style="display: block; margin: auto;" />
 
 
 ## `OxyBS` estimates
@@ -494,37 +424,84 @@ lines(density(MethOxy[,3,1]),col=3)
 lines(density(MethOxy[,4,1]),col=4)
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-33-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-31-1.png" style="display: block; margin: auto;" />
+
+## `oxBS.MLE` estimates
+
+`ENmix` package had the function `oxBS.MLE` from [Xu *et al.* (2016)](https://www.ncbi.nlm.nih.gov/pubmed/27522082) that can be uses to obtain estimates for the specific case where ox-BS and BS data are available.
+
+
+
+```r
+beta_BS <- getBeta(MSet.noob)[,c(1,3,5,6)]
+beta_OxBS <- getBeta(MSet.noob)[,c(7,8,2,4)]
+N_BS <- getCN(MSet.noob)[,c(1,3,5,6)]
+N_OxBS <- getCN(MSet.noob)[,c(7,8,2,4)]
+colnames(beta_BS) <- c("rep1","rep2","rep3","rep4")
+colnames(beta_OxBS) <- c("rep1","rep2","rep3","rep4")
+colnames(N_BS) <- c("rep1","rep2","rep3","rep4")
+colnames(N_OxBS) <- c("rep1","rep2","rep3","rep4")
+
+library(ENmix)
+oxBSMLEresults <- oxBS.MLE(beta.BS=beta_BS,beta.oxBS=beta_OxBS,
+                           N.BS=N_BS,N.oxBS=N_OxBS)
+```
 
 
 ## Comparison of 5-hmC estimates from different methods
 
 
+<img src="README_files/figure-html/unnamed-chunk-33-1.png" style="display: block; margin: auto;" />
 
-```r
-library(GGally)
-# data for replicate 1 is shown
-df <- data.frame(x = as.numeric(results_exact$hmC[,1]),y=as.numeric(results_em$hmC[,1]),
-                 z = as.numeric(MethOxy[,1,3]),w=as.numeric(hmC_naive[,1]))
-ggpairs(df, title = "5-hmc estimates",  
-  axisLabels = "show",columnLabels=c("Exact MLE","EM","OxyBS","Naive"))
-```
 
-<img src="README_files/figure-html/unnamed-chunk-34-1.png" style="display: block; margin: auto;" />
 
+
+## Comparison of processing times from different methods
 
 
 ```r
-library(ggplot2)
-ggplot(df,aes(x=x,y=z)) + geom_point(alpha = 0.3) + xlab("Exact MLE") +
-  ylab("OxyBS")
+library(OxyBS)
+library(microbenchmark)
+library(MLML2R)
+signalBS <- MethylatedBS+UnMethylatedBS
+signalOxBS <- MethylatedOxBS+UnMethylatedOxBS
+betaBS <- MethylatedBS/signalBS
+betaOxBS <- MethylatedOxBS/signalOxBS
+
+nCpGs <- dim(UnMethylatedOxBS)[1]
+nSpecimens <- dim(UnMethylatedOxBS)[2]
+MethOxy1 <- array(NA,dim=c(nCpGs,nSpecimens,3))
+dimnames(MethOxy1) <- list(
+  rownames(MethylatedBS)[1:nCpGs],
+  colnames(MethylatedBS)[1:nSpecimens], c("C","5mC","5hmC"))
+
+oxyBS <- function()
+{
+  for(i in 1:nSpecimens){
+MethOxy1[,i,] <-fitOxBS(betaBS[,i],betaOxBS[,i],signalBS[,i],signalOxBS[,i])
+  }
+}
+
+mbm = microbenchmark(
+  EXACT = MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, 
+               M = MethylatedOxBS,exact=TRUE),
+  EM = MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, 
+            M = MethylatedOxBS,tol=0.00001),
+  oxBSMLE = oxBS.MLE(beta.BS=beta_BS,beta.oxBS=beta_OxBS,
+                     N.BS=N_BS,N.oxBS=N_OxBS),
+  oxyBS_res = oxyBS(),
+  times=1)
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-35-1.png" style="display: block; margin: auto;" />
 
-```r
-ggplot(df,aes(x=y,y=z)) + geom_point(alpha = 0.3) + xlab("EM") +
-  ylab("OxyBS")
-```
 
-<img src="README_files/figure-html/unnamed-chunk-35-2.png" style="display: block; margin: auto;" />
+
+
+
+| Method    |      Function           |  Package | Time (Seconds)                             |
+|-----------|:-----------------------:|---------:|-------------------------------------------:|
+| Iterative |  `MLML` (`tol=0.00001`) | `MLML2R` | 175.503  |
+| Iterative |  `fitOxBS`              | `OxyBS`  | 3854.848  |
+| Closed-form analytical |  `MLML` (`exact=TRUE`) | `MLML2R` | 0.808  |
+| Closed-form analytical |  `oxBS.MLE` | `ENmix` | 1.011  |
+

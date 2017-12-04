@@ -8,9 +8,6 @@ output:
 ---
 
 
-
-
-
 # Getting publicly available data
 
 
@@ -35,8 +32,6 @@ Samples:
 * GSM1543274	brain-BS-4
 * GSM1543275	brain-oxBS-1
 * GSM1543276	brain-oxBS-2
-
-
 
 This example has the following dependencies:
 
@@ -193,10 +188,6 @@ rgSet
 ##   annotation: ilmn12.hg19
 ```
 
-```r
-save(rgSet,file="rgSet.rds")
-```
-
 
 # Preprocessing
 
@@ -228,8 +219,6 @@ We kept $83\%$ of the probes according to this criterion.
 The `rgSet` object is a class called `RGChannelSet` which represents two color data with a green and a red channel. We will use, as input in the `MLML` funcion, a `MethylSet`, which contains the methylated and unmethylated signals. The most basic way to construct a `MethylSet` is to using the function `preprocessRaw` which uses the array design to match up the different probes and color channels to construct the methylated and unmethylated signals. Here we will use the `preprocessNoob` function, which does the preprocessing and returns a `MethylSet`.
 
 
-
-
 Arrays were then normalized using the Noob/ssNoob preprocessing method for Infinium methylation microarrays.
 
 
@@ -250,9 +239,6 @@ MSet.noob<- preprocessNoob(rgSet[keep_probes,])
 ```
 
 
-
-
-
 Prepare de input data:
 
 
@@ -265,7 +251,11 @@ MethylatedOxBS <- getMeth(MSet.noob)[,c(7,8,2,4)]
 UnMethylatedOxBS <- getUnmeth(MSet.noob)[,c(7,8,2,4)]
 ```
 
-Only a small sample of CpGs and 2 replicates will be used in the example data.
+
+
+
+
+# This was included in the package as example:
 
 
 ```r
@@ -282,8 +272,159 @@ colnames(MethylatedBS) <- c("sample1","sample2")
 colnames(UnMethylatedBS) <- c("sample1","sample2")
 colnames(MethylatedOxBS) <- c("sample1","sample2")
 colnames(UnMethylatedOxBS) <- c("sample1","sample2")
+
+N_BS <- round(MethylatedBS+UnMethylatedBS)
+
+N_OxBS <- round(MethylatedOxBS+UnMethylatedOxBS)
+
+N_TAB <- pmax(N_BS,N_OxBS)
+
+p_m=.3
+p_h=0.2
+p_u=.5
+
+true_parameters_sim <- data.frame(p_m=.3,p_h=.2,p_u=.5)
+save(true_parameters_sim,file="true_parameters_sim.rda")
+
+set.seed(2017)
+MethylatedBS_sim <- apply(N_BS, c(1,2), function(x) rbinom(n=1, size=x, prob=(p_m+p_h)))
+                          
+UnMethylatedBS_sim <- N_BS - MethylatedBS_sim
+
+MethylatedOxBS_sim <- apply(N_OxBS, c(1,2), function(x) rbinom(n=1, size=x, prob=p_m))
+                            
+UnMethylatedOxBS_sim <- N_OxBS - MethylatedOxBS_sim
+
+MethylatedTAB_sim <- apply(N_TAB, c(1,2), function(x) rbinom(n=1, size=x, prob=p_h))
+                           
+UnMethylatedTAB_sim <- N_TAB - MethylatedTAB_sim
+
+
+save(MethylatedBS_sim,file="MethylatedBS_sim.rda")
+save(UnMethylatedBS_sim,file="UnMethylatedBS_sim.rda")
+save(MethylatedOxBS_sim,file="MethylatedOxBS_sim.rda")
+save(UnMethylatedOxBS_sim,file="UnMethylatedOxBS_sim.rda")
+save(MethylatedTAB_sim,file="MethylatedTAB_sim.rda")
+save(UnMethylatedTAB_sim,file="UnMethylatedTAB_sim.rda")
 ```
 
 
 
+# Second Example Dataset
 
+
+```r
+MethylatedBS <- getMeth(MSet.noob)[,c(1,3,5,6)]
+UnMethylatedBS <- getUnmeth(MSet.noob)[,c(1,3,5,6)]
+
+MethylatedOxBS <- getMeth(MSet.noob)[,c(7,8,2,4)]
+UnMethylatedOxBS <- getUnmeth(MSet.noob)[,c(7,8,2,4)]
+
+colnames(MethylatedBS) <- c("sample1","sample2","sample3","sample4")
+colnames(UnMethylatedBS) <- c("sample1","sample2","sample3","sample4")
+colnames(MethylatedOxBS) <- c("sample1","sample2","sample3","sample4")
+colnames(UnMethylatedOxBS) <- c("sample1","sample2","sample3","sample4")
+
+CpG <- rownames(MethylatedBS)
+
+N_BS <- round(MethylatedBS+UnMethylatedBS)
+
+N_OxBS <- round(MethylatedOxBS+UnMethylatedOxBS)
+
+N_TAB <- pmax(N_BS,N_OxBS)
+
+# Use estimates from dataset as base for the true parameters in the simulation
+library(MLML2R)
+```
+
+```
+## 
+## Attaching package: 'MLML2R'
+```
+
+```
+## The following objects are masked _by_ '.GlobalEnv':
+## 
+##     MethylatedBS_sim, MethylatedOxBS_sim, MethylatedTAB_sim,
+##     UnMethylatedBS_sim, UnMethylatedOxBS_sim, UnMethylatedTAB_sim
+```
+
+```r
+results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,exact=TRUE)
+
+
+set.seed(2017)
+
+temp1 <- data.frame(n=as.vector(N_BS),p_m=c(results_exact$mC[,1],results_exact$mC[,1],results_exact$mC[,1],results_exact$mC[,1]),p_h=c(results_exact$hmC[,1],results_exact$hmC[,1],results_exact$hmC[,1],results_exact$hmC[,1]))
+
+MethylatedBS_temp <- c()
+for (i in 1:dim(temp1)[1])
+{
+  MethylatedBS_temp[i] <- rbinom(n=1, size=temp1$n[i], prob=(temp1$p_m[i]+temp1$p_h[i]))
+}
+
+UnMethylatedBS_sim2 <- matrix(N_BS - MethylatedBS_temp,ncol=4)
+MethylatedBS_sim2 <- matrix(MethylatedBS_temp,ncol=4)
+
+temp1 <- data.frame(n=as.vector(N_OxBS),p_m=c(results_exact$mC[,1],results_exact$mC[,1],results_exact$mC[,1],results_exact$mC[,1]),p_h=c(results_exact$hmC[,1],results_exact$hmC[,1],results_exact$hmC[,1],results_exact$hmC[,1]))
+
+MethylatedOxBS_temp <- c()
+for (i in 1:dim(temp1)[1])
+{
+  MethylatedOxBS_temp[i] <- rbinom(n=1, size=temp1$n[i], prob=temp1$p_m[i])
+}
+
+UnMethylatedOxBS_sim2 <- matrix(N_OxBS - MethylatedOxBS_temp,ncol=4)
+MethylatedOxBS_sim2 <- matrix(MethylatedOxBS_temp,ncol=4)
+
+
+temp1 <- data.frame(n=as.vector(N_TAB),p_m=c(results_exact$mC[,1],results_exact$mC[,1],results_exact$mC[,1],results_exact$mC[,1]),p_h=c(results_exact$hmC[,1],results_exact$hmC[,1],results_exact$hmC[,1],results_exact$hmC[,1]))
+
+MethylatedTAB_temp <- c()
+for (i in 1:dim(temp1)[1])
+{
+  MethylatedTAB_temp[i] <- rbinom(n=1, size=temp1$n[i], prob=temp1$p_h[i])
+}
+
+
+UnMethylatedTAB_sim2 <- matrix(N_TAB - MethylatedTAB_temp,ncol=4)
+MethylatedTAB_sim2 <- matrix(MethylatedTAB_temp,ncol=4)
+
+
+set.seed(112017)
+
+a <- sample(1:dim(MethylatedBS)[1],10000,replace=FALSE)
+
+MethylatedBS_sim2 <- MethylatedBS_sim2[a,]
+UnMethylatedBS_sim2 <- UnMethylatedBS_sim2[a,]
+MethylatedOxBS_sim2 <- MethylatedOxBS_sim2[a,]
+UnMethylatedOxBS_sim2 <- UnMethylatedOxBS_sim2[a,]
+MethylatedTAB_sim2 <- MethylatedTAB_sim2[a,]
+UnMethylatedTAB_sim2 <- UnMethylatedTAB_sim2[a,]
+
+colnames(MethylatedBS_sim2) <- c("sample1","sample2","sample3","sample4")
+colnames(UnMethylatedBS_sim2) <- c("sample1","sample2","sample3","sample4")
+colnames(MethylatedOxBS_sim2) <- c("sample1","sample2","sample3","sample4")
+colnames(UnMethylatedOxBS_sim2) <- c("sample1","sample2","sample3","sample4")
+
+rownames(MethylatedBS_sim2) <- CpG[a]
+rownames(UnMethylatedBS_sim2) <- CpG[a]
+rownames(MethylatedOxBS_sim2) <- CpG[a]
+rownames(UnMethylatedOxBS_sim2) <- CpG[a]
+rownames(MethylatedTAB_sim2) <- CpG[a]
+rownames(UnMethylatedTAB_sim2) <- CpG[a]
+
+
+save(MethylatedBS_sim2,file="MethylatedBS_sim2.rda")
+save(UnMethylatedBS_sim2,file="UnMethylatedBS_sim2.rda")
+save(MethylatedOxBS_sim2,file="MethylatedOxBS_sim2.rda")
+save(UnMethylatedOxBS_sim2,file="UnMethylatedOxBS_sim2.rda")
+save(MethylatedTAB_sim2,file="MethylatedTAB_sim2.rda")
+save(UnMethylatedTAB_sim2,file="UnMethylatedTAB_sim2.rda")
+
+
+true_parameters_sim2 <- data.frame(p_m=results_exact$mC[,1],p_h=results_exact$hmC[,1])
+true_parameters_sim2$p_u <- 1-true_parameters_sim2$p_m-true_parameters_sim2$p_h
+true_parameters_sim2 <- true_parameters_sim2[a,]
+save(true_parameters_sim2,file="true_parameters_sim2.rda")
+```
