@@ -8,11 +8,10 @@ Authors@R: c(person("Samara", "Kiihl", email = "samara@ime.unicamp.br",
                   person("Arce","Domingo-Relloso",role="aut"),
                   person("Jose","Bermudez",role="aut"),
                   person("Maria","Tellez-Plaza",role="aut"))
-Description: An implementation of the EM-algorithm to obtain maximum likelihood 
-    estimates (MLE) of the levels of 5-mC and 5-hmC in the DNA using information 
-    from BS-conversion, TAB-conversion, and oxBS-conversion methods. 
-    One can use information from all three methods or any combination of two of them. 
-    Exact constrained MLE option is also available for combination of two methods.
+Description: Maximum likelihood estimates (MLE) of the levels of 5-mC and 5-hmC 
+    in the DNA using information from BS-conversion, TAB-conversion, 
+    and oxBS-conversion methods. One can use information from all three methods 
+    or any combination of two of them. Estimates are based on Binomial model.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

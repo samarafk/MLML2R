@@ -20,8 +20,10 @@ MLML_temp(G = NULL, H = NULL, L = NULL, M = NULL, T = NULL,
 
 \item{U}{Unmethylated channel (intensities/counts) from standard BS-conversion (True 5-C).}
 
-\item{iterative}{logical indicating if the exact constrained MLE should be returned as estimate;
-If iterative=TRUE EM-algorithm is used.}
+\item{iterative}{logical. If iterative=TRUE EM-algorithm is used. For the combination of
+two methods, iterative=FALSE returns the exact constrained MLE using the the pool-adjacent-violators
+algorithm (PAVA). When all three methods are combined, iterative=FALSE returns the
+constrained MLE using Lagrange multiplier.}
 
 \item{tol}{convergence tolerance; considered only if iterative=TRUE}
 }
@@ -41,10 +43,7 @@ MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.
 }
 \details{
 The function returns MLE estimates (binomial model assumed).
- When iterative=TRUE, the MLE are obtained via EM-algorithm. For the combination of two methods,
- the iterative=FALSE option returns exact constrained MLE using the the pool-adjacent-violators
- algorithm (PAVA). When all three methods are combined, the iterative=FALSE option returns the
- constrained MLE using Lagrange multiplier. The function assumes that the order of the
+ When iterative=TRUE, the MLE are obtained via EM-algorithm. The function assumes that the order of the
  rows and columns in the input matrices are consistent. In addition, all the input matrices
  must have the same dimension. Usually, rows represent CpG loci and columns are the samples.
 }

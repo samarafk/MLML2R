@@ -6,14 +6,13 @@
 #' @param M Methylated channel (intensities/counts) from oxBS-conversion (True 5-mC).
 #' @param T Methylated channel (intensities/counts) from standard BS-conversion (5-mC+5-hmC).
 #' @param U Unmethylated channel (intensities/counts) from standard BS-conversion (True 5-C).
-#' @param iterative logical indicating if the exact constrained MLE should be returned as estimate;
-#'  If iterative=TRUE EM-algorithm is used.
+#' @param iterative logical. If iterative=TRUE EM-algorithm is used. For the combination of
+#'  two methods, iterative=FALSE returns the exact constrained MLE using the the pool-adjacent-violators
+#'  algorithm (PAVA). When all three methods are combined, iterative=FALSE returns the
+#'  constrained MLE using Lagrange multiplier.
 #' @param tol convergence tolerance; considered only if iterative=TRUE
 #' @details The function returns MLE estimates (binomial model assumed).
-#'  When iterative=TRUE, the MLE are obtained via EM-algorithm. For the combination of two methods,
-#'  the iterative=FALSE option returns exact constrained MLE using the the pool-adjacent-violators
-#'  algorithm (PAVA). When all three methods are combined, the iterative=FALSE option returns the
-#'  constrained MLE using Lagrange multiplier. The function assumes that the order of the
+#'  When iterative=TRUE, the MLE are obtained via EM-algorithm. The function assumes that the order of the
 #'  rows and columns in the input matrices are consistent. In addition, all the input matrices
 #'  must have the same dimension. Usually, rows represent CpG loci and columns are the samples.
 #' @return The returned value is a list with the following components.
