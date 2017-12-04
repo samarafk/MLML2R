@@ -492,7 +492,7 @@ mbm = microbenchmark(
   times=1)
 ```
 
-```{r,eval=TRUE,echo=FALSE}
+```{r,eval=FALSE,echo=FALSE}
 save(mbm,file="mbm.rds")
 ```
 
