@@ -9,6 +9,8 @@
 MethylatedOxBS_sim
 }
 \description{
-A matrix of counts after preprocessing corresponding to 100 CpGs and 2 samples.
+A matrix of simulated counts corresponding to 100 CpGs and 2 samples.
+True proportions of methylation, hydroxymethylation and unmethylated
+used in the simulation are .3, .2, and .5, respectively.
 }
 \keyword{datasets}
