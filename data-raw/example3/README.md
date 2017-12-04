@@ -139,8 +139,8 @@ mbm
 ```
 ## Unit: milliseconds
 ##      expr        min         lq      mean    median        uq       max
-##  lagrange   9.688392   9.835388  22.48343  10.51562  49.94725  52.31685
-##        EM 277.275773 280.259731 286.23858 282.63753 285.45536 320.14820
+##  lagrange   8.797352   9.166617  21.61562  10.12498  49.17773  49.77772
+##        EM 232.395691 240.551371 275.79024 276.31503 313.62644 313.86383
 ##  neval
 ##     10
 ##     10
@@ -154,13 +154,36 @@ M = MethylatedOxBS_sim2
 G = UnMethylatedTAB_sim2
 H = MethylatedTAB_sim2
 
-
 results_oxBS_TAB_BS_exact <- list()
 
-results_oxBS_TAB_BS_exact$mC <- M/(U+H+M)
-results_oxBS_TAB_BS_exact$hmC <- H/(U+H+M)
-results_oxBS_TAB_BS_exact$C <- U/(U+H+M)
+results_oxBS_TAB_BS_exact$mC <- M/(M+L)
+results_oxBS_TAB_BS_exact$hmC <- H/(H+G)
+results_oxBS_TAB_BS_exact$C <- U/(U+T)
+
+
+range(results_oxBS_TAB_BS_exact$mC)
 ```
+
+```
+## [1] 0.009537784 0.969560706
+```
+
+```r
+range(results_oxBS_TAB_BS_exact$hmC)
+```
+
+```
+## [1] 0.0000000 0.7659855
+```
+
+```r
+range(results_oxBS_TAB_BS_exact$C)
+```
+
+```
+## [1] 0.02216867 0.98640249
+```
+
 <img src="README_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
 
 
@@ -254,3 +277,6 @@ all.equal(results_em$hmC,results_exact$hmC)
 
 
 <img src="README_files/figure-html/unnamed-chunk-19-1.png" style="display: block; margin: auto;" />
+
+
+

@@ -114,13 +114,17 @@ M = MethylatedOxBS_sim2
 G = UnMethylatedTAB_sim2
 H = MethylatedTAB_sim2
 
-
 results_oxBS_TAB_BS_exact <- list()
 
-results_oxBS_TAB_BS_exact$mC <- M/(U+H+M)
-results_oxBS_TAB_BS_exact$hmC <- H/(U+H+M)
-results_oxBS_TAB_BS_exact$C <- U/(U+H+M)
+results_oxBS_TAB_BS_exact$mC <- M/(M+L)
+results_oxBS_TAB_BS_exact$hmC <- H/(H+G)
+results_oxBS_TAB_BS_exact$C <- U/(U+T)
 
+
+range(results_oxBS_TAB_BS_exact$mC)
+range(results_oxBS_TAB_BS_exact$hmC)
+range(results_oxBS_TAB_BS_exact$C)
+```
 
 ```{r,echo=FALSE,fig.align='center',fig.height=3,fig.width=9}
 
@@ -330,5 +334,7 @@ plot(density(results_em$C[,1]),main= "5-C using exact",ylim=c(0,5),xlab=" ",xlim
 lines(density(results_em$C[,2]),col=2)
 lines(density(results_em$C[,3]),col=3)
 lines(density(results_em$C[,4]),col=4)
-
 ```
+
+
+
