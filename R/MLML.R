@@ -7,14 +7,14 @@
 #' @param Tc Methylated channel (intensities/counts) from standard BS-conversion (5-mC+5-hmC).
 #' @param Uc Unmethylated channel (intensities/counts) from standard BS-conversion (True 5-C).
 #' @param iterative logical. If iterative=TRUE EM-algorithm is used. For the combination of
-#'  two methods, iterative=FALSE returns the exact constrained MLE using the the pool-adjacent-violators
-#'  algorithm (PAVA). When all three methods are combined, iterative=FALSE returns the
-#'  constrained MLE using Lagrange multiplier.
+#'  two methods, iterative=FALSE returns the exact constrained MLE using the
+#'  pool-adjacent-violators algorithm (PAVA). When all three methods are combined,
+#'  iterative=FALSE returns the constrained MLE using Lagrange multiplier.
 #' @param tol convergence tolerance; considered only if iterative=TRUE
 #' @details The function returns MLE estimates (binomial model assumed).
-#'  When iterative=TRUE, the MLE are obtained via EM-algorithm. The function assumes that the order of the
-#'  rows and columns in the input matrices are consistent. In addition, all the input matrices
-#'  must have the same dimension. Usually, rows represent CpG loci and columns are the samples.
+#'  The function assumes that the order of the rows and columns in the input matrices
+#'  are consistent. In addition, all the input matrices must have the same dimension.
+#'  Usually, rows represent CpG loci and columns are the samples.
 #' @return The returned value is a list with the following components.
 #' @return \item{mC}{maximum likelihood estimate for the proportion of methylation.}
 #' @return \item{hmC}{maximum likelihood estimate for the proportion of hydroxymethylation.}
@@ -71,11 +71,13 @@
 #' Maria Tellez-Plaza.
 #'
 #' @references
-#'   Qu J, Zhou M, Song Q, Hong EE, Smith AD. MLML: consistent simultaneous estimates of DNA methylation and hydroxymethylation.
-#'   Bioinformatics. 2013;29(20):2645-2646. doi:10.1093/bioinformatics/btt459.
+#'   Qu J, Zhou M, Song Q, Hong EE, Smith AD. MLML: consistent simultaneous estimates of
+#'   DNA methylation and hydroxymethylation. Bioinformatics. 2013;29(20):2645-2646.
+#'   doi:10.1093/bioinformatics/btt459.
 #'
-#'   Ayer M, Brunk HD, Ewing GM, Reid WT, Silverman E. An Empirical Distribution Function for Sampling with Incomplete Information.
-#'   Ann. Math. Statist. 1955, 26(4), 641–647. doi:10.1214/aoms/1177728423.
+#'   Ayer M, Brunk HD, Ewing GM, Reid WT, Silverman E. An Empirical Distribution Function
+#'   for Sampling with Incomplete Information. Ann. Math. Statist. 1955, 26(4), 641–647.
+#'   doi:10.1214/aoms/1177728423.
 #'
 #'   Zongli Xu, Jack A. Taylor, Yuet-Kin Leung, Shuk-Mei Ho, Liang Niu;
 #'   oxBS-MLE: an efficient method to estimate 5-methylcytosine and 5-hydroxymethylcytosine

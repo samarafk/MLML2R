@@ -1,13 +1,13 @@
 Package: MLML2R
 Type: Package
 Title: Maximum Likelihood Estimates for 5-mC and 5-hmC Levels in the DNA
-Version: 0.1.0
-Authors@R: c(person("Samara", "Kiihl", email = "samara@ime.unicamp.br",
-                  role = c("aut", "cre")),
-                  person("Maria Jose","Garrido",role="aut"),
-                  person("Arce","Domingo-Relloso",role="aut"),
-                  person("Jose","Bermudez",role="aut"),
-                  person("Maria","Tellez-Plaza",role="aut"))
+Version: 0.99.0
+Author: Samara Kiihl [aut, cre],
+  Maria Jose Martinez-Garrido [aut],
+  Arce Domingo-Relloso [aut],
+  Jose Bermudez [aut],
+  Maria Tellez-Plaza [aut]
+Maintainer: Samara Kiihl <samara@ime.unicamp.br>
 Description: Maximum likelihood estimates (MLE) of the levels of 5-mC and 5-hmC 
     in the DNA using information from BS-conversion, TAB-conversion, 
     and oxBS-conversion methods. One can use information from all three methods 
@@ -18,6 +18,5 @@ LazyData: true
 biocViews: Software, MethylationArray, Epigenetics, DNAMethylation, Microarray, TwoChannel, OneChannel
 RoxygenNote: 6.0.1
 Suggests:
-  minfi,
-    testthat
+  minfi
 BugReports: https://github.com/samarafk/MLML2R/issues

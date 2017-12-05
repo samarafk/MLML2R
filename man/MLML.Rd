@@ -21,9 +21,9 @@ MLML(Gc = NULL, Hc = NULL, Lc = NULL, Mc = NULL, Tc = NULL,
 \item{Uc}{Unmethylated channel (intensities/counts) from standard BS-conversion (True 5-C).}
 
 \item{iterative}{logical. If iterative=TRUE EM-algorithm is used. For the combination of
-two methods, iterative=FALSE returns the exact constrained MLE using the the pool-adjacent-violators
-algorithm (PAVA). When all three methods are combined, iterative=FALSE returns the
-constrained MLE using Lagrange multiplier.}
+two methods, iterative=FALSE returns the exact constrained MLE using the
+pool-adjacent-violators algorithm (PAVA). When all three methods are combined,
+iterative=FALSE returns the constrained MLE using Lagrange multiplier.}
 
 \item{tol}{convergence tolerance; considered only if iterative=TRUE}
 }
@@ -43,9 +43,9 @@ MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.
 }
 \details{
 The function returns MLE estimates (binomial model assumed).
- When iterative=TRUE, the MLE are obtained via EM-algorithm. The function assumes that the order of the
- rows and columns in the input matrices are consistent. In addition, all the input matrices
- must have the same dimension. Usually, rows represent CpG loci and columns are the samples.
+ The function assumes that the order of the rows and columns in the input matrices
+ are consistent. In addition, all the input matrices must have the same dimension.
+ Usually, rows represent CpG loci and columns are the samples.
 }
 \examples{
 # load the example datasets from BS, oxBS and TAB methods
@@ -92,11 +92,13 @@ Gc = UnMethylatedTAB_sim, Hc = MethylatedTAB_sim)
 
 }
 \references{
-Qu J, Zhou M, Song Q, Hong EE, Smith AD. MLML: consistent simultaneous estimates of DNA methylation and hydroxymethylation.
-  Bioinformatics. 2013;29(20):2645-2646. doi:10.1093/bioinformatics/btt459.
+Qu J, Zhou M, Song Q, Hong EE, Smith AD. MLML: consistent simultaneous estimates of
+  DNA methylation and hydroxymethylation. Bioinformatics. 2013;29(20):2645-2646.
+  doi:10.1093/bioinformatics/btt459.
 
-  Ayer M, Brunk HD, Ewing GM, Reid WT, Silverman E. An Empirical Distribution Function for Sampling with Incomplete Information.
-  Ann. Math. Statist. 1955, 26(4), 641–647. doi:10.1214/aoms/1177728423.
+  Ayer M, Brunk HD, Ewing GM, Reid WT, Silverman E. An Empirical Distribution Function
+  for Sampling with Incomplete Information. Ann. Math. Statist. 1955, 26(4), 641–647.
+  doi:10.1214/aoms/1177728423.
 
   Zongli Xu, Jack A. Taylor, Yuet-Kin Leung, Shuk-Mei Ho, Liang Niu;
   oxBS-MLE: an efficient method to estimate 5-methylcytosine and 5-hydroxymethylcytosine
