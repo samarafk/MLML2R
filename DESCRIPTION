@@ -15,7 +15,9 @@ Description: Maximum likelihood estimates (MLE) of the levels of 5-mC and 5-hmC
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+biocViews: Software, MethylationArray, Epigenetics, DNAMethylation, Microarray, TwoChannel, OneChannel
 RoxygenNote: 6.0.1
-Suggests: 
-  minfi
+Suggests:
+  minfi,
+    testthat
 BugReports: https://github.com/samarafk/MLML2R/issues

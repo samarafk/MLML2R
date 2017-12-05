@@ -14,7 +14,7 @@
 true_parameters_sim2
 }
 \description{
-A dataset with the true proportions of methylation, hydroxymethylation and unmethylation
-for each CpG. Used to generate the counts.
+A dataset with the true proportions of methylation, hydroxymethylation
+and unmethylation for each CpG. Used to generate the counts.
 }
 \keyword{datasets}

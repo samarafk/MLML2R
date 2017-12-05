@@ -11,7 +11,7 @@ UnMethylatedBS_sim2
 \description{
 A matrix of simulated counts corresponding to 1000 CpGs and 4 samples.
 True proportions of methylation, hydroxymethylation and unmethylated
-used in the simulation are listed in the columns p_m, p_h, and p_u, respectively,
-in dataset true_parameters_sim2
+used in the simulation are listed in the columns p_m, p_h, and p_u,
+respectively, in dataset true_parameters_sim2
 }
 \keyword{datasets}

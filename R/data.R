@@ -2,8 +2,8 @@
 #'
 #' A matrix of simulated counts corresponding to 1000 CpGs and 4 samples.
 #' True proportions of methylation, hydroxymethylation and unmethylated
-#' used in the simulation are listed inthe columns p_m, p_h, and p_u, respectively,
-#' in dataset true_parameters_sim2
+#' used in the simulation are listed inthe columns p_m, p_h, and p_u,
+#' respectively, in dataset true_parameters_sim2
 #'
 #' @format
 #'
@@ -13,8 +13,8 @@
 
 #' True proportions for simulation
 #'
-#' A dataset with the true proportions of methylation, hydroxymethylation and unmethylation
-#' for each CpG. Used to generate the counts.
+#' A dataset with the true proportions of methylation, hydroxymethylation
+#' and unmethylation for each CpG. Used to generate the counts.
 #'
 #' @format a data frame with 1000 rows (CpGs) and 3 columns:
 #' \describe{
@@ -29,8 +29,8 @@
 #'
 #' A matrix of simulated counts corresponding to 1000 CpGs and 4 samples.
 #' True proportions of methylation, hydroxymethylation and unmethylated
-#' used in the simulation are listed in the columns p_m, p_h, and p_u, respectively,
-#' in dataset true_parameters_sim2
+#' used in the simulation are listed in the columns p_m, p_h, and p_u,
+#' respectively, in dataset true_parameters_sim2
 #'
 #' @format
 #'
@@ -42,8 +42,8 @@
 #'
 #' A matrix of simulated counts corresponding to 1000 CpGs and 4 samples.
 #' True proportions of methylation, hydroxymethylation and unmethylated
-#' used in the simulation are listed in the columns p_m, p_h, and p_u, respectively,
-#' in dataset true_parameters_sim2
+#' used in the simulation are listed in the columns p_m, p_h, and p_u,
+#' respectively, in dataset true_parameters_sim2
 #'
 #' @format
 #'
@@ -55,8 +55,8 @@
 #'
 #' A matrix of simulated counts corresponding to 1000 CpGs and 4 samples.
 #' True proportions of methylation, hydroxymethylation and unmethylated
-#' used in the simulation are listed in the columns p_m, p_h, and p_u, respectively,
-#' in dataset true_parameters_sim2
+#' used in the simulation are listed in the columns p_m, p_h, and p_u,
+#' respectively, in dataset true_parameters_sim2
 #'
 #' @format
 #'
@@ -68,8 +68,8 @@
 #'
 #' A matrix of simulated counts corresponding to 1000 CpGs and 4 samples.
 #' True proportions of methylation, hydroxymethylation and unmethylated
-#' used in the simulation are listed in the columns p_m, p_h, and p_u, respectively,
-#' in dataset true_parameters_sim2
+#' used in the simulation are listed in the columns p_m, p_h, and p_u,
+#' respectively, in dataset true_parameters_sim2
 #'
 #' @format
 #'
@@ -81,8 +81,8 @@
 #'
 #' A matrix of simulated counts corresponding to 1000 CpGs and 4 samples.
 #' True proportions of methylation, hydroxymethylation and unmethylated
-#' used in the simulation are listed in the columns p_m, p_h, and p_u, respectively,
-#' in dataset true_parameters_sim2
+#' used in the simulation are listed in the columns p_m, p_h, and p_u,
+#' respectively, in dataset true_parameters_sim2
 #'
 #' @format
 #'
