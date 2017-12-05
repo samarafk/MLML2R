@@ -4,7 +4,7 @@
 \name{true_parameters_sim2}
 \alias{true_parameters_sim2}
 \title{True proportions for simulation}
-\format{a data frame with 10000 rows (CpGs) and 3 columns:
+\format{a data frame with 1000 rows (CpGs) and 3 columns:
 \describe{
   \item{p_m}{methylation proportion}
   \item{p_h}{hydroxymethylation proportion}

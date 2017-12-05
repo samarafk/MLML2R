@@ -4,12 +4,12 @@
 \name{UnMethylatedTAB_sim2}
 \alias{UnMethylatedTAB_sim2}
 \title{Unmethylated counts from TAB}
-\format{10000 x 4 matrix (CpGs in the rows and  Samples in the columns).}
+\format{1000 x 4 matrix (CpGs in the rows and  Samples in the columns).}
 \usage{
 UnMethylatedTAB_sim2
 }
 \description{
-A matrix of simulated counts corresponding to 10000 CpGs and 4 samples.
+A matrix of simulated counts corresponding to 1000 CpGs and 4 samples.
 True proportions of methylation, hydroxymethylation and unmethylated
 used in the simulation are listed in the columns p_m, p_h, and p_u, respectively,
 in dataset true_parameters_sim2
