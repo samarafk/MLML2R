@@ -63,14 +63,14 @@ Dataset used in this example was simulated from the above true proportions.
 
 ```{r}
 # via EM algortihm
-results_em <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-                   L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
-                   G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2,tol=0.00001,iterative = TRUE)
+results_em <- MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+                   Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2,
+                   Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2,tol=0.00001,iterative = TRUE)
 
 # via Lagrange multiplier approximation
-results_lag <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-                   L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
-                   G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2)
+results_lag <- MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+                   Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2,
+                   Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2)
 ```
 
 ```{r,echo=FALSE,fig.align='center',fig.height=8,fig.width=8}
@@ -96,12 +96,12 @@ all.equal(results_lag$mC[,1],true_parameters_sim2$p_m)
 
 library(microbenchmark)
 mbm = microbenchmark(
-   lagrange = MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-                                                             L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
-                                                            G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2),
-   EM = MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-                            L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
-                            G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2,tol=0.0001,iterative = TRUE),
+   lagrange = MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+                                                             Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2,
+                                                            Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2),
+   EM = MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+                            Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2,
+                            Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2,tol=0.0001,iterative = TRUE),
    times=10)
 mbm
 
@@ -205,12 +205,12 @@ lines(density(results_em$C[,4]),col=4)
 
 ```{r}
 # obtain MLE via EM-algorithm for BS+oxBS:
-results_em <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,iterative=TRUE,tol=0.0001)
+results_em <- MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2,iterative=TRUE,tol=0.0001)
 
 # obtain constrained exact MLE for BS+oxBS:
-results_exact <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2)
+results_exact <- MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2)
 
 all.equal(results_em$hmC,results_exact$hmC)
 ```
@@ -249,12 +249,12 @@ lines(density(results_em$C[,4]),col=4)
 
 ```{r}
 # obtain MLE via EM-algorithm for BS+TAB:
-results_em <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2,tol=0.0001)
+results_em <- MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2,tol=0.0001)
 
 # obtain constrained exact MLE for BS+TAB:
-results_exact <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2)
+results_exact <- MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2)
 
 all.equal(results_em$hmC,results_exact$hmC)
 ```
@@ -296,12 +296,12 @@ lines(density(results_em$C[,4]),col=4)
 
 ```{r}
 # obtain MLE via EM-algorithm for oxBS+TAB:
-results_em <- MLML(L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
-G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2,iterative=TRUE,tol=0.0001)
+results_em <- MLML(Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2,
+Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2,iterative=TRUE,tol=0.0001)
 
 # obtain constrained exact MLE for oxBS+TAB:
-results_exact <- MLML(L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
-G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2)
+results_exact <- MLML(Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2,
+Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2)
 
 all.equal(results_em$hmC,results_exact$hmC)
 
