@@ -350,7 +350,7 @@ library(MLML2R)
 ```
 
 ```r
-results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,exact=TRUE)
+results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS)
 
 
 set.seed(2017)
@@ -393,7 +393,7 @@ MethylatedTAB_sim2 <- matrix(MethylatedTAB_temp,ncol=4)
 
 set.seed(112017)
 
-a <- sample(1:dim(MethylatedBS)[1],10000,replace=FALSE)
+a <- sample(1:dim(MethylatedBS)[1],1000,replace=FALSE)
 
 MethylatedBS_sim2 <- MethylatedBS_sim2[a,]
 UnMethylatedBS_sim2 <- UnMethylatedBS_sim2[a,]

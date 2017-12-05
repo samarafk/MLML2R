@@ -336,7 +336,7 @@ library(MLML2R)</code></pre>
 ## 
 ##     MethylatedBS_sim, MethylatedOxBS_sim, MethylatedTAB_sim,
 ##     UnMethylatedBS_sim, UnMethylatedOxBS_sim, UnMethylatedTAB_sim</code></pre>
-<pre class="r"><code>results_exact &lt;- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,exact=TRUE)
+<pre class="r"><code>results_exact &lt;- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS)
 
 
 set.seed(2017)
@@ -379,7 +379,7 @@ MethylatedTAB_sim2 &lt;- matrix(MethylatedTAB_temp,ncol=4)
 
 set.seed(112017)
 
-a &lt;- sample(1:dim(MethylatedBS)[1],10000,replace=FALSE)
+a &lt;- sample(1:dim(MethylatedBS)[1],1000,replace=FALSE)
 
 MethylatedBS_sim2 &lt;- MethylatedBS_sim2[a,]
 UnMethylatedBS_sim2 &lt;- UnMethylatedBS_sim2[a,]
