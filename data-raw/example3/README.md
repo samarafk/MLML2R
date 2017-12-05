@@ -57,14 +57,14 @@ Dataset used in this example was simulated from the above true proportions.
 
 ```r
 # via EM algortihm
-results_em <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-                   L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
-                   G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2,tol=0.00001,iterative = TRUE)
+results_em <- MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+                   Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2,
+                   Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2,tol=0.00001,iterative = TRUE)
 
 # via Lagrange multiplier approximation
-results_lag <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-                   L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
-                   G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2)
+results_lag <- MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+                   Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2,
+                   Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2)
 ```
 
 <img src="README_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
@@ -75,7 +75,7 @@ all.equal(results_em$hmC,results_lag$hmC)
 ```
 
 ```
-## [1] "Mean relative difference: 1.371669e-05"
+## [1] "Mean relative difference: 1.363813e-05"
 ```
 
 ```r
@@ -83,7 +83,7 @@ all.equal(results_em$C,results_lag$C)
 ```
 
 ```
-## [1] "Mean relative difference: 2.519594e-06"
+## [1] "Mean relative difference: 1.823263e-06"
 ```
 
 ```r
@@ -92,7 +92,7 @@ all.equal(results_em$hmC[,1],true_parameters_sim2$p_h)
 
 ```
 ## [1] "names for target but not for current"
-## [2] "Mean relative difference: 0.04164895"
+## [2] "Mean relative difference: 0.04152325"
 ```
 
 ```r
@@ -101,7 +101,7 @@ all.equal(results_em$mC[,1],true_parameters_sim2$p_m)
 
 ```
 ## [1] "names for target but not for current"
-## [2] "Mean relative difference: 0.01735317"
+## [2] "Mean relative difference: 0.01683185"
 ```
 
 ```r
@@ -110,7 +110,7 @@ all.equal(results_lag$hmC[,1],true_parameters_sim2$p_h)
 
 ```
 ## [1] "names for target but not for current"
-## [2] "Mean relative difference: 0.04165114"
+## [2] "Mean relative difference: 0.04152631"
 ```
 
 ```r
@@ -119,31 +119,28 @@ all.equal(results_lag$mC[,1],true_parameters_sim2$p_m)
 
 ```
 ## [1] "names for target but not for current"
-## [2] "Mean relative difference: 0.01737099"
+## [2] "Mean relative difference: 0.0168322"
 ```
 
 
 ```r
 library(microbenchmark)
 mbm = microbenchmark(
-   lagrange = MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-                                                             L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
-                                                            G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2),
-   EM = MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-                            L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
-                            G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2,tol=0.0001,iterative = TRUE),
+   lagrange = MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+                                                             Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2,
+                                                            Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2),
+   EM = MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+                            Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2,
+                            Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2,tol=0.0001,iterative = TRUE),
    times=10)
 mbm
 ```
 
 ```
-## Unit: milliseconds
-##      expr        min         lq      mean    median        uq       max
-##  lagrange   8.797352   9.166617  21.61562  10.12498  49.17773  49.77772
-##        EM 232.395691 240.551371 275.79024 276.31503 313.62644 313.86383
-##  neval
-##     10
-##     10
+## Unit: microseconds
+##      expr      min       lq      mean    median       uq       max neval
+##  lagrange  606.489  616.528  652.1492  633.5775  694.807   720.897    10
+##        EM 7202.162 7773.634 8405.2229 8129.4215 8872.485 10195.835    10
 ```
 
 ```r
@@ -165,7 +162,7 @@ range(results_oxBS_TAB_BS_exact$mC)
 ```
 
 ```
-## [1] 0.009537784 0.969560706
+## [1] 0.01035002 0.95846582
 ```
 
 ```r
@@ -173,7 +170,7 @@ range(results_oxBS_TAB_BS_exact$hmC)
 ```
 
 ```
-## [1] 0.0000000 0.7659855
+## [1] 0.0000000 0.6842684
 ```
 
 ```r
@@ -181,7 +178,7 @@ range(results_oxBS_TAB_BS_exact$C)
 ```
 
 ```
-## [1] 0.02216867 0.98640249
+## [1] 0.02967969 0.98232222
 ```
 
 <img src="README_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
@@ -201,18 +198,18 @@ range(results_oxBS_TAB_BS_exact$C)
 
 ```r
 # obtain MLE via EM-algorithm for BS+oxBS:
-results_em <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,iterative=TRUE,tol=0.0001)
+results_em <- MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2,iterative=TRUE,tol=0.0001)
 
 # obtain constrained exact MLE for BS+oxBS:
-results_exact <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2)
+results_exact <- MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2)
 
 all.equal(results_em$hmC,results_exact$hmC)
 ```
 
 ```
-## [1] "Mean relative difference: 0.001189797"
+## [1] "Mean relative difference: 0.002200955"
 ```
 
 <img src="README_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
@@ -227,12 +224,12 @@ all.equal(results_em$hmC,results_exact$hmC)
 
 ```r
 # obtain MLE via EM-algorithm for BS+TAB:
-results_em <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2,tol=0.0001)
+results_em <- MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2,tol=0.0001)
 
 # obtain constrained exact MLE for BS+TAB:
-results_exact <- MLML(T = MethylatedBS_sim2 , U = UnMethylatedBS_sim2,
-G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2)
+results_exact <- MLML(Tc = MethylatedBS_sim2 , Uc = UnMethylatedBS_sim2,
+Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2)
 
 all.equal(results_em$hmC,results_exact$hmC)
 ```
@@ -256,19 +253,19 @@ all.equal(results_em$hmC,results_exact$hmC)
 
 ```r
 # obtain MLE via EM-algorithm for oxBS+TAB:
-results_em <- MLML(L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
-G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2,iterative=TRUE,tol=0.0001)
+results_em <- MLML(Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2,
+Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2,iterative=TRUE,tol=0.0001)
 
 # obtain constrained exact MLE for oxBS+TAB:
-results_exact <- MLML(L = UnMethylatedOxBS_sim2, M = MethylatedOxBS_sim2,
-G = UnMethylatedTAB_sim2, H = MethylatedTAB_sim2)
+results_exact <- MLML(Lc = UnMethylatedOxBS_sim2, Mc = MethylatedOxBS_sim2,
+Gc = UnMethylatedTAB_sim2, Hc = MethylatedTAB_sim2)
 
 all.equal(results_em$hmC,results_exact$hmC)
 ```
 
 ```
 ## [1] "Attributes: < Component \"dimnames\": Component 2: target is NULL, current is character >"
-## [2] "Mean relative difference: 5.673549e-06"
+## [2] "Mean relative difference: 6.485336e-06"
 ```
 
 

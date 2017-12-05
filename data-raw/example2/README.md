@@ -420,7 +420,7 @@ Getting the MLE estimates using EM-algorithm:
 
 ```r
 library(MLML2R)
-results_em <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,tol=0.0001)
+results_em <- MLML(Tc = MethylatedBS , Uc = UnMethylatedBS, Lc = UnMethylatedOxBS, Mc = MethylatedOxBS,tol=0.0001,iterative = TRUE)
 ```
 
 ```r
@@ -438,7 +438,7 @@ Getting the constrained exact MLE estimates:
 
 ```r
 library(MLML2R)
-results_exact <- MLML(T = MethylatedBS , U = UnMethylatedBS, L = UnMethylatedOxBS, M = MethylatedOxBS,exact=TRUE)
+results_exact <- MLML(Tc = MethylatedBS , Uc = UnMethylatedBS, Lc = UnMethylatedOxBS, Mc = MethylatedOxBS)
 ```
 
 
