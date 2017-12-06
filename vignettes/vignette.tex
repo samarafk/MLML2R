@@ -123,6 +123,7 @@ To start this example we will need the following packages:
 \end{Sinput}
 \end{Schunk}
 
+
 It is usually best practice to start the analysis from the raw data, which in the case of the 450K array is a \verb|.IDAT| file.
 
 The raw files are deposited in GEO and can be downloaded by doing:
@@ -146,7 +147,6 @@ The \verb|.IDAT| files can now be read:
 \begin{Schunk}
 \begin{Sinput}
 > rgSet <- read.metharray.exp("GSE63179/idat")
-> rgSet
 \end{Sinput}
 \end{Schunk}
 
@@ -156,6 +156,9 @@ To access phenotype data we use the \Rfunction{pData} function. The phenotype da
 \begin{Sinput}
 > pData(rgSet)
 \end{Sinput}
+\begin{Soutput}
+DataFrame with 8 rows and 0 columns
+\end{Soutput}
 \end{Schunk}
 In this example the phenotype is not really relevant, since we have only one sample: male, 25 years old. What we do need is the information about the conversion method used in each replicate: BS or oxBS. We will access this information automatically from GEO:
 \begin{Schunk}
@@ -164,15 +167,32 @@ In this example the phenotype is not really relevant, since we have only one sam
 > pD.all <- pData(geoMat[[1]])
 > pD <- pD.all[, c("title", "geo_accession", "characteristics_ch1.1",
 +                  "characteristics_ch1.2","characteristics_ch1.3")]
+> pD
 \end{Sinput}
 \end{Schunk}
 
 
-
 \begin{Schunk}
-\begin{Sinput}
-> pD
-\end{Sinput}
+\begin{Soutput}
+                  title geo_accession characteristics_ch1.1 characteristics_ch1.2
+GSM1543269   brain-BS-1    GSM1543269          gender: Male               age: 25
+GSM1543270 brain-oxBS-3    GSM1543270          gender: Male               age: 25
+GSM1543271   brain-BS-2    GSM1543271          gender: Male               age: 25
+GSM1543272 brain-oxBS-4    GSM1543272          gender: Male               age: 25
+GSM1543273   brain-BS-3    GSM1543273          gender: Male               age: 25
+GSM1543274   brain-BS-4    GSM1543274          gender: Male               age: 25
+GSM1543275 brain-oxBS-1    GSM1543275          gender: Male               age: 25
+GSM1543276 brain-oxBS-2    GSM1543276          gender: Male               age: 25
+           characteristics_ch1.3
+GSM1543269    bisulfite_proc: BS
+GSM1543270  bisulfite_proc: oxBS
+GSM1543271    bisulfite_proc: BS
+GSM1543272  bisulfite_proc: oxBS
+GSM1543273    bisulfite_proc: BS
+GSM1543274    bisulfite_proc: BS
+GSM1543275  bisulfite_proc: oxBS
+GSM1543276  bisulfite_proc: oxBS
+\end{Soutput}
 \end{Schunk}
 
 
@@ -187,6 +207,20 @@ This phenotype data needs to be merged into the methylation data. The following 
 > pData(rgSet) <- as(pD,"DataFrame")
 > rgSet
 \end{Sinput}
+\begin{Soutput}
+class: RGChannelSet 
+dim: 622399 8 
+metadata(0):
+assays(2): Green Red
+rownames(622399): 10600313 10600322 ... 74810490 74810492
+rowData names(0):
+colnames(8): GSM1543269 GSM1543270 ... GSM1543275 GSM1543276
+colData names(5): title geo_accession characteristics_ch1.1
+  characteristics_ch1.2 characteristics_ch1.3
+Annotation
+  array: IlluminaHumanMethylation450k
+  annotation: ilmn12.hg19
+\end{Soutput}
 \end{Schunk}
 
 The \Robject{rgSet} object is a class called \Rclass{RGChannelSet} used for two color data (green and a red channel). The input in the \Rfunction{MLML} funcion is  \Rclass{MethylSet}, which contains the methylated and unmethylated signals. The most basic way to construct a \Rclass{MethylSet} is  using the function \Rfunction{preprocessRaw}. Here we chose the function \Rfunction{preprocessNoob} for background correction and construction of the \Rclass{MethylSet}.
@@ -196,6 +230,9 @@ The \Robject{rgSet} object is a class called \Rclass{RGChannelSet} used for two 
 \begin{Sinput}
 > MSet.noob<- preprocessNoob(rgSet)
 \end{Sinput}
+\begin{Soutput}
+[preprocessNoob] Applying R/G ratio flip to fix dye bias...
+\end{Soutput}
 \end{Schunk}
 
 
@@ -214,9 +251,6 @@ The BS replicates are in columns 1, 3, 5, and 6. The remaining columns are from 
 \end{Schunk}
 
 
-
-
-
 In this example we only have two methods, therefore we can choose between the EM-algorithm and the exact constrained maximum likelihood estimates (using PAVA).
 
 Estimates via the EM-algorithm:
@@ -228,8 +262,6 @@ Estimates via the EM-algorithm:
 +                    iterative = TRUE)
 \end{Sinput}
 \end{Schunk}
-
-
 
 
 The exact constrained MLE (using PAVA):
@@ -246,12 +278,16 @@ The estimates are very similar for both methods:
 \begin{Sinput}
 > all.equal(results_exactPD1$hmC,results_emPD1$hmC,scale=1)
 \end{Sinput}
+\begin{Soutput}
+[1] "Mean absolute difference: 8.206517e-07"
+\end{Soutput}
 \end{Schunk}
 
 When only two methods are available, we highly recommend the default option \Rcode{iterative=FALSE} since the difference in the estimates obtained via EM and exact constrained is very small, but the former requires more computational effort:
 
 \begin{Schunk}
 \begin{Sinput}
+> library(microbenchmark)
 > mbmPD1 = microbenchmark(
 +   EXACT = MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
 +                L.matrix = UnMethylatedOxBS,M.matrix = MethylatedOxBS),
@@ -261,6 +297,12 @@ When only two methods are available, we highly recommend the default option \Rco
 +   times=1)
 > mbmPD1
 \end{Sinput}
+\begin{Soutput}
+Unit: milliseconds
+  expr         min          lq        mean      median          uq         max neval
+ EXACT    703.9588    703.9588    703.9588    703.9588    703.9588    703.9588     1
+    EM 195957.8838 195957.8838 195957.8838 195957.8838 195957.8838 195957.8838     1
+\end{Soutput}
 \end{Schunk}
 
 
@@ -315,15 +357,28 @@ We need to identify the samples from different methods: BS-conversion, oxBS-conv
 > pD.all <- pData(geoMat[[1]])
 > pD <- pD.all[, c("title", "geo_accession", "characteristics_ch1",
 +                  "characteristics_ch1.2","characteristics_ch1.3")]
+> head(pD)
 \end{Sinput}
 \end{Schunk}
 
 
-
 \begin{Schunk}
-\begin{Sinput}
-> pD
-\end{Sinput}
+\begin{Soutput}
+                   title geo_accession characteristics_ch1        characteristics_ch1.2
+GSM1905306   tissue_1_BS    GSM1905306      gender: Female  survival time (months): 1.1
+GSM1905307 tissue_1_oxBS    GSM1905307      gender: Female  survival time (months): 1.1
+GSM1905308   tissue_2_BS    GSM1905308      gender: Female survival time (months): 53.3
+GSM1905309 tissue_2_oxBS    GSM1905309      gender: Female survival time (months): 53.3
+GSM1905310   tissue_3_BS    GSM1905310        gender: Male  survival time (months): 0.6
+GSM1905311 tissue_3_oxBS    GSM1905311        gender: Male  survival time (months): 0.6
+           characteristics_ch1.3
+GSM1905306     subject age: 77.6
+GSM1905307     subject age: 77.6
+GSM1905308     subject age: 45.3
+GSM1905309     subject age: 45.3
+GSM1905310     subject age: 69.7
+GSM1905311     subject age: 69.7
+\end{Soutput}
 \end{Schunk}
 
 Keeping only some of the variables from phenotype data:
@@ -349,6 +404,19 @@ We now need to merge this pheno data into the methylation data. The following ar
 > pData(rgSet) <- as(pD,"DataFrame")
 > rgSet
 \end{Sinput}
+\begin{Soutput}
+class: RGChannelSet 
+dim: 622399 60 
+metadata(0):
+assays(2): Green Red
+rownames(622399): 10600313 10600322 ... 74810490 74810492
+rowData names(0):
+colnames(60): GSM1905306 GSM1905307 ... GSM1905364 GSM1905365
+colData names(5): method geo_accession gender survival_months age_years
+Annotation
+  array: IlluminaHumanMethylation450k
+  annotation: ilmn12.hg19
+\end{Soutput}
 \end{Schunk}
 
 Preprocessing:
@@ -356,6 +424,9 @@ Preprocessing:
 \begin{Sinput}
 > MSet.noob<- preprocessNoob(rgSet)
 \end{Sinput}
+\begin{Soutput}
+[preprocessNoob] Applying R/G ratio flip to fix dye bias...
+\end{Soutput}
 \end{Schunk}
 
 
@@ -375,8 +446,6 @@ After the preprocessed steps we can use \Rfunction{MLML} from the \Biocpkg{MLML2
 
 
 
-
-
 In this example we only have two methods, therefore we can choose between the EM-algorithm and the exact constrained maximum likelihood estimates (using PAVA).
 
 Estimates via the EM-algorithm:
@@ -388,8 +457,6 @@ Estimates via the EM-algorithm:
 +                    iterative = TRUE)
 \end{Sinput}
 \end{Schunk}
-
-
 
 
 The exact constrained MLE (using PAVA):
@@ -406,23 +473,10 @@ The estimates are very similar for both methods:
 \begin{Sinput}
 > all.equal(results_exactPD2$hmC,results_emPD2$hmC,scale=1)
 \end{Sinput}
+\begin{Soutput}
+[1] "Mean absolute difference: 1.704285e-06"
+\end{Soutput}
 \end{Schunk}
-
-The EM-algorithm is computational intensive:
-
-\begin{Schunk}
-\begin{Sinput}
-> mbmPD2 = microbenchmark(
-+   EXACT = MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
-+                L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS),
-+   EM = MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
-+             L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS,
-+             iterative = TRUE),
-+   times=1)
-> mbmPD2
-\end{Sinput}
-\end{Schunk}
-
 
 
 
