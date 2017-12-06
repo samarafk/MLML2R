@@ -95,3 +95,27 @@ vignettes/pD.rds
 vignettes/MethylatedOxBS.rds
 
 vignettes/UnMethylatedOxBS.rds
+
+data-raw/vignette_old/MethylatedBS.rds
+
+data-raw/vignette_old/MethylatedBS2.rds
+
+data-raw/vignette_old/MethylatedOxBS2.rds
+
+data-raw/vignette_old/pD1.rds
+
+data-raw/vignette_old/results_emPD1.rds
+
+data-raw/vignette_old/results_emPD2.rds
+
+data-raw/vignette_old/pD.rds
+
+data-raw/vignette_old/UnMethylatedOxBS2.rds
+
+data-raw/vignette_old/UnMethylatedOxBS.rds
+
+data-raw/vignette_old/UnMethylatedBS2.rds
+
+data-raw/vignette_old/UnMethylatedBS.rds
+
+data-raw/vignette_old/MethylatedOxBS.rds
