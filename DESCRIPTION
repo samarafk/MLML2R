@@ -1,6 +1,6 @@
 Package: MLML2R
 Type: Package
-Title: Maximum Likelihood Estimates for 5-mC and 5-hmC Levels in the DNA
+Title: Maximum Likelihood Estimation of DNA Methylation and Hydroxymethylation Levels
 Version: 0.99.0
 Author: Samara Kiihl [aut, cre],
   Maria Jose Martinez-Garrido [aut],
@@ -18,5 +18,7 @@ LazyData: true
 biocViews: Software, MethylationArray, Epigenetics, DNAMethylation, Microarray, TwoChannel, OneChannel
 RoxygenNote: 6.0.1
 Suggests:
-  minfi
+  minfi,
+  BiocStyle,
+  microbenchmark
 BugReports: https://github.com/samarafk/MLML2R/issues

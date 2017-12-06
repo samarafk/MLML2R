@@ -1,11 +1,11 @@
 #' MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.
 #'
-#' @param Gc Unmethylated channel (intensities/counts) from TAB-conversion (5-C + 5-mC).
-#' @param Hc Methylated channel (intensities/counts) from TAB-conversion  (True 5-hmC).
-#' @param Lc Unmethylated channel (intensities/counts) from oxBS-conversion (5-C + 5-hmC).
-#' @param Mc Methylated channel (intensities/counts) from oxBS-conversion (True 5-mC).
-#' @param Tc Methylated channel (intensities/counts) from standard BS-conversion (5-mC+5-hmC).
-#' @param Uc Unmethylated channel (intensities/counts) from standard BS-conversion (True 5-C).
+#' @param G.matrix Unmethylated channel (intensities/counts) from TAB-conversion (5-C + 5-mC).
+#' @param H.matrix Methylated channel (intensities/counts) from TAB-conversion  (True 5-hmC).
+#' @param L.matrix Unmethylated channel (intensities/counts) from oxBS-conversion (5-C + 5-hmC).
+#' @param M.matrix Methylated channel (intensities/counts) from oxBS-conversion (True 5-mC).
+#' @param T.matrix Methylated channel (intensities/counts) from standard BS-conversion (5-mC+5-hmC).
+#' @param U.matrix Unmethylated channel (intensities/counts) from standard BS-conversion (True 5-C).
 #' @param iterative logical. If iterative=TRUE EM-algorithm is used. For the combination of
 #'  two methods, iterative=FALSE returns the exact constrained MLE using the
 #'  pool-adjacent-violators algorithm (PAVA). When all three methods are combined,
@@ -30,38 +30,38 @@
 #' data(UnMethylatedTAB_sim)
 #'
 #' # obtain MLE via EM-algorithm for BS+oxBS:
-#' results_em <- MLML(Tc = MethylatedBS_sim , Uc = UnMethylatedBS_sim,
-#' Lc = UnMethylatedOxBS_sim, Mc = MethylatedOxBS_sim,iterative=TRUE,tol=0.0001)
+#' results_em <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
+#' L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,iterative=TRUE,tol=0.0001)
 #'
 #' # obtain constrained exact MLE for BS+oxBS:
-#' results_exact <- MLML(Tc = MethylatedBS_sim , Uc = UnMethylatedBS_sim,
-#' Lc = UnMethylatedOxBS_sim, Mc = MethylatedOxBS_sim)
+#' results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
+#' L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim)
 #'
 #' # obtain MLE via EM-algorithm for BS+TAB:
-#' results_em <- MLML(Tc = MethylatedBS_sim , Uc = UnMethylatedBS_sim,
-#' Gc = UnMethylatedTAB_sim, Hc = MethylatedTAB_sim,tol=0.0001)
+#' results_em <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
+#' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,tol=0.0001)
 #'
 #' # obtain constrained exact MLE for BS+TAB:
-#' results_exact <- MLML(Tc = MethylatedBS_sim , Uc = UnMethylatedBS_sim,
-#' Gc = UnMethylatedTAB_sim, Hc = MethylatedTAB_sim)
+#' results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
+#' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
 #'
 #' # obtain MLE via EM-algorithm for oxBS+TAB:
-#' results_em <- MLML(Lc = UnMethylatedOxBS_sim, Mc = MethylatedOxBS_sim,
-#' Gc = UnMethylatedTAB_sim, Hc = MethylatedTAB_sim,iterative=TRUE,tol=0.0001)
+#' results_em <- MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
+#' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE,tol=0.0001)
 #'
 #' # obtain constrained exact MLE for oxBS+TAB:
-#' results_exact <- MLML(Lc = UnMethylatedOxBS_sim, Mc = MethylatedOxBS_sim,
-#' Gc = UnMethylatedTAB_sim, Hc = MethylatedTAB_sim)
+#' results_exact <- MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
+#' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
 #'
 #' # obtain MLE via EM-algorithm for BS+oxBS+TAB:
-#' results_em <- MLML(Tc = MethylatedBS_sim , Uc = UnMethylatedBS_sim,
-#' Lc = UnMethylatedOxBS_sim, Mc = MethylatedOxBS_sim,
-#' Gc = UnMethylatedTAB_sim, Hc = MethylatedTAB_sim,iterative=TRUE,tol=0.0001)
+#' results_em <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
+#' L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
+#' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE,tol=0.0001)
 #'
 #' #' # obtain MLE via Lagrange multiplier for BS+oxBS+TAB:
-#' results_exact <- MLML(Tc = MethylatedBS_sim , Uc = UnMethylatedBS_sim,
-#' Lc = UnMethylatedOxBS_sim, Mc = MethylatedOxBS_sim,
-#' Gc = UnMethylatedTAB_sim, Hc = MethylatedTAB_sim)
+#' results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
+#' L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
+#' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
 #'
 #' @author
 #' Samara Kiihl samara@ime.unicamp.br;
@@ -84,44 +84,44 @@
 #'   in paired bisulfite and oxidative bisulfite treated DNA,
 #'   Bioinformatics, 2016;32(23):3667–3669.
 
-MLML <- function(Gc       = NULL,
-                 Hc       = NULL,
-                 Lc       = NULL,
-                 Mc       = NULL,
-                 Tc       = NULL,
-                 Uc       = NULL,
+MLML <- function(G.matrix       = NULL,
+                 H.matrix       = NULL,
+                 L.matrix       = NULL,
+                 M.matrix       = NULL,
+                 T.matrix       = NULL,
+                 U.matrix       = NULL,
                  iterative = FALSE,
                  tol=0.00001)
 {
-  g <- if (is.null(Gc)) {
+  g <- if (is.null(G.matrix)) {
     NULL
   } else {
-    round(Gc)
+    round(G.matrix)
   }
-  h <- if (is.null(Hc)) {
+  h <- if (is.null(H.matrix)) {
     NULL
   } else {
-    round(Hc)
+    round(H.matrix)
   }
-  l <- if (is.null(Lc)) {
+  l <- if (is.null(L.matrix)) {
     NULL
   } else {
-    round(Lc)
+    round(L.matrix)
   }
-  m <- if (is.null(Mc)) {
+  m <- if (is.null(M.matrix)) {
     NULL
   } else {
-    round(Mc)
+    round(M.matrix)
   }
-  u <- if (is.null(Uc)) {
+  u <- if (is.null(U.matrix)) {
     NULL
   } else {
-    round(Uc)
+    round(U.matrix)
   }
-  t <- if (is.null(Tc)) {
+  t <- if (is.null(T.matrix)) {
     NULL
   } else {
-    round(Tc)
+    round(T.matrix)
   }
 
   four <-function(x1,x2,x3,x4){
@@ -140,14 +140,14 @@ MLML <- function(Gc       = NULL,
   pm <- matrix()
   ph <- matrix()
 
-  if (!is.null(Gc) &
-      !is.null(Hc) &
-      !is.null(Lc) & !is.null(Mc) &
-      !is.null(Tc) & !is.null(Uc)) {
+  if (!is.null(G.matrix) &
+      !is.null(H.matrix) &
+      !is.null(L.matrix) & !is.null(M.matrix) &
+      !is.null(T.matrix) & !is.null(U.matrix)) {
     ######### 3 methods
 
-      if (!six(rownames(Lc),rownames(Mc),rownames(Tc),
-                        rownames(Uc),rownames(Gc),rownames(Hc)))
+      if (!six(rownames(L.matrix),rownames(M.matrix),rownames(T.matrix),
+                        rownames(U.matrix),rownames(G.matrix),rownames(H.matrix)))
           {stop("Row names are inconsistent")}
     else {
       if (!iterative)
@@ -188,11 +188,11 @@ MLML <- function(Gc       = NULL,
       c("TAB-conversion +  oxBS-conversion + standard BS-conversion")
 
 
-  } else if (is.null(Gc) || is.null(Hc)) {
+  } else if (is.null(G.matrix) || is.null(H.matrix)) {
     ##### oxBS-seq + BS-seq
 
-if (!four(rownames(Lc),rownames(Mc),rownames(Tc),
-                        rownames(Uc))){stop("Row names are inconsistent")}
+if (!four(rownames(L.matrix),rownames(M.matrix),rownames(T.matrix),
+                        rownames(U.matrix))){stop("Row names are inconsistent")}
     else {
 
     if (!iterative)
@@ -219,11 +219,11 @@ if (!four(rownames(Lc),rownames(Mc),rownames(Tc),
     methods <- c("oxBS-conversion + standard BS-conversion")
 
 
-  } else if (is.null(Mc) || is.null(Lc)) {
+  } else if (is.null(M.matrix) || is.null(L.matrix)) {
     ##### TAB-seq + BS-seq
 
-       if (!four(rownames(Gc),rownames(Hc),rownames(Tc),
-                        rownames(Uc))){stop("Row names are inconsistent")}
+       if (!four(rownames(G.matrix),rownames(H.matrix),rownames(T.matrix),
+                        rownames(U.matrix))){stop("Row names are inconsistent")}
     else {
 
     if (!iterative)
@@ -252,8 +252,8 @@ if (!four(rownames(Lc),rownames(Mc),rownames(Tc),
   } else {
     ##### TAB-seq + Ox-seq
 
-      if (!four(rownames(Gc),rownames(Hc),rownames(Mc),
-                        rownames(Lc))){stop("Row names are inconsistent")}
+      if (!four(rownames(G.matrix),rownames(H.matrix),rownames(M.matrix),
+                        rownames(L.matrix))){stop("Row names are inconsistent")}
     else {
 
     if (!iterative)
