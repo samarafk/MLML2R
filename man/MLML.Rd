@@ -12,7 +12,7 @@ MLML(G.matrix = NULL, H.matrix = NULL, L.matrix = NULL, M.matrix = NULL,
 
 \item{H.matrix}{Methylated channel (Unconverted cytosines/ C counts) from TAB-conversion(reflecting True 5-hmC).}
 
-\item{L.matrix}{Unmethylated channel (Converted cytosines/ T counts) (reflecting 5-C + 5-hmC).}
+\item{L.matrix}{Unmethylated channel (Converted cytosines/ T counts) from oxBS-conversion (reflecting 5-C + 5-hmC).}
 
 \item{M.matrix}{Methylated channel (Unconverted cytosines/ C counts) from oxBS-conversion (reflecting True 5-mC).}
 

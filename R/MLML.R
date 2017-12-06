@@ -2,7 +2,7 @@
 #'
 #' @param G.matrix Unmethylated channel (Converted cytosines/ T counts) from TAB-conversion (reflecting 5-C + 5-mC).
 #' @param H.matrix Methylated channel (Unconverted cytosines/ C counts) from TAB-conversion(reflecting True 5-hmC).
-#' @param L.matrix Unmethylated channel (Converted cytosines/ T counts) (reflecting 5-C + 5-hmC).
+#' @param L.matrix Unmethylated channel (Converted cytosines/ T counts) from oxBS-conversion (reflecting 5-C + 5-hmC).
 #' @param M.matrix Methylated channel (Unconverted cytosines/ C counts) from oxBS-conversion (reflecting True 5-mC).
 #' @param T.matrix Methylated channel (Unconverted cytosines/ C counts) from standard BS-conversion (reflecting 5-mC+5-hmC).
 #' @param U.matrix Unmethylated channel (Converted cytosines/ T counts) from standard BS-conversion (True 5-C).
