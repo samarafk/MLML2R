@@ -1,11 +1,11 @@
 #' MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.
 #'
-#' @param G.matrix Unmethylated channel (intensities/counts) from TAB-conversion (5-C + 5-mC).
-#' @param H.matrix Methylated channel (intensities/counts) from TAB-conversion  (True 5-hmC).
-#' @param L.matrix Unmethylated channel (intensities/counts) from oxBS-conversion (5-C + 5-hmC).
-#' @param M.matrix Methylated channel (intensities/counts) from oxBS-conversion (True 5-mC).
-#' @param T.matrix Methylated channel (intensities/counts) from standard BS-conversion (5-mC+5-hmC).
-#' @param U.matrix Unmethylated channel (intensities/counts) from standard BS-conversion (True 5-C).
+#' @param G.matrix Unmethylated channel (Converted cytosines/ $T$ counts) from TAB-conversion (reflecting 5-C + 5-mC).
+#' @param H.matrix Methylated channel (Unconverted cytosines/ $C$ counts) from TAB-conversion(reflecting True 5-hmC).
+#' @param L.matrix Unmethylated channel (Converted cytosines/ $T$ counts) (reflecting 5-C + 5-hmC).
+#' @param M.matrix Methylated channel (Unconverted cytosines/ $C$ counts) from oxBS-conversion (reflecting True 5-mC).
+#' @param T.matrix Methylated channel (Unconverted cytosines/ $C$ counts) from standard BS-conversion (reflecting 5-mC+5-hmC).
+#' @param U.matrix Unmethylated channel (Converted cytosines/ $T$ counts) from standard BS-conversion (True 5-C).
 #' @param iterative logical. If iterative=TRUE EM-algorithm is used. For the combination of
 #'  two methods, iterative=FALSE returns the exact constrained MLE using the
 #'  pool-adjacent-violators algorithm (PAVA). When all three methods are combined,

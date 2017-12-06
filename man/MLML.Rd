@@ -8,17 +8,17 @@ MLML(G.matrix = NULL, H.matrix = NULL, L.matrix = NULL, M.matrix = NULL,
   T.matrix = NULL, U.matrix = NULL, iterative = FALSE, tol = 1e-05)
 }
 \arguments{
-\item{G.matrix}{Unmethylated channel (intensities/counts) from TAB-conversion (5-C + 5-mC).}
+\item{G.matrix}{Unmethylated channel (Converted cytosines/ $T$ counts) from TAB-conversion (reflecting 5-C + 5-mC).}
 
-\item{H.matrix}{Methylated channel (intensities/counts) from TAB-conversion  (True 5-hmC).}
+\item{H.matrix}{Methylated channel (Unconverted cytosines/ $C$ counts) from TAB-conversion(reflecting True 5-hmC).}
 
-\item{L.matrix}{Unmethylated channel (intensities/counts) from oxBS-conversion (5-C + 5-hmC).}
+\item{L.matrix}{Unmethylated channel (Converted cytosines/ $T$ counts) (reflecting 5-C + 5-hmC).}
 
-\item{M.matrix}{Methylated channel (intensities/counts) from oxBS-conversion (True 5-mC).}
+\item{M.matrix}{Methylated channel (Unconverted cytosines/ $C$ counts) from oxBS-conversion (reflecting True 5-mC).}
 
-\item{T.matrix}{Methylated channel (intensities/counts) from standard BS-conversion (5-mC+5-hmC).}
+\item{T.matrix}{Methylated channel (Unconverted cytosines/ $C$ counts) from standard BS-conversion (reflecting 5-mC+5-hmC).}
 
-\item{U.matrix}{Unmethylated channel (intensities/counts) from standard BS-conversion (True 5-C).}
+\item{U.matrix}{Unmethylated channel (Converted cytosines/ $T$ counts) from standard BS-conversion (True 5-C).}
 
 \item{iterative}{logical. If iterative=TRUE EM-algorithm is used. For the combination of
 two methods, iterative=FALSE returns the exact constrained MLE using the
