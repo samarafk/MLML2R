@@ -20,5 +20,6 @@ RoxygenNote: 6.0.1
 Suggests:
   minfi,
   BiocStyle,
-  microbenchmark
+  microbenchmark,
+  GEOquery
 BugReports: https://github.com/samarafk/MLML2R/issues
