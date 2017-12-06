@@ -115,7 +115,7 @@ We will use the dataset from \cite{10.1371/journal.pone.0118202}, which consists
 When data is obtained through Infinium Methylation arrays, we recommend the use of the \Biocpkg{minfi} package, a well-established tool for reading, preprocessing and analysing DNA methylation data from these platforms. Although our example relies on \Biocpkg{minfi} and other \Bioconductor{} tools, \Biocpkg{MLML2R} does not depend on any packages. Thus, the user is free to read and preprocess the data using any software of preference and then import the intensities (or $T$ and $C$ counts) for the methylated and unmethylated channel (or converted and uncoverted cytosines) into \R{} in matrix format.
 
 To start this example we will need the following packages:
-<<eval=TRUE>>=
+<<eval=FALSE>>=
 library(MLML2R)
 library(minfi)
 library(GEOquery)
@@ -210,7 +210,7 @@ save(UnMethylatedOxBS,file="UnMethylatedOxBS.rds")
 @
 
 
-<<eval=TRUE,echo=FALSE>>=
+<<eval=FALSE,echo=FALSE>>=
 load("MethylatedBS.rds")
 load("UnMethylatedBS.rds")
 load("MethylatedOxBS.rds")
@@ -232,20 +232,20 @@ results_emPD1 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
 save(results_emPD1,file="results_emPD1.rds")
 @
 
-<<eval=TRUE,echo=FALSE>>=
+<<eval=FALSE,echo=FALSE>>=
 load("results_emPD1.rds")
 @
 
 
 The exact constrained MLE (using PAVA):
 
-<<eval=TRUE>>=
+<<eval=FALSE>>=
 results_exactPD1 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
                       L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS)
 @
 
 The estimates are very similar for both methods:
-<<eval=TRUE>>=
+<<eval=FALSE>>=
 all.equal(results_exactPD1$hmC,results_emPD1$hmC,scale=1)
 @
 
@@ -264,7 +264,7 @@ mbmPD1
 
 
 
-<<fig10,fig=TRUE,include=FALSE,width=15,height=5,eval=TRUE,echo=FALSE>>=
+<<fig10,fig=TRUE,include=FALSE,width=15,height=5,eval=FALSE,echo=FALSE>>=
 par(mfrow =c(1,3))
 densityPlot(results_exactPD1$hmC,main= "5-hmC using PAVA",cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
 densityPlot(results_exactPD1$mC,main= "5-mC using PAVA",cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
@@ -320,7 +320,7 @@ pD <- pD.all[, c("title", "geo_accession", "characteristics_ch1",
 save(pD,file="pD1.rds")
 @
 
-<<eval=TRUE,echo=FALSE>>=
+<<eval=FALSE,echo=FALSE>>=
 load("pD1.rds")
 @
 
@@ -329,7 +329,7 @@ pD
 @
 
 Keeping only some of the variables from phenotype data:
-<<eval=TRUE>>=
+<<eval=FALSE>>=
 names(pD)[c(1,3,4,5)] <- c("method","gender","survival_months","age_years")
 pD$gender <- sub("^gender: ", "", pD$gender)
 pD$age_years <- as.numeric(sub("^subject age: ", "", pD$age_years))
@@ -376,7 +376,7 @@ save(UnMethylatedOxBS,file="UnMethylatedOxBS2.rds")
 @
 
 
-<<eval=TRUE,echo=FALSE>>=
+<<eval=FALSE,echo=FALSE>>=
 load("MethylatedBS2.rds")
 load("UnMethylatedBS2.rds")
 load("MethylatedOxBS2.rds")
@@ -398,20 +398,20 @@ results_emPD2 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
 save(results_emPD2,file="results_emPD2.rds")
 @
 
-<<eval=TRUE,echo=FALSE>>=
+<<eval=FALSE,echo=FALSE>>=
 load("results_emPD2.rds")
 @
 
 
 The exact constrained MLE (using PAVA):
 
-<<eval=TRUE>>=
+<<eval=FALSE>>=
 results_exactPD2 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
                       L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS)
 @
 
 The estimates are very similar for both methods:
-<<eval=TRUE>>=
+<<eval=FALSE>>=
 all.equal(results_exactPD2$hmC,results_emPD2$hmC,scale=1)
 @
 
@@ -430,7 +430,7 @@ mbmPD2
 
 
 
-<<fig11,fig=TRUE,include=FALSE,width=15,height=5,eval=TRUE,echo=FALSE>>=
+<<fig11,fig=TRUE,include=FALSE,width=15,height=5,eval=FALSE,echo=FALSE>>=
 par(mfrow =c(1,3))
 densityPlot(results_exactPD2$hmC,main= "5-hmC using PAVA",cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
 densityPlot(results_exactPD2$mC,main= "5-mC using PAVA",cex.axis=1.5,cex.main=1.5,cex.lab=1.5)

@@ -246,9 +246,6 @@ The estimates are very similar for both methods:
 \begin{Sinput}
 > all.equal(results_exactPD1$hmC,results_emPD1$hmC,scale=1)
 \end{Sinput}
-\begin{Soutput}
-[1] "Mean absolute difference: 8.206517e-07"
-\end{Soutput}
 \end{Schunk}
 
 When only two methods are available, we highly recommend the default option \Rcode{iterative=FALSE} since the difference in the estimates obtained via EM and exact constrained is very small, but the former requires more computational effort:
@@ -409,9 +406,6 @@ The estimates are very similar for both methods:
 \begin{Sinput}
 > all.equal(results_exactPD2$hmC,results_emPD2$hmC,scale=1)
 \end{Sinput}
-\begin{Soutput}
-[1] "Mean absolute difference: 1.704285e-06"
-\end{Soutput}
 \end{Schunk}
 
 The EM-algorithm is computational intensive:
