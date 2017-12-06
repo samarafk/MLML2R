@@ -162,9 +162,9 @@ Maximum likelihood estimate via EM-algorithm approach \cite{Qu:MLML} is obtained
 \end{Sinput}
 \begin{Soutput}
 Unit: microseconds
-  expr     min       lq      mean   median       uq      max neval
- EXACT  63.947   80.914   85.7107   85.836   94.993  107.919    10
-    EM 902.922 1026.810 1488.7881 1385.684 1445.678 2793.337    10
+  expr     min      lq      mean    median       uq      max neval
+ EXACT  64.272  68.967   83.0758   82.4815   93.893  107.394    10
+    EM 911.991 977.769 1488.3738 1375.7350 1441.275 2787.930    10
 \end{Soutput}
 \end{Schunk}
 
@@ -210,9 +210,9 @@ Using EM-algorithm:
 \end{Sinput}
 \begin{Soutput}
 Unit: microseconds
-  expr     min      lq      mean   median      uq      max neval
- EXACT  61.560  66.042   75.2638  72.5635  77.294  106.563    10
-    EM 778.386 791.816 1062.4799 835.0475 916.937 2030.559    10
+  expr     min      lq      mean    median       uq      max neval
+ EXACT  65.111  84.224   95.2926   87.7625   95.027  180.402    10
+    EM 771.454 976.850 1269.8069 1066.7110 1207.037 2269.705    10
 \end{Soutput}
 \end{Schunk}
 
@@ -258,9 +258,9 @@ Unit: microseconds
 \end{Sinput}
 \begin{Soutput}
 Unit: microseconds
-  expr     min      lq     mean  median      uq     max neval
- EXACT  82.548  86.923  95.9764  88.347  94.101 142.221    10
-    EM 305.167 332.516 340.7433 340.114 352.012 367.013    10
+  expr     min      lq     mean   median      uq     max neval
+ EXACT  63.334  63.688  77.4390  69.0850  85.656 106.744    10
+    EM 218.499 220.511 239.6617 227.4495 236.438 326.068    10
 \end{Soutput}
 \end{Schunk}
 
@@ -317,8 +317,8 @@ We recommend the default option \Rcode{iterative=FALSE} since the difference in 
 \begin{Soutput}
 Unit: microseconds
   expr     min      lq     mean  median      uq      max neval
- EXACT  71.317  72.047  79.5506  73.344  78.959  104.456    10
-    EM 353.784 366.858 570.0218 405.417 597.645 1618.299    10
+ EXACT  70.705  72.237  78.4059  72.965  75.254  120.414    10
+    EM 367.417 372.204 494.3133 375.354 387.998 1550.788    10
 \end{Soutput}
 \end{Schunk}
 
@@ -458,6 +458,117 @@ The exact constrained MLE (using PAVA):
  \caption{\label{fig:fig10} Estimated proportions of hydroxymethylation, methylation and unmethylation for the CpGs in the dataset using the \Rfunction{MLML} function with default options.}
 \end{figure*}
 
+
+
+\subsection{Publicly available data: GSE73895}
+
+We will use the dataset from \cite{pmid27886174}, which consists of 30 DNA samples from glioblastoma tumors treated with oxBS-BS and hybridized to the Infinium 450K array.
+
+
+The raw files are deposited in GEO and can be downloaded and read into \R{} by doing:
+\begin{Schunk}
+\begin{Sinput}
+> getGEOSuppFiles("GSE73895")
+> untar("GSE73895/GSE73895_RAW.tar", exdir = "GSE73895/idat")
+> idatFiles <- list.files("GSE73895/idat", pattern = "idat.gz$", full = TRUE)
+> sapply(idatFiles, gunzip, overwrite = TRUE)
+> rgSet <- read.metharray.exp("GSE73895/idat")
+\end{Sinput}
+\end{Schunk}
+
+We need to identify the samples from different methods: BS-conversion, oxBS-conversion. We obtain this information from GEO:
+
+\begin{Schunk}
+\begin{Sinput}
+> geoMat <- getGEO("GSE73895")
+> pD.all <- pData(geoMat[[1]])
+> pD <- pD.all[, c("title", "geo_accession", "characteristics_ch1",
++                  "characteristics_ch1.2","characteristics_ch1.3")]
+> head(pD)
+\end{Sinput}
+\end{Schunk}
+
+%
+% <<eval=TRUE,echo=FALSE>>=
+% load("pD1.rds")
+% head(pD)
+% @
+
+Keeping only some of the variables from phenotype data:
+\begin{Schunk}
+\begin{Sinput}
+> names(pD)[c(1,3,4,5)] <- c("method","gender","survival_months","age_years")
+> pD$gender <- sub("^gender: ", "", pD$gender)
+> pD$age_years <- as.numeric(sub("^subject age: ", "", pD$age_years))
+> pD$survival_months <- as.numeric(sapply(pD$survival_months, function(x)
++   strsplit(as.character(x),":")[[1]][2]))
+> pD$method <- sapply(pD$method, function(x) strsplit(as.character(x),"_")[[1]][3])
+\end{Sinput}
+\end{Schunk}
+
+We now need to merge this pheno data into the methylation data. The following are commands to make sure we have the same row identifier in both datasets before merging.
+
+\begin{Schunk}
+\begin{Sinput}
+> sampleNames(rgSet) <- sapply(sampleNames(rgSet),function(x)
++   strsplit(x,"_")[[1]][1])
+> rownames(pD) <- pD$geo_accession
+> pD <- pD[sampleNames(rgSet),]
+> pData(rgSet) <- as(pD,"DataFrame")
+> rgSet
+\end{Sinput}
+\end{Schunk}
+
+Preprocessing and preparing input matrices for \Rfunction{MLML}:
+\begin{Schunk}
+\begin{Sinput}
+> MSet.noob<- preprocessNoob(rgSet)
+> BS_index <- which(pData(rgSet)$method=="BS")
+> oxBS_index <- which(pData(rgSet)$method=="oxBS")
+> MethylatedBS <- getMeth(MSet.noob)[,BS_index]
+> UnMethylatedBS <- getUnmeth(MSet.noob)[,BS_index]
+> MethylatedOxBS <- getMeth(MSet.noob)[,oxBS_index]
+> UnMethylatedOxBS <- getUnmeth(MSet.noob)[,oxBS_index]
+\end{Sinput}
+\end{Schunk}
+
+
+
+In this example we only have two methods, therefore we can choose between the EM-algorithm and the exact constrained maximum likelihood estimates (using PAVA).
+
+Estimates via the EM-algorithm:
+
+\begin{Schunk}
+\begin{Sinput}
+> results_emPD2 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
++                    L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS,
++                    iterative = TRUE)
+\end{Sinput}
+\end{Schunk}
+
+
+The exact constrained MLE (using PAVA):
+
+\begin{Schunk}
+\begin{Sinput}
+> results_exactPD2 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
++                       L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS)
+\end{Sinput}
+\end{Schunk}
+
+
+
+% <<fig11,fig=TRUE,include=FALSE,width=15,height=5,eval=FALSE,echo=FALSE>>=
+% par(mfrow =c(1,3))
+% densityPlot(results_exactPD2$hmC,main= "5-hmC using PAVA",cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
+% densityPlot(results_exactPD2$mC,main= "5-mC using PAVA",cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
+% densityPlot(results_exactPD2$C,main= "5-C using PAVA",cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
+% @
+
+\begin{figure*}[h]
+ \includegraphics{vignette-fig11}
+ \caption{\label{fig:fig11} Estimated proportions of hydroxymethylation, methylation and unmethylation for the CpGs in the dataset using the \Rfunction{MLML} function with default options.}
+\end{figure*}
 
 
 \bibliography{refs}
