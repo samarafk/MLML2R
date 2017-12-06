@@ -10,7 +10,8 @@ output:
 
 Evaluation functions:
 
-```{r}
+
+```r
 # mean squared error
 MSE <- function(estimated,parameter){
   mean((estimated-parameter)^2)
@@ -25,17 +26,23 @@ RE <- function(estimated,parameter){
 MAE <- function(estimated,parameter){
   mean(abs(estimated-parameter))
 }
-
 ```
 
 
 Setting parameters for simulated data:
 
-```{r}
+
+```r
 coverage = c(4:20)
 
 true_parameters <- data.frame(p_m=c(0.1,0.3), p_h=c(.1,.1))
 true_parameters
+```
+
+```
+##   p_m p_h
+## 1 0.1 0.1
+## 2 0.3 0.1
 ```
 
 
@@ -43,7 +50,8 @@ true_parameters
 Simulating the data:
 
 
-```{r}
+
+```r
 set.seed(122017)
 
 n = 1000
@@ -73,14 +81,14 @@ for (i in 1:dim(true_parameters)[1])
   
   save(MethylatedBS,UnMethylatedBS,MethylatedOxBS,UnMethylatedOxBS,MethylatedTAB,UnMethylatedTAB,file=paste0("simulatedCounts/",p_m,"-",p_h,".rda"))
 }
-  
 ```
 
 
 Comparing the methods of BS and OxBS:
 
 
-```{r}
+
+```r
 library(OxyBS)
 library(MLML2R)
 
@@ -142,15 +150,38 @@ for (i in 1:dim(true_parameters)[1])
   MAE_result4[j,i] <- MAE(hmC_naive[,j],p_h)
   }
 }
-
-
 ```
 
-True parameters: `r true_parameters[1,]`
-
-```{r,fig.align='center',fig.height=9,fig.width=9,echo=FALSE}
-aa <- max(c(MAE_result2[,1],MAE_result3[,1],MAE_result4[,1]))
-plot(x=coverage,y=as.vector(MAE_result4[,1]),type="l",col=1,ylim=c(0,aa))
-lines(x=coverage,y=as.vector(MAE_result3[,1]),col=3)
-lines(x=coverage,y=as.vector(MAE_result2[,1]),col=4)
 ```
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+```
+
+True parameters: 0.1, 0.1
+
+<img src="Simulation_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
