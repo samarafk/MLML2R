@@ -119,3 +119,25 @@ data-raw/vignette_old/UnMethylatedBS2.rds
 data-raw/vignette_old/UnMethylatedBS.rds
 
 data-raw/vignette_old/MethylatedOxBS.rds
+
+vignettes/GSE63179/filelist.txt
+
+vignettes/GSE63179/GSE63179_matrixSignalIntensities.txt.gz
+
+vignettes/GSE63179/GSE63179_RAW.tar
+
+vignettes/GSE63179/idat/GPL16304_Gene_features_Metadata.txt.gz
+
+vignettes/GSE63179/idat/GPL16304_Gene_features_PlatformTable.txt.gz
+
+vignettes/GSE73895/filelist.txt
+
+vignettes/GSE73895/GSE73895_RAW.tar
+
+vignettes/GSE73895/idat/GPL13534_450K_Manifest_header_Descriptions.xlsx.gz
+
+vignettes/GSE73895/idat/GPL13534_HumanMethylation450_15017482_v.1.1.bpm.txt.gz
+
+vignettes/GSE73895/idat/GPL13534_HumanMethylation450_15017482_v.1.1.csv.gz
+
+vignettes/GSE73895/idat/GPL13534_HumanMethylation450_15017482_v.1.2.bpm.gz
