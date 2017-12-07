@@ -1,36 +1,41 @@
-\documentclass{article}
-<<style-Sweave, eval=TRUE, echo=FALSE, results=tex>>=
-BiocStyle::latex()
-@
+---
+title: "MLML2R: Maximum Likelihood Estimates for 5-mC and 5-hmC Levels in the DNA"
+shorttitle: "MLML2R"
+package: MLML2R
+bibliography: refs.bib
+author: "Samara F. Kiihl and Maria Tellez-Plaza"
+date: "`r Sys.Date()`"
+output: 
+  BiocStyle::pdf_document:
+   fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{Using MLML2R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE,eval=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+```
+
+# Introduction
 
 
-\bioctitle[MLML2R]{MLML2R: Maximum Likelihood Estimates for 5-mC and 5-hmC Levels in the DNA}
-\author{Samara F. Kiihl\thanks{\email{samara@ime.unicamp.br}}\, and Maria Tellez-Plaza}
 
-
-
-\begin{document}
-
-\maketitle
-
-\begin{abstract}
 
 We present a guide to the Bioconductor package \Biocpkg{MLML2R}. The package provides computational efficient maximum likelihood estimates of DNA methylation and hydroxymethylation proportions when data from the DNA processing methods bisulfite conversion (BS), oxidative bisulfite conversion (ox-BS), and Tet-assisted bisulfite conversion (TAB) are available. Estimates can be obtained when data from all the three methods are available or when any combination of only two of them are available. The package does not depend on other \R{} packages, allowing the user  to read and preprocess the data in any software and import the results into \R{} in matrix format, obtain the estimates and use that as input in the other packages for genomic analysis, such as \Biocpkg{minfi}, \Biocpkg{sva} and \Biocpkg{limma}.
 
-\end{abstract}
-
-Report issues on \url{https://github.com/samarafk/MLML2R/issues}
-
-
-\tableofcontents
-
-\newpage
-
-\section{Introduction}
 
 In a given CpG site from a single cell we will either have a $C$ or a $T$ after DNA processing conversion methods, with a different interpretation for each of the available methods. This is a binary outcome and we assume a Binomial model and use the maximum likelihood estimation method to obtain the estimates for hydroxymethylation and methylation proportions.
 
-$T$ reads are referred to as converted cytosine and $C$ reads are referred to as unconverted cytosine. Conventionally, $T$ counts are also referred to as unmethylated counts, and $C$ counts as methylated counts. In case of Infinium Methylation arrays, we have intensities representing the methylated (M) and unmethylated (U) channels that are proportional to the number of unconverted and converted cytosines ($C$ and $T$, respectively). The most used summary from these experiments is  the proportion $\beta=\frac{M}{M+U}$, commonly referred to as \textit{beta-value}, which reflects the methylation level at a CpG site. Na\"ively using the difference between betas from BS and oxBS as an estimate of 5-hmC (hydroxymethylated cytosine), and the difference between betas from BS and TAB as an estimate of 5-mC (methylated cytosine) can many times provide negative proportions and instances where the sum of 5-C (unmodified cytosine), 5-mC and 5-hmC proportions is greater than one due to measurement errors.
+$T$ reads are referred to as converted cytosine and $C$ reads are referred to as unconverted cytosine. Conventionally, $T$ counts are also referred to as unmethylated counts, and $C$ counts as methylated counts. In case of Infinium Methylation arrays, we have intensities representing the methylated (M) and unmethylated (U) channels that are proportional to the number of unconverted and converted cytosines ($C$ and $T$, respectively). The most used summary from these experiments is  the proportion $\beta=\frac{M}{M+U}$, commonly referred to as \textit{beta-value}, which reflects the methylation level at a CpG site. Naïvely using the difference between betas from BS and oxBS as an estimate of 5-hmC (hydroxymethylated cytosine), and the difference between betas from BS and TAB as an estimate of 5-mC (methylated cytosine) can many times provide negative proportions and instances where the sum of 5-C (unmodified cytosine), 5-mC and 5-hmC proportions is greater than one due to measurement errors.
 
 \Biocpkg{MLML2R} package allows the user to jointly estimate hydroxymethylation and methylation consistently and efficiently.
 
@@ -39,105 +44,45 @@ The function \Rfunction{MLML} takes as input the data from the different methods
 The function assumes that the order of the rows and columns in the input matrices are consistent. In addition, all the input matrices must have the same dimension. Usually, rows represent CpG loci and columns are the samples.
 
 
-\begin{table}[h]
-\begin{center}
-\begin{tabular}{|l|l|}
-\hline
-Arguments           &       Description \\
-\hline
-\Robject{G.matrix} & Unmethylated channel (Converted cytosines/ T counts) from\\
- & TAB-conversion (reflecting 5-C + 5-mC). \\
-\Robject{H.matrix} & Methylated channel (Unconverted cytosines/ C counts) from\\
- & TAB-conversion (reflecting True 5-hmC).\\
-\Robject{L.matrix}	& Unmethylated channel (Converted cytosines/ T counts) from\\
- & oxBS-conversion (reflecting 5-C + 5-hmC).\\
-\Robject{M.matrix}	& Methylated channel (Unconverted cytosines/ C counts) from\\
- & oxBS-conversion (reflecting True 5-mC).\\
-\Robject{T.matrix}	&
-Methylated channel (Unconverted cytosines/ C counts) from\\
- & standard BS-conversion (reflecting 5-mC+5-hmC).\\
-\Robject{U.matrix}	&
-Unmethylated channel (Converted cytosines/ T counts) from\\
- & standard BS-conversion (reflecting True 5-C).\\
-\Robject{iterative}	& logical. If iterative=TRUE EM-algorithm is used.\\
- & For the combination of two methods, iterative=FALSE returns the\\
- & exact constrained MLE using the the pool-adjacent-violators algorithm\\
- &  (PAVA). When all three methods are combined, iterative=FALSE\\
- &  returns the constrained MLE using Lagrange multiplier.\\
-\Robject{tol}	&  convergence tolerance; considered only if iterative=TRUE.\\
-\hline
-\end{tabular}
-\end{center}
-\caption{Arguments of the \Rfunction{MLML} function}
-\label{table:args}
-\end{table}
+# Worked examples
 
 
-	\begin{table}[h]
-			\begin{center}
-				\begin{tabular}{|l|l|}
-					\hline
-					Value           &       Description \\
-					\hline
-					\Robject{mC}	&
-maximum likelihood estimate for the 5-mC proportion\\
-		\Robject{hmC}	&
-maximum likelihood estimate for the 5-hmC proportion\\
-\Robject{C}	&
-maximum likelihood estimate for the 5-mC proportion\\
-\Robject{methods}	&
-the conversion methods used to produce the MLE\\
-				 \hline
-				\end{tabular}
-			\end{center}
-			\caption{Results returned from the \Rfunction{MLML} function}
-			\label{table:value}
-		\end{table}
-
-When only two methods are available, the default option returns the exact constrained maximum likelihood estimates  using the the pool-adjacent-violators algorithm (PAVA)\cite{ayer1955}. Maximum likelihood estimate via EM-algorithm approach \cite{Qu:MLML} is obtained with the option \verb|iterative=TRUE|. In this case, the default (or user specified) \verb|tol| is considered in the iterative method.
-
-When data from the three methods are available, the default otion in the \Rfunction{MLML} function returns the constrained maximum likelihood estimates using an approximated solution for the Lagrange multipliers method. Maximum likelihood estimate via EM-algorithm approach \cite{Qu:MLML} is obtained with the option \verb|iterative=TRUE|. In this case, the default (or user specified) \verb|tol| is considered in the iterative method.
-
-
-\section{Worked examples}
-
-
-\subsection{Simulated data}
+## Simulated data
 
 \Biocpkg{MLML2R} includes small example datasets for illustration.
 
  We simulated counts from Binomial model with true proportions of methylation, hydroxymethylation and unmethylated being $0.3$, $0.2$, and $0.5$, respectively. For instance, \verb|MethylatedBS_sim| is a matrix of simulated counts from BS corresponding to 100 CpGs and 2 samples. Similarly we simulated matrices with methylated and unmethylated counts for all the three methods: BS, oxBS and TAB. The rows and columns in the input matrices are consistent.
 
-\subsubsection{BS and oxBS methods}
+### BS and oxBS methods
 
  Load the package:
 
-<<eval=TRUE>>=
+```{r}
  library(MLML2R)
-@
+```
 
- When only two methods are available, the default option returns the exact constrained maximum likelihood estimates  using the the pool-adjacent-violators algorithm (PAVA)\cite{ayer1955}.
+ When only two methods are available, the default option returns the exact constrained maximum likelihood estimates  using the the pool-adjacent-violators algorithm (PAVA) [@ayer1955].
 
 
-<<eval=TRUE>>=
+```{r}
  results_exactBO1 <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
  L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim)
-@
+```
 
-Maximum likelihood estimate via EM-algorithm approach \cite{Qu:MLML} is obtained with the option \verb|iterative=TRUE|. In this case, the default (or user specified) \verb|tol| is considered in the iterative method.
+Maximum likelihood estimate via EM-algorithm approach [@Qu:MLML] is obtained with the option \verb|iterative=TRUE|. In this case, the default (or user specified) \verb|tol| is considered in the iterative method.
 
-<<eval=TRUE>>=
+```{r}
  results_emBO1 <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
  L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,iterative=TRUE)
-@
+```
 
  When only two methods are available, we highly recommend the default option \Rcode{iterative=FALSE} since the difference in the estimates obtained via EM and exact constrained is very small, but the former requires more computational effort:
 
-<<eval=TRUE>>=
+```{r}
  all.equal(results_emBO1$hmC,results_exactBO1$hmC,scale=1)
-@
+```
 
-<<eval=TRUE>>=
+```{r}
  library(microbenchmark)
  mbmBO1 = microbenchmark(
     EXACT = MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
@@ -147,29 +92,29 @@ Maximum likelihood estimate via EM-algorithm approach \cite{Qu:MLML} is obtained
                  iterative=TRUE),
     times=10)
  mbmBO1
-@
+```
 
 
-\subsubsection{BS and TAB methods}
+### BS and TAB methods
 
 Using PAVA:
-<<eval=TRUE>>=
+```{r}
 results_exactBT1 <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
 G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
-@
+```
 
 Using EM-algorithm:
-<<eval=TRUE>>=
+```{r}
  results_emBT1 <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE)
-@
+```
 
 
-<<eval=TRUE>>=
+```{r}
  all.equal(results_emBT1$hmC,results_exactBT1$hmC,scale=1)
-@
+```
 
-<<eval=TRUE>>=
+```{r}
  mbmBT1 = microbenchmark(
     EXACT = MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
                  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim),
@@ -178,29 +123,29 @@ Using EM-algorithm:
                  iterative=TRUE),
     times=10)
  mbmBT1
-@
+```
 
 
-\subsubsection{oxBS and TAB methods}
+### oxBS and TAB methods
 
  Using PAVA:
-<<eval=TRUE>>=
+```{r}
  results_exactOT1 <- MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
-@
+```
 
  Using EM-algorithm:
-<<eval=TRUE>>=
+```{r}
  results_emOT1 <- MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE)
-@
+```
 
 
-<<eval=TRUE>>=
+```{r}
  all.equal(results_emOT1$hmC,results_exactOT1$hmC,scale=1)
-@
+```
 
-<<eval=TRUE>>=
+```{r}
  mbmOT1 = microbenchmark(
     EXACT = MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
                  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim),
@@ -209,37 +154,37 @@ Using EM-algorithm:
                  iterative=TRUE),
     times=10)
  mbmOT1
-@
+```
 
 
 
-\subsubsection{BS, oxBS and TAB methods}
+### BS, oxBS and TAB methods
 
 When data from the three methods are available, the default otion in the \Rfunction{MLML} function returns the constrained maximum likelihood estimates using an approximated solution for Lagrange multipliers method.
 
 
-<<eval=TRUE>>=
+```{r}
 results_exactBOT1 <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
 L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
 G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
-@
+```
 
-Maximum likelihood estimate via EM-algorithm approach \cite{Qu:MLML} is obtained with the option \verb|iterative=TRUE|. In this case, the default (or user specified) \verb|tol| is considered in the iterative method.
+Maximum likelihood estimate via EM-algorithm approach [@Qu:MLML] is obtained with the option \verb|iterative=TRUE|. In this case, the default (or user specified) \verb|tol| is considered in the iterative method.
 
-<<eval=TRUE>>=
+```{r}
  results_emBOT1 <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
  L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE)
-@
+```
 
 
 We recommend the default option \Rcode{iterative=FALSE} since the difference in the estimates obtained via EM and the approximate exact constrained is very small, but the former requires more computational effort:
 
-<<eval=TRUE>>=
+```{r}
  all.equal(results_emBOT1$hmC,results_exactBOT1$hmC,scale=1)
-@
+```
 
-<<eval=TRUE>>=
+```{r}
  mbmBOT1 = microbenchmark(
     EXACT = MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
                  L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
@@ -250,77 +195,72 @@ We recommend the default option \Rcode{iterative=FALSE} since the difference in 
                  iterative=TRUE),
     times=10)
  mbmBOT1
-@
+```
 
 
-\subsection{Publicly available data: GSE63179}
+## Publicly available data: GSE63179
 
-We will use the dataset from \cite{10.1371/journal.pone.0118202}, which consists of eight DNA samples from the same DNA source treated with oxBS-BS and hybridized to the Infinium 450K array.
+We will use the dataset from @10.1371/journal.pone.0118202, which consists of eight DNA samples from the same DNA source treated with oxBS-BS and hybridized to the Infinium 450K array.
 
 When data is obtained through Infinium Methylation arrays, we recommend the use of the \Biocpkg{minfi} package, a well-established tool for reading, preprocessing and analysing DNA methylation data from these platforms. Although our example relies on \Biocpkg{minfi} and other \Bioconductor{} tools, \Biocpkg{MLML2R} does not depend on any packages. Thus, the user is free to read and preprocess the data using any software of preference and then import the intensities (or $T$ and $C$ counts) for the methylated and unmethylated channel (or converted and uncoverted cytosines) into \R{} in matrix format.
 
 To start this example we will need the following packages:
-<<eval=FALSE>>=
+```{r,eval=FALSE}
 library(minfi)
 library(GEOquery)
-@
+```
 
 
 It is usually best practice to start the analysis from the raw data, which in the case of the 450K array is a \verb|.IDAT| file.
 
 The raw files are deposited in GEO and can be downloaded by using the \Rfunction{getGEOSuppFiles}. There are two files for each replicate, since the 450k array is a two-color array. The \verb|.IDAT| files are downloaded in compressed format and need to be uncompressed before they are read by the \Rfunction{read.metharray.exp} function.
 
-<<eval=FALSE>>=
+```{r,eval=FALSE}
 getGEOSuppFiles("GSE63179")
 untar("GSE63179/GSE63179_RAW.tar", exdir = "GSE63179/idat")
 
 list.files("GSE63179/idat", pattern = "idat")
 files <- list.files("GSE63179/idat", pattern = "idat.gz$", full = TRUE)
 sapply(files, gunzip, overwrite = TRUE)
-@
+```
 
 The \verb|.IDAT| files can now be read:
-<<eval=FALSE>>=
+```{r,eval=FALSE}
 rgSet <- read.metharray.exp("GSE63179/idat")
-@
+```
 
 To access phenotype data we use the \Rfunction{pData} function. The phenotype data is not yet available from the \Robject{rgSet}.
-<<eval=FALSE,cache=TRUE>>=
+```{r,eval=FALSE}
 pData(rgSet)
-@
+```
 In this example the phenotype is not really relevant, since we have only one sample: male, 25 years old. What we do need is the information about the conversion method used in each replicate: BS or oxBS. We will access this information automatically from GEO:
-<<eval=FALSE>>=
+```{r,eval=FALSE}
 geoMat <- getGEO("GSE63179")
 pD.all <- pData(geoMat[[1]])
 pD <- pD.all[, c("title", "geo_accession", "characteristics_ch1.1",
                  "characteristics_ch1.2","characteristics_ch1.3")]
 pD
-@
+```
 
-
-% <<eval=TRUE,echo=FALSE>>=
-% load("pD.rds")
-% pD
-% @
 
 
 This phenotype data needs to be merged into the methylation data. The following commands guarantee we have the same replicate identifier in both datasets before merging.
 
-<<eval=FALSE,cache=TRUE>>=
+```{r,eval=FALSE}
 sampleNames(rgSet) <- sapply(sampleNames(rgSet),function(x)
   strsplit(x,"_")[[1]][1])
 rownames(pD) <- pD$geo_accession
 pD <- pD[sampleNames(rgSet),]
 pData(rgSet) <- as(pD,"DataFrame")
 rgSet
-@
+```
 
 The \Robject{rgSet} object is a class called \Rclass{RGChannelSet} used for two color data (green and a red channel). The input in the \Rfunction{MLML} funcion is  \Rclass{MethylSet}, which contains the methylated and unmethylated signals. The most basic way to construct a \Rclass{MethylSet} is  using the function \Rfunction{preprocessRaw}. Here we chose the function \Rfunction{preprocessNoob} for background correction and construction of the \Rclass{MethylSet}.
 
 
-<<eval=FALSE,cache=TRUE>>=
+```{r,eval=FALSE}
 MSet.noob<- preprocessNoob(rgSet)
-@
+```
 
 
 After the preprocessed steps we can use \Rfunction{MLML} from the \Biocpkg{MLML2R} package.
@@ -328,56 +268,41 @@ After the preprocessed steps we can use \Rfunction{MLML} from the \Biocpkg{MLML2
 
 The BS replicates are in columns 1, 3, 5, and 6. The remaining columns are from the oxBS treated replicates.
 
-<<eval=FALSE,cache=TRUE>>=
+```{r,eval=FALSE}
 MethylatedBS <- getMeth(MSet.noob)[,c(1,3,5,6)]
 UnMethylatedBS <- getUnmeth(MSet.noob)[,c(1,3,5,6)]
 MethylatedOxBS <- getMeth(MSet.noob)[,c(7,8,2,4)]
 UnMethylatedOxBS <- getUnmeth(MSet.noob)[,c(7,8,2,4)]
-@
+```
 
 
 In this example we only have two methods, therefore we can choose between the EM-algorithm and the exact constrained maximum likelihood estimates (using PAVA).
 
 Estimates via the EM-algorithm:
 
-<<eval=FALSE,echo=TRUE,cache=TRUE>>=
+```{r,eval=FALSE}
 results_emPD1 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
                    L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS,
                    iterative = TRUE)
-@
+```
 
 
 The exact constrained MLE (using PAVA):
 
-<<eval=FALSE,cache=TRUE>>=
+```{r,eval=FALSE}
 results_exactPD1 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
                       L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS)
-@
+```
 
 
 
+## Publicly available data: GSE73895
 
-% <<fig10,fig=TRUE,include=FALSE,width=15,height=5,eval=FALSE,echo=FALSE>>=
-% par(mfrow =c(1,3))
-% densityPlot(results_exactPD1$hmC,main= "5-hmC using PAVA",cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
-% densityPlot(results_exactPD1$mC,main= "5-mC using PAVA",cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
-% densityPlot(results_exactPD1$C,main= "5-C using PAVA",cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
-% @
-
-\begin{figure*}[h]
- \includegraphics{vignette-fig10}
- \caption{\label{fig:fig10} Estimated proportions of hydroxymethylation, methylation and unmethylation for the CpGs in the dataset using the \Rfunction{MLML} function with default options.}
-\end{figure*}
-
-
-
-\subsection{Publicly available data: GSE73895}
-
-We will use the dataset from \cite{pmid27886174}, which consists of 30 DNA samples from glioblastoma tumors treated with oxBS-BS and hybridized to the Infinium 450K array.
+We will use the dataset from @pmid27886174, which consists of 30 DNA samples from glioblastoma tumors treated with oxBS-BS and hybridized to the Infinium 450K array.
 
 
 The raw files are deposited in GEO and can be downloaded and read into \R{} by doing:
-<<eval=FALSE>>=
+```{r,eval=FALSE}
 getGEOSuppFiles("GSE73895")
 untar("GSE73895/GSE73895_RAW.tar", exdir = "GSE73895/idat")
 
@@ -385,47 +310,42 @@ idatFiles <- list.files("GSE73895/idat", pattern = "idat.gz$", full = TRUE)
 sapply(idatFiles, gunzip, overwrite = TRUE)
 
 rgSet <- read.metharray.exp("GSE73895/idat")
-@
+```
 
 We need to identify the samples from different methods: BS-conversion, oxBS-conversion. We obtain this information from GEO:
 
-<<eval=FALSE>>=
+```{r,eval=FALSE}
 geoMat <- getGEO("GSE73895")
 pD.all <- pData(geoMat[[1]])
 pD <- pD.all[, c("title", "geo_accession", "characteristics_ch1",
                  "characteristics_ch1.2","characteristics_ch1.3")]
 head(pD)
-@
+```
 
-%
-% <<eval=TRUE,echo=FALSE>>=
-% load("pD1.rds")
-% head(pD)
-% @
 
 Keeping only some of the variables from phenotype data:
-<<eval=FALSE,cache=TRUE>>=
+```{r,eval=FALSE}
 names(pD)[c(1,3,4,5)] <- c("method","gender","survival_months","age_years")
 pD$gender <- sub("^gender: ", "", pD$gender)
 pD$age_years <- as.numeric(sub("^subject age: ", "", pD$age_years))
 pD$survival_months <- as.numeric(sapply(pD$survival_months, function(x)
   strsplit(as.character(x),":")[[1]][2]))
 pD$method <- sapply(pD$method, function(x) strsplit(as.character(x),"_")[[1]][3])
-@
+```
 
 We now need to merge this pheno data into the methylation data. The following are commands to make sure we have the same row identifier in both datasets before merging.
 
-<<eval=FALSE,cache=TRUE>>=
+```{r,eval=FALSE}
 sampleNames(rgSet) <- sapply(sampleNames(rgSet),function(x)
   strsplit(x,"_")[[1]][1])
 rownames(pD) <- pD$geo_accession
 pD <- pD[sampleNames(rgSet),]
 pData(rgSet) <- as(pD,"DataFrame")
 rgSet
-@
+```
 
 Preprocessing and preparing input matrices for \Rfunction{MLML}:
-<<eval=FALSE,cache=TRUE>>=
+```{r,eval=FALSE}
 MSet.noob<- preprocessNoob(rgSet)
 
 BS_index <- which(pData(rgSet)$method=="BS")
@@ -435,7 +355,7 @@ MethylatedBS <- getMeth(MSet.noob)[,BS_index]
 UnMethylatedBS <- getUnmeth(MSet.noob)[,BS_index]
 MethylatedOxBS <- getMeth(MSet.noob)[,oxBS_index]
 UnMethylatedOxBS <- getUnmeth(MSet.noob)[,oxBS_index]
-@
+```
 
 
 
@@ -443,36 +363,60 @@ In this example we only have two methods, therefore we can choose between the EM
 
 Estimates via the EM-algorithm:
 
-<<eval=FALSE,echo=TRUE,cache=TRUE>>=
+```{r,eval=FALSE}
 results_emPD2 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
                    L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS,
                    iterative = TRUE)
-@
+```
 
 
 The exact constrained MLE (using PAVA):
 
-<<eval=FALSE,cache=TRUE>>=
+```{r,eval=FALSE}
 results_exactPD2 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
                       L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS)
-@
+```
 
 
 
-% <<fig11,fig=TRUE,include=FALSE,width=15,height=5,eval=FALSE,echo=FALSE>>=
-% par(mfrow =c(1,3))
-% densityPlot(results_exactPD2$hmC,main= "5-hmC using PAVA",cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
-% densityPlot(results_exactPD2$mC,main= "5-mC using PAVA",cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
-% densityPlot(results_exactPD2$C,main= "5-C using PAVA",cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
-% @
 
-\begin{figure*}[h]
- \includegraphics{vignette-fig11}
- \caption{\label{fig:fig11} Estimated proportions of hydroxymethylation, methylation and unmethylation for the CpGs in the dataset using the \Rfunction{MLML} function with default options.}
-\end{figure*}
+# Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))
 
 
-\bibliography{refs}
-
-
-\end{document}
+# References

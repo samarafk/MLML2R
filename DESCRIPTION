@@ -14,6 +14,7 @@ Description: Maximum likelihood estimates (MLE) of the levels of 5-mC and 5-hmC
     or any combination of two of them. Estimates are based on Binomial model.
 License: MIT + file LICENSE
 Encoding: UTF-8
+VignetteBuilder: knitr
 LazyData: true
 biocViews: Software, MethylationArray, Epigenetics, DNAMethylation, Microarray, TwoChannel, OneChannel
 RoxygenNote: 6.0.1
@@ -21,5 +22,7 @@ Suggests:
   minfi,
   BiocStyle,
   microbenchmark,
-  GEOquery
+  GEOquery,
+  knitr,
+  rmarkdown
 BugReports: https://github.com/samarafk/MLML2R/issues
