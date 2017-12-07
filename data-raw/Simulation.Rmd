@@ -82,7 +82,7 @@ Comparing the methods of BS and OxBS:
 
 ```{r}
 library(OxyBS)
-library(MLML2R)
+source("MLML_temp.R")
 
 # MLML EM
 RE_result1 <- matrix(NA,nrow=length(coverage),ncol=dim(true_parameters)[1])
@@ -119,24 +119,24 @@ for (i in 1:dim(true_parameters)[1])
   hmC_naive <- beta_BS-beta_OxBS
 
 
-  #results_em <- MLML(T.matrix = MethylatedBS, U.matrix = UnMethylatedBS, L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS,iterative = TRUE)
+  results_em <- MLML(T.matrix = MethylatedBS, U.matrix = UnMethylatedBS, L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS,iterative = TRUE)
   results_exact <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS)
   
   for (j in 1:length(coverage))
   {
   result_OxyBS <- fitOxBS(betaBS=beta_BS[,j],betaOxBS=beta_OxBS[,j],signalBS=N_BS[,j],signalOxBS=N_OxBS[,j])
 
-  #RE_result1[j,i] <- RE(results_em$hmC[,j],p_h)
+  RE_result1[j,i] <- RE(results_em$hmC[,j],p_h)
   RE_result2[j,i] <- RE(results_exact$hmC[,j],p_h)
   RE_result3[j,i] <- RE(result_OxyBS[,3],p_h)
   RE_result4[j,i] <- RE(hmC_naive[,j],p_h)
   
-  #RMSE_result1[j,i] <- sqrt(MSE(results_em$hmC[,j],p_h))
+  RMSE_result1[j,i] <- sqrt(MSE(results_em$hmC[,j],p_h))
   RMSE_result2[j,i] <- sqrt(MSE(results_exact$hmC[,j],p_h))
   RMSE_result3[j,i] <- sqrt(MSE(result_OxyBS[,3],p_h))
   RMSE_result4[j,i] <- sqrt(MSE(hmC_naive[,j],p_h))
   
-  #MAE_result1[j,i] <- MAE(results_em$hmC[,j],p_h)
+  MAE_result1[j,i] <- MAE(results_em$hmC[,j],p_h)
   MAE_result2[j,i] <- MAE(results_exact$hmC[,j],p_h)
   MAE_result3[j,i] <- MAE(result_OxyBS[,3],p_h)
   MAE_result4[j,i] <- MAE(hmC_naive[,j],p_h)
@@ -149,8 +149,55 @@ for (i in 1:dim(true_parameters)[1])
 True parameters: `r true_parameters[1,]`
 
 ```{r,fig.align='center',fig.height=9,fig.width=9,echo=FALSE}
-aa <- max(c(MAE_result2[,1],MAE_result3[,1],MAE_result4[,1]))
+aa <- max(c(MAE_result1[,1],MAE_result2[,1],MAE_result3[,1],MAE_result4[,1]),na.rm=TRUE)
 plot(x=coverage,y=as.vector(MAE_result4[,1]),type="l",col=1,ylim=c(0,aa))
 lines(x=coverage,y=as.vector(MAE_result3[,1]),col=3)
 lines(x=coverage,y=as.vector(MAE_result2[,1]),col=4)
+lines(x=coverage,y=as.vector(MAE_result1[,1]),col=2)
+```
+```{r,echo=FALSE}
+T.matrix = MethylatedBS; U.matrix = UnMethylatedBS; L.matrix = UnMethylatedOxBS; M.matrix = MethylatedOxBS
+
+
+  l <- if (is.null(L.matrix)) {
+    NULL
+  } else {
+    round(L.matrix)
+  }
+  m <- if (is.null(M.matrix)) {
+    NULL
+  } else {
+    round(M.matrix)
+  }
+  u <- if (is.null(U.matrix)) {
+    NULL
+  } else {
+    round(U.matrix)
+  }
+  t <- if (is.null(T.matrix)) {
+    NULL
+  } else {
+    round(T.matrix)
+  }
+  
+ l <- l[4,1]
+ m <- m[4,1]
+ u <- u[4,1]
+ t <- t[4,1]
+ 
+ 
+  pme <- 0.3
+  phe <- 0.5
+  diff <- 1
+  
+        pme_ant <- pme
+        phe_ant <- phe
+        k <- ifelse((pme+phe)>0, t*(pme / (pme + phe)),0)
+        pme <- (m + k) / (m + l + u + t)
+        phe <- ((-k + t) / (t + u - k)) * (1 - pme)
+        diff_pme <- abs(max(pme - pme_ant,na.rm = TRUE))
+        diff_phe <- abs(max(phe - phe_ant,na.rm = TRUE))
+        diff <- abs(max(diff_pme, diff_phe))
+      
+
 ```

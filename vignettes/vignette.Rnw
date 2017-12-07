@@ -260,7 +260,7 @@ We will use the dataset from \cite{10.1371/journal.pone.0118202}, which consists
 When data is obtained through Infinium Methylation arrays, we recommend the use of the \Biocpkg{minfi} package, a well-established tool for reading, preprocessing and analysing DNA methylation data from these platforms. Although our example relies on \Biocpkg{minfi} and other \Bioconductor{} tools, \Biocpkg{MLML2R} does not depend on any packages. Thus, the user is free to read and preprocess the data using any software of preference and then import the intensities (or $T$ and $C$ counts) for the methylated and unmethylated channel (or converted and uncoverted cytosines) into \R{} in matrix format.
 
 To start this example we will need the following packages:
-<<eval=TRUE>>=
+<<eval=FALSE>>=
 library(minfi)
 library(GEOquery)
 @

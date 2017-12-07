@@ -33,7 +33,7 @@ Setting parameters for simulated data:
 
 
 ```r
-coverage = c(4:20)
+coverage = c(4:100)
 
 true_parameters <- data.frame(p_m=c(0.1,0.3), p_h=c(.1,.1))
 true_parameters
@@ -90,7 +90,7 @@ Comparing the methods of BS and OxBS:
 
 ```r
 library(OxyBS)
-library(MLML2R)
+source("MLML_temp.R")
 
 # MLML EM
 RE_result1 <- matrix(NA,nrow=length(coverage),ncol=dim(true_parameters)[1])
@@ -127,24 +127,24 @@ for (i in 1:dim(true_parameters)[1])
   hmC_naive <- beta_BS-beta_OxBS
 
 
-  #results_em <- MLML(T.matrix = MethylatedBS, U.matrix = UnMethylatedBS, L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS,iterative = TRUE)
+  results_em <- MLML(T.matrix = MethylatedBS, U.matrix = UnMethylatedBS, L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS,iterative = TRUE)
   results_exact <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS)
   
   for (j in 1:length(coverage))
   {
   result_OxyBS <- fitOxBS(betaBS=beta_BS[,j],betaOxBS=beta_OxBS[,j],signalBS=N_BS[,j],signalOxBS=N_OxBS[,j])
 
-  #RE_result1[j,i] <- RE(results_em$hmC[,j],p_h)
+  RE_result1[j,i] <- RE(results_em$hmC[,j],p_h)
   RE_result2[j,i] <- RE(results_exact$hmC[,j],p_h)
   RE_result3[j,i] <- RE(result_OxyBS[,3],p_h)
   RE_result4[j,i] <- RE(hmC_naive[,j],p_h)
   
-  #RMSE_result1[j,i] <- sqrt(MSE(results_em$hmC[,j],p_h))
+  RMSE_result1[j,i] <- sqrt(MSE(results_em$hmC[,j],p_h))
   RMSE_result2[j,i] <- sqrt(MSE(results_exact$hmC[,j],p_h))
   RMSE_result3[j,i] <- sqrt(MSE(result_OxyBS[,3],p_h))
   RMSE_result4[j,i] <- sqrt(MSE(hmC_naive[,j],p_h))
   
-  #MAE_result1[j,i] <- MAE(results_em$hmC[,j],p_h)
+  MAE_result1[j,i] <- MAE(results_em$hmC[,j],p_h)
   MAE_result2[j,i] <- MAE(results_exact$hmC[,j],p_h)
   MAE_result3[j,i] <- MAE(result_OxyBS[,3],p_h)
   MAE_result4[j,i] <- MAE(hmC_naive[,j],p_h)
@@ -180,8 +180,25 @@ for (i in 1:dim(true_parameters)[1])
 ## Warning in log(1 - est5mC - est5hmC): NaNs produced
 
 ## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
+
+## Warning in log(1 - est5mC - est5hmC): NaNs produced
 ```
 
 True parameters: 0.1, 0.1
 
 <img src="Simulation_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
+
