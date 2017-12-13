@@ -50,6 +50,35 @@ biocLite(c("minfi", "GEOquery"))
 
 
 
+```
+## https://ftp.ncbi.nlm.nih.gov/geo/series/GSE63nnn/GSE63179/suppl/
+```
+
+```
+## OK
+```
+
+```
+## Warning in download.file(file.path(url, i), destfile =
+## file.path(storedir, : URL https://ftp.ncbi.nlm.nih.gov/geo/series/GSE63nnn/
+## GSE63179/suppl///geo/series/GSE63nnn/GSE63179/: cannot open destfile '/
+## Users/imac/Documents/GitHub/MLML2R/data-raw/GSE63179//geo/series/GSE63nnn/
+## GSE63179/', reason 'No such file or directory'
+```
+
+```
+## Warning in download.file(file.path(url, i), destfile =
+## file.path(storedir, : download had nonzero exit status
+```
+
+```
+## [1] "GSM1543269_9373551079_R01C01_Grn.idat.gz"
+## [2] "GSM1543269_9373551079_R01C01_Red.idat.gz"
+## [3] "GSM1543270_9373551079_R01C02_Grn.idat.gz"
+## [4] "GSM1543270_9373551079_R01C02_Red.idat.gz"
+## [5] "GSM1543271_9373551079_R02C01_Grn.idat.gz"
+## [6] "GSM1543271_9373551079_R02C01_Red.idat.gz"
+```
 
 
 
@@ -69,7 +98,38 @@ sapply(idatFiles, gunzip, overwrite = TRUE)
 ```
 
 ```
-## named list()
+## GSE63179/idat/GSM1543269_9373551079_R01C01_Grn.idat.gz 
+##                                                8095291 
+## GSE63179/idat/GSM1543269_9373551079_R01C01_Red.idat.gz 
+##                                                8095291 
+## GSE63179/idat/GSM1543270_9373551079_R01C02_Grn.idat.gz 
+##                                                8095286 
+## GSE63179/idat/GSM1543270_9373551079_R01C02_Red.idat.gz 
+##                                                8095286 
+## GSE63179/idat/GSM1543271_9373551079_R02C01_Grn.idat.gz 
+##                                                8095284 
+## GSE63179/idat/GSM1543271_9373551079_R02C01_Red.idat.gz 
+##                                                8095284 
+## GSE63179/idat/GSM1543272_9373551079_R02C02_Grn.idat.gz 
+##                                                8095285 
+## GSE63179/idat/GSM1543272_9373551079_R02C02_Red.idat.gz 
+##                                                8095285 
+## GSE63179/idat/GSM1543273_9373551079_R03C01_Grn.idat.gz 
+##                                                8095286 
+## GSE63179/idat/GSM1543273_9373551079_R03C01_Red.idat.gz 
+##                                                8095286 
+## GSE63179/idat/GSM1543274_9373551079_R04C01_Grn.idat.gz 
+##                                                8095287 
+## GSE63179/idat/GSM1543274_9373551079_R04C01_Red.idat.gz 
+##                                                8095287 
+## GSE63179/idat/GSM1543275_9373551079_R05C01_Grn.idat.gz 
+##                                                8095290 
+## GSE63179/idat/GSM1543275_9373551079_R05C01_Red.idat.gz 
+##                                                8095290 
+## GSE63179/idat/GSM1543276_9373551079_R06C01_Grn.idat.gz 
+##                                                8095287 
+## GSE63179/idat/GSM1543276_9373551079_R06C01_Red.idat.gz 
+##                                                8095287
 ```
 
 

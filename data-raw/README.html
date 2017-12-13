@@ -154,13 +154,59 @@ library(GEOquery)</code></pre>
 <p>Use the following commands to install these packages in R:</p>
 <pre class="r"><code>source(&quot;http://www.bioconductor.org/biocLite.R&quot;)
 biocLite(c(&quot;minfi&quot;, &quot;GEOquery&quot;))</code></pre>
+<pre><code>## https://ftp.ncbi.nlm.nih.gov/geo/series/GSE63nnn/GSE63179/suppl/</code></pre>
+<pre><code>## OK</code></pre>
+<pre><code>## Warning in download.file(file.path(url, i), destfile =
+## file.path(storedir, : URL https://ftp.ncbi.nlm.nih.gov/geo/series/GSE63nnn/
+## GSE63179/suppl///geo/series/GSE63nnn/GSE63179/: cannot open destfile '/
+## Users/imac/Documents/GitHub/MLML2R/data-raw/GSE63179//geo/series/GSE63nnn/
+## GSE63179/', reason 'No such file or directory'</code></pre>
+<pre><code>## Warning in download.file(file.path(url, i), destfile =
+## file.path(storedir, : download had nonzero exit status</code></pre>
+<pre><code>## [1] &quot;GSM1543269_9373551079_R01C01_Grn.idat.gz&quot;
+## [2] &quot;GSM1543269_9373551079_R01C01_Red.idat.gz&quot;
+## [3] &quot;GSM1543270_9373551079_R01C02_Grn.idat.gz&quot;
+## [4] &quot;GSM1543270_9373551079_R01C02_Red.idat.gz&quot;
+## [5] &quot;GSM1543271_9373551079_R02C01_Grn.idat.gz&quot;
+## [6] &quot;GSM1543271_9373551079_R02C01_Red.idat.gz&quot;</code></pre>
 <pre class="r"><code>getGEOSuppFiles(&quot;GSE63179&quot;)
 untar(&quot;GSE63179/GSE63179_RAW.tar&quot;, exdir = &quot;GSE63179/idat&quot;)
 head(list.files(&quot;GSE63179/idat&quot;, pattern = &quot;idat&quot;))</code></pre>
 <p>Decompress the compressed IDAT files:</p>
 <pre class="r"><code>idatFiles &lt;- list.files(&quot;GSE63179/idat&quot;, pattern = &quot;idat.gz$&quot;, full = TRUE)
 sapply(idatFiles, gunzip, overwrite = TRUE)</code></pre>
-<pre><code>## named list()</code></pre>
+<pre><code>## GSE63179/idat/GSM1543269_9373551079_R01C01_Grn.idat.gz 
+##                                                8095291 
+## GSE63179/idat/GSM1543269_9373551079_R01C01_Red.idat.gz 
+##                                                8095291 
+## GSE63179/idat/GSM1543270_9373551079_R01C02_Grn.idat.gz 
+##                                                8095286 
+## GSE63179/idat/GSM1543270_9373551079_R01C02_Red.idat.gz 
+##                                                8095286 
+## GSE63179/idat/GSM1543271_9373551079_R02C01_Grn.idat.gz 
+##                                                8095284 
+## GSE63179/idat/GSM1543271_9373551079_R02C01_Red.idat.gz 
+##                                                8095284 
+## GSE63179/idat/GSM1543272_9373551079_R02C02_Grn.idat.gz 
+##                                                8095285 
+## GSE63179/idat/GSM1543272_9373551079_R02C02_Red.idat.gz 
+##                                                8095285 
+## GSE63179/idat/GSM1543273_9373551079_R03C01_Grn.idat.gz 
+##                                                8095286 
+## GSE63179/idat/GSM1543273_9373551079_R03C01_Red.idat.gz 
+##                                                8095286 
+## GSE63179/idat/GSM1543274_9373551079_R04C01_Grn.idat.gz 
+##                                                8095287 
+## GSE63179/idat/GSM1543274_9373551079_R04C01_Red.idat.gz 
+##                                                8095287 
+## GSE63179/idat/GSM1543275_9373551079_R05C01_Grn.idat.gz 
+##                                                8095290 
+## GSE63179/idat/GSM1543275_9373551079_R05C01_Red.idat.gz 
+##                                                8095290 
+## GSE63179/idat/GSM1543276_9373551079_R06C01_Grn.idat.gz 
+##                                                8095287 
+## GSE63179/idat/GSM1543276_9373551079_R06C01_Red.idat.gz 
+##                                                8095287</code></pre>
 <p>Now we read the IDAT files in the directory:</p>
 <pre class="r"><code>rgSet &lt;- read.metharray.exp(&quot;GSE63179/idat&quot;)
 rgSet</code></pre>
