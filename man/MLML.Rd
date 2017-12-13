@@ -58,7 +58,7 @@ data(UnMethylatedTAB_sim)
 
 # obtain MLE via EM-algorithm for BS+oxBS:
 results_em <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
-L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,iterative=TRUE,tol=0.0001)
+L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,iterative=TRUE)
 
 # obtain constrained exact MLE for BS+oxBS:
 results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
@@ -66,7 +66,7 @@ L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim)
 
 # obtain MLE via EM-algorithm for BS+TAB:
 results_em <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
-G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,tol=0.0001)
+G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
 
 # obtain constrained exact MLE for BS+TAB:
 results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
@@ -74,7 +74,7 @@ G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
 
 # obtain MLE via EM-algorithm for oxBS+TAB:
 results_em <- MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
-G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE,tol=0.0001)
+G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE)
 
 # obtain constrained exact MLE for oxBS+TAB:
 results_exact <- MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
@@ -83,7 +83,7 @@ G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
 # obtain MLE via EM-algorithm for BS+oxBS+TAB:
 results_em <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
 L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
-G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE,tol=0.0001)
+G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE)
 
 #' # obtain MLE via Lagrange multiplier for BS+oxBS+TAB:
 results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,

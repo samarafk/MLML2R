@@ -31,7 +31,7 @@
 #'
 #' # obtain MLE via EM-algorithm for BS+oxBS:
 #' results_em <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
-#' L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,iterative=TRUE,tol=0.0001)
+#' L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,iterative=TRUE)
 #'
 #' # obtain constrained exact MLE for BS+oxBS:
 #' results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
@@ -39,7 +39,7 @@
 #'
 #' # obtain MLE via EM-algorithm for BS+TAB:
 #' results_em <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
-#' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,tol=0.0001)
+#' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
 #'
 #' # obtain constrained exact MLE for BS+TAB:
 #' results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
@@ -47,7 +47,7 @@
 #'
 #' # obtain MLE via EM-algorithm for oxBS+TAB:
 #' results_em <- MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
-#' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE,tol=0.0001)
+#' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE)
 #'
 #' # obtain constrained exact MLE for oxBS+TAB:
 #' results_exact <- MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
@@ -56,7 +56,7 @@
 #' # obtain MLE via EM-algorithm for BS+oxBS+TAB:
 #' results_em <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
 #' L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
-#' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE,tol=0.0001)
+#' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE)
 #'
 #' #' # obtain MLE via Lagrange multiplier for BS+oxBS+TAB:
 #' results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
@@ -155,17 +155,22 @@ MLML <- function(G.matrix       = NULL,
         pm0 <- pm <- m/(m+l)
         ph0 <- ph <- h/(h+g)
         pc0 <- pc <- u/(u+t)
+        ss <- pm0+ph0+pc0+1e-08
+        pm0 <- pm <- ifelse( m/(m+l)<1 & h/(h+g)<1 & u/(u+t)<1 & m >0 & h > 0 & u > 0 , pm0 , pm0/ss)
+        ph0 <- ph <- ifelse( m/(m+l)<1 & h/(h+g)<1 & u/(u+t)<1 & m >0 & h > 0 & u > 0 , ph0 , ph0/ss)
+        pc0 <- pc <- ifelse( m/(m+l)<1 & h/(h+g)<1 & u/(u+t)<1 & m >0 & h > 0 & u > 0 , pc0 , pc0/ss)
+
         Vm <- pm*(1-pm)/(m+l)
         Vh <- ph*(1-ph)/(h+g)
         Vc <- pc*(1-pc)/(u+t)
-        lam <- (1-pm0-ph0-pc0)/(Vm+Vh+Vc)
+        lam <- (1-pm0-ph0-pc0)/(Vm+Vh+Vc+1e-08)
         pm <- pm0 + lam*Vm
         ph <- ph0 + lam*Vh
         pc <- pc0 + lam*Vc
         Vm <- pm*(1-pm)/(m+l)
         Vh <- ph*(1-ph)/(h+g)
         Vc <- pc*(1-pc)/(u+t)
-        lam <- (1-pm0-ph0-pc0)/(Vm+Vh+Vc)
+        lam <- (1-pm0-ph0-pc0)/(Vm+Vh+Vc+1e-08)
         pme <- pm0 + lam*Vm
         phe <- ph0 + lam*Vh
       } else {
@@ -173,8 +178,8 @@ MLML <- function(G.matrix       = NULL,
     while (diff > tol) {
       pme_ant <- pme
       phe_ant <- phe
-      k <- t * (pme / (pme + phe))
-      j <- g * (pme / (1 - phe))
+      k <- t * (pme / (pme + phe + 1e-08))
+      j <- g * (pme / (1 - phe + 1e-08))
       pme <- (m + j + k) / (m + l + h + g + u + t)
       phe <- ((h - k + t) / (h + g + t + u - j - k)) * (1 - pme)
       diff_pme <- abs(max(pme - pme_ant))
@@ -204,7 +209,7 @@ if (!four(rownames(L.matrix),rownames(M.matrix),rownames(T.matrix),
       while (diff > tol) {
         pme_ant <- pme
         phe_ant <- phe
-        k <- t * (pme / (pme + phe))
+        k <- t * (pme / (pme + phe + 1e-08))
         pme <- (m + k) / (m + l + u + t)
         phe <- ((-k + t) / (t + u - k)) * (1 - pme)
         diff_pme <- abs(max(pme - pme_ant))
@@ -235,8 +240,8 @@ if (!four(rownames(L.matrix),rownames(M.matrix),rownames(T.matrix),
       while (diff > tol) {
         pme_ant <- pme
         phe_ant <- phe
-        k <- t * (pme / (pme + phe))
-        j <- g * (pme / (1 - phe))
+        k <- t * (pme / (pme + phe + 1e-08))
+        j <- g * (pme / (1 - phe + 1e-08))
 
         pme <- (j + k) / (g + h + t + u)
         phe <- ((h - k + t) / (g + h + t + u - k - j)) * (1 - pme)
@@ -264,7 +269,7 @@ if (!four(rownames(L.matrix),rownames(M.matrix),rownames(T.matrix),
       while (diff > tol) {
         pme_ant <- pme
         phe_ant <- phe
-        j <- g * (pme / (1 - phe))
+        j <- g * (pme / (1 - phe + 1e-08))
 
         pme <- (j + m) / (g + h + m + l)
         phe <- ((h) / (h + g - j)) * (1 - pme)
