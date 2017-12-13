@@ -487,7 +487,6 @@ Here we show examples from real datasets.
 % all.equal(true_parameters_sim2$p_h,results_exactBT2$hmC[,1],scale=1)[2]
 % @
 %
-% <<fig6ab,fig=TRUE,include=FALSE,width=7,height=7,eval=TRUE,echo=FALSE>>=
 % plot(x=true_parameters_sim2$p_h,y=results_exactBT2$hmC[,1],xlab="True hydroxymethylation proportion",ylab="Estimated proportion using PAVA",cex.axis=1.5,cex.main=1.5,cex.lab=1.5,main="BS and TAB")
 % @
 %

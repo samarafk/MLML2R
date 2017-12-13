@@ -2,6 +2,8 @@
 title: "MLML2R: Maximum Likelihood Estimates for 5-mC and 5-hmC Levels in the DNA"
 shorttitle: "MLML2R"
 package: MLML2R
+abstract: >
+  We present a guide to the Bioconductor package \Biocpkg{MLML2R}. The package provides computational efficient maximum likelihood estimates of DNA methylation and hydroxymethylation proportions when data from the DNA processing methods bisulfite conversion (BS), oxidative bisulfite conversion (ox-BS), and Tet-assisted bisulfite conversion (TAB) are available. Estimates can be obtained when data from all the three methods are available or when any combination of only two of them are available. The package does not depend on other \R{} packages, allowing the user to read and preprocess the data with any given software, to import the results into \{R} in matrix format, to obtain the maximum likelihood 5-hmC and 5-mC estimates and use them as input for other packages traditionally used in genomic data analysis, such as \Biocpkg{minfi}, \Biocpkg{sva} and \Biocpkg{limma}.
 bibliography: refs.bib
 author: "Samara F. Kiihl and Maria Tellez-Plaza"
 date: "`r Sys.Date()`"
@@ -25,12 +27,8 @@ knitr::opts_chunk$set(
 BiocStyle::markdown()
 ```
 
+
 # Introduction
-
-
-
-
-We present a guide to the Bioconductor package \Biocpkg{MLML2R}. The package provides computational efficient maximum likelihood estimates of DNA methylation and hydroxymethylation proportions when data from the DNA processing methods bisulfite conversion (BS), oxidative bisulfite conversion (ox-BS), and Tet-assisted bisulfite conversion (TAB) are available. Estimates can be obtained when data from all the three methods are available or when any combination of only two of them are available. The package does not depend on other \R{} packages, allowing the user  to read and preprocess the data in any software and import the results into \R{} in matrix format, obtain the estimates and use that as input in the other packages for genomic analysis, such as \Biocpkg{minfi}, \Biocpkg{sva} and \Biocpkg{limma}.
 
 
 In a given CpG site from a single cell we will either have a $C$ or a $T$ after DNA processing conversion methods, with a different interpretation for each of the available methods. This is a binary outcome and we assume a Binomial model and use the maximum likelihood estimation method to obtain the estimates for hydroxymethylation and methylation proportions.
@@ -39,9 +37,30 @@ $T$ reads are referred to as converted cytosine and $C$ reads are referred to as
 
 \Biocpkg{MLML2R} package allows the user to jointly estimate hydroxymethylation and methylation consistently and efficiently.
 
-The function \Rfunction{MLML} takes as input the data from the different methods and returns the estimated proportion of methylation, hydroxymethylation and unmethylation for a given CpG site. Table \ref{table:args} presents the arguments of the \Rfunction{MLML} and Table \ref{table:value} lists the results returned by the function.
+The function \Rfunction{MLML} takes as input the data from the different methods and returns the estimated proportion of methylation, hydroxymethylation and unmethylation for a given CpG site. Table 1 presents the arguments of the \Rfunction{MLML} and Table 2 lists the results returned by the function.
 
 The function assumes that the order of the rows and columns in the input matrices are consistent. In addition, all the input matrices must have the same dimension. Usually, rows represent CpG loci and columns are the samples.
+
+
+Arguments           |       Description      
+--------------------|------------------------
+\Robject{G.matrix}  | Unmethylated channel (Converted cytosines/ T counts) from  TAB-conversion (reflecting 5-C + 5-mC). 
+\Robject{H.matrix}  | Methylated channel (Unconverted cytosines/ C counts) from TAB-conversion (reflecting True 5-hmC). 
+\Robject{L.matrix}	| Unmethylated channel (Converted cytosines/ T counts) from oxBS-conversion (reflecting 5-C + 5-hmC). 
+\Robject{M.matrix}	| Methylated channel (Unconverted cytosines/ C counts) from  oxBS-conversion (reflecting True 5-mC). 
+\Robject{T.matrix}	| Methylated channel (Unconverted cytosines/ C counts) from  standard BS-conversion (reflecting 5-mC+5-hmC). 
+\Robject{U.matrix}	| Unmethylated channel (Converted cytosines/ T counts) from standard BS-conversion (reflecting True 5-C). 
+: `MLML` function and random variable notation.
+
+
+
+Value | Description
+------|------------------
+\Robject{mC}	| maximum likelihood estimate for the 5-mC proportion
+\Robject{hmC}	| maximum likelihood estimate for the 5-hmC proportion
+\Robject{C}	| maximum likelihood estimate for the 5-mC proportion
+\Robject{methods}	| the conversion methods used to produce the MLE
+: Results returned from the \Rfunction{MLML} function
 
 
 # Worked examples
@@ -202,7 +221,7 @@ We recommend the default option \Rcode{iterative=FALSE} since the difference in 
 
 We will use the dataset from @10.1371/journal.pone.0118202, which consists of eight DNA samples from the same DNA source treated with oxBS-BS and hybridized to the Infinium 450K array.
 
-When data is obtained through Infinium Methylation arrays, we recommend the use of the \Biocpkg{minfi} package, a well-established tool for reading, preprocessing and analysing DNA methylation data from these platforms. Although our example relies on \Biocpkg{minfi} and other \Bioconductor{} tools, \Biocpkg{MLML2R} does not depend on any packages. Thus, the user is free to read and preprocess the data using any software of preference and then import the intensities (or $T$ and $C$ counts) for the methylated and unmethylated channel (or converted and uncoverted cytosines) into \R{} in matrix format.
+When data is obtained through Infinium Methylation arrays, we recommend the use of the \Biocpkg{minfi} package [@minfi], a well-established tool for reading, preprocessing and analysing DNA methylation data from these platforms. Although our example relies on \Biocpkg{minfi} and other \Bioconductor{} tools, \Biocpkg{MLML2R} does not depend on any packages. Thus, the user is free to read and preprocess the data using any software of preference and then import the intensities (or $T$ and $C$ counts) for the methylated and unmethylated channel (or converted and uncoverted cytosines) into \R{} in matrix format.
 
 To start this example we will need the following packages:
 ```{r,eval=FALSE}
@@ -255,7 +274,7 @@ pData(rgSet) <- as(pD,"DataFrame")
 rgSet
 ```
 
-The \Robject{rgSet} object is a class called \Rclass{RGChannelSet} used for two color data (green and a red channel). The input in the \Rfunction{MLML} funcion is  \Rclass{MethylSet}, which contains the methylated and unmethylated signals. The most basic way to construct a \Rclass{MethylSet} is  using the function \Rfunction{preprocessRaw}. Here we chose the function \Rfunction{preprocessNoob} for background correction and construction of the \Rclass{MethylSet}.
+The \Robject{rgSet} object is a class called \Rclass{RGChannelSet} used for two color data (green and a red channel). The input in the \Rfunction{MLML} funcion is  \Rclass{MethylSet}, which contains the methylated and unmethylated signals. The most basic way to construct a \Rclass{MethylSet} is  using the function \Rfunction{preprocessRaw}. Here we chose the function \Rfunction{preprocessNoob} [@noob] for background correction and construction of the \Rclass{MethylSet}.
 
 
 ```{r,eval=FALSE}
@@ -378,45 +397,6 @@ results_exactPD2 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
 ```
 
 
-
-
-# Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
-```
-
-You can enable figure captions by `fig_caption: yes` in YAML:
-
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
-```
-
-Also a quote using `>`:
-
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
 
 
 # References

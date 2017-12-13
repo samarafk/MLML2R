@@ -1,0 +1,625 @@
+---
+title: "MLML2R package User's Guide"
+shorttitle: "MLML2R"
+package: MLML2R
+abstract: >
+  We present a guide to the Bioconductor package \Biocpkg{MLML2R}. The package provides computational efficient maximum likelihood estimates of DNA methylation and hydroxymethylation proportions when data from the DNA processing methods bisulfite conversion (BS), oxidative bisulfite conversion (ox-BS), and Tet-assisted bisulfite conversion (TAB) are available. Estimates can be obtained when data from all the three methods are available or when any combination of only two of them are available. The package does not depend on other \R{} packages, allowing the user to read and preprocess the data with any given software, to import the results into \{R} in matrix format, to obtain the maximum likelihood 5-hmC and 5-mC estimates and use them as input for other packages traditionally used in genomic data analysis, such as \Biocpkg{minfi}, \Biocpkg{sva} and \Biocpkg{limma}.
+bibliography: refs.bib
+author: "Samara F. Kiihl and Maria Tellez-Plaza"
+date: "`r Sys.Date()`"
+output: 
+  BiocStyle::pdf_document:
+   fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{Using MLML2R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE,eval=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+```
+
+
+# Introduction
+
+
+In a given CpG site from a single cell we will either have a $C$ or a $T$ after DNA processing conversion methods, with a different interpretation for each of the available methods. This is a binary outcome and we assume a Binomial model and use the maximum likelihood estimation method to obtain the estimates for hydroxymethylation and methylation proportions.
+
+$T$ reads are referred to as converted cytosine and $C$ reads are referred to as unconverted cytosine. Conventionally, $T$ counts are also referred to as unmethylated counts, and $C$ counts as methylated counts. In case of Infinium Methylation arrays, we have intensities representing the methylated (M) and unmethylated (U) channels that are proportional to the number of unconverted and converted cytosines ($C$ and $T$, respectively). The most used summary from these experiments is  the proportion $\beta=\frac{M}{M+U}$, commonly referred to as \textit{beta-value}, which reflects the methylation level at a CpG site. Naïvely using the difference between betas from BS and oxBS as an estimate of 5-hmC (hydroxymethylated cytosine), and the difference between betas from BS and TAB as an estimate of 5-mC (methylated cytosine) can many times provide negative proportions and instances where the sum of 5-C (unmodified cytosine), 5-mC and 5-hmC proportions is greater than one due to measurement errors.
+
+\Biocpkg{MLML2R} package allows the user to jointly estimate hydroxymethylation and methylation consistently and efficiently.
+
+The function \Rfunction{MLML} takes as input the data from the different methods and returns the estimated proportion of methylation, hydroxymethylation and unmethylation for a given CpG site. Table 1 presents the arguments of the \Rfunction{MLML} and Table 2 lists the results returned by the function.
+
+The function assumes that the order of the rows and columns in the input matrices are consistent. In addition, all the input matrices must have the same dimension. Usually, rows represent CpG loci and columns are the samples.
+
+
+Arguments           |       Description      
+--------------------|----------------------------------------------------
+\Robject{G.matrix}  | Unmethylated channel (Converted cytosines/ T counts) from  TAB-conversion (reflecting 5-C + 5-mC). 
+\Robject{H.matrix}  | Methylated channel (Unconverted cytosines/ C counts) from TAB-conversion (reflecting True 5-hmC). 
+\Robject{L.matrix}	| Unmethylated channel (Converted cytosines/ T counts) from oxBS-conversion (reflecting 5-C + 5-hmC). 
+\Robject{M.matrix}	| Methylated channel (Unconverted cytosines/ C counts) from  oxBS-conversion (reflecting True 5-mC). 
+\Robject{T.matrix}	| Methylated channel (Unconverted cytosines/ C counts) from  standard BS-conversion (reflecting 5-mC+5-hmC). 
+\Robject{U.matrix}	| Unmethylated channel (Converted cytosines/ T counts) from standard BS-conversion (reflecting True 5-C). 
+: `MLML` function and random variable notation.
+
+
+
+Value | Description
+------|------------------
+\Robject{mC}	| maximum likelihood estimate for the 5-mC proportion
+\Robject{hmC}	| maximum likelihood estimate for the 5-hmC proportion
+\Robject{C}	| maximum likelihood estimate for the 5-mC proportion
+\Robject{methods}	| the conversion methods used to produce the MLE
+: Results returned from the \Rfunction{MLML} function
+
+
+# Worked examples
+
+## Publicly available data: GSE63179
+
+We will use the dataset from @10.1371/journal.pone.0118202, which consists of eight DNA samples from the same DNA source treated with oxBS-BS and hybridized to the Infinium 450K array.
+
+When data is obtained through Infinium Methylation arrays, we recommend the use of the \Biocpkg{minfi} package [@minfi], a well-established tool for reading, preprocessing and analysing DNA methylation data from these platforms. Although our example relies on \Biocpkg{minfi} and other \Bioconductor{} tools, \Biocpkg{MLML2R} does not depend on any packages. Thus, the user is free to read and preprocess the data using any software of preference and then import the intensities (or $T$ and $C$ counts) for the methylated and unmethylated channel (or converted and uncoverted cytosines) into \R{} in matrix format.
+
+To start this example we will need the following packages:
+```{r,eval=FALSE,message=FALSE}
+library(MLML2R)
+library(minfi)
+library(GEOquery)
+```
+
+
+It is usually best practice to start the analysis from the raw data, which in the case of the 450K array is a \verb|.IDAT| file.
+
+The raw files are deposited in GEO and can be downloaded by using the \Rfunction{getGEOSuppFiles}. There are two files for each replicate, since the 450k array is a two-color array. The \verb|.IDAT| files are downloaded in compressed format and need to be uncompressed before they are read by the \Rfunction{read.metharray.exp} function.
+
+```{r,eval=FALSE}
+getGEOSuppFiles("GSE63179")
+untar("GSE63179/GSE63179_RAW.tar", exdir = "GSE63179/idat")
+
+list.files("GSE63179/idat", pattern = "idat")
+files <- list.files("GSE63179/idat", pattern = "idat.gz$", full = TRUE)
+sapply(files, gunzip, overwrite = TRUE)
+```
+
+The \verb|.IDAT| files can now be read:
+```{r,eval=FALSE}
+rgSet <- read.metharray.exp("GSE63179/idat")
+```
+
+```{r,eval=FALSE,echo=FALSE}
+rgSet <- read.metharray.exp("../data-raw/example1/GSE63179/idat")
+```
+
+To access phenotype data we use the \Rfunction{pData} function. The phenotype data is not yet available from the \Robject{rgSet}.
+```{r,eval=FALSE}
+pData(rgSet)
+```
+In this example the phenotype is not really relevant, since we have only one sample: male, 25 years old. What we do need is the information about the conversion method used in each replicate: BS or oxBS. We will access this information automatically from GEO:
+```{r,eval=FALSE}
+geoMat <- getGEO("GSE63179")
+pD.all <- pData(geoMat[[1]])
+pD <- pD.all[, c("title", "geo_accession", "characteristics_ch1.1",
+                 "characteristics_ch1.2","characteristics_ch1.3")]
+pD
+```
+
+
+This phenotype data needs to be merged into the methylation data. The following commands guarantee we have the same replicate identifier in both datasets before merging.
+
+```{r,eval=FALSE}
+sampleNames(rgSet) <- sapply(sampleNames(rgSet),function(x)
+  strsplit(x,"_")[[1]][1])
+rownames(pD) <- pD$geo_accession
+pD <- pD[sampleNames(rgSet),]
+pData(rgSet) <- as(pD,"DataFrame")
+rgSet
+```
+
+The \Robject{rgSet} object is a class called \Rclass{RGChannelSet} used for two color data (green and a red channel). The input in the \Rfunction{MLML} funcion is  \Rclass{MethylSet}, which contains the methylated and unmethylated signals. The most basic way to construct a \Rclass{MethylSet} is  using the function \Rfunction{preprocessRaw}. Here we chose the function \Rfunction{preprocessNoob} [@noob] for background correction and construction of the \Rclass{MethylSet}.
+
+
+```{r,eval=FALSE}
+MSet.noob<- preprocessNoob(rgSet)
+```
+
+
+After the preprocessed steps we can use \Rfunction{MLML} from the \Biocpkg{MLML2R} package.
+
+
+The BS replicates are in columns 1, 3, 5, and 6 (information from `pD$title`). The remaining columns are from the oxBS treated replicates.
+
+```{r,eval=FALSE}
+MethylatedBS <- getMeth(MSet.noob)[,c(1,3,5,6)]
+UnMethylatedBS <- getUnmeth(MSet.noob)[,c(1,3,5,6)]
+MethylatedOxBS <- getMeth(MSet.noob)[,c(7,8,2,4)]
+UnMethylatedOxBS <- getUnmeth(MSet.noob)[,c(7,8,2,4)]
+```
+
+
+
+ When only two methods are available, the default option of \Rfunction{MLML} function returns the exact constrained maximum likelihood estimates  using the the pool-adjacent-violators algorithm (PAVA) [@ayer1955].
+
+```{r,eval=FALSE}
+results_exactPD1 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
+                      L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS)
+```
+
+
+Maximum likelihood estimate via EM-algorithm approach [@Qu:MLML] is obtained with the option \verb|iterative=TRUE|. In this case, the default (or user specified) \verb|tol| is considered in the iterative method.
+
+
+```{r,eval=FALSE}
+results_emPD1 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
+                   L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS,
+                   iterative = TRUE)
+```
+
+The estimates are very similar for both methods:
+```{r,echo=TRUE,eval=FALSE}
+all.equal(results_exactPD1$hmC,results_emPD1$hmC,scale=1)
+```
+
+
+```{r echo=FALSE,eval=FALSE}
+load("../data-raw/example1/results_exact.rds")
+```
+
+```{r plot,echo=FALSE,eval=FALSE}
+pdf(file="Real1_estimates.pdf",width=15,height=5)
+par(mfrow =c(1,3))
+densityPlot(results_exact$hmC,main= "5-hmC using PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion")
+densityPlot(results_exact$mC,main= "5-mC using PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion")
+densityPlot(results_exact$C,main= "5-C using PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion")
+dev.off()
+```
+
+```{r,echo=FALSE,fig.width=15,fig.height=5,fig.cap="Estimated proportions of hydroxymethylation, methylation and unmethylation for the CpGs in the dataset using the MLML function with default options."}
+knitr::include_graphics("Real1_estimates.pdf") 
+```
+
+
+## Simulated data
+
+
+To illustrate the package when all the three methods are available or when any combination of only two of them are available, we will simulate a dataset. 
+
+We will use a sample of the estimates of 5-mC, 5-hmC and 5-C of the previous example as the true proportions, as shown in Figure 2.
+
+
+
+Two replicate samples with 1000 CpGs will be simulated. For CpG $i$ in sample $j$:
+
+$$T_{i,j} \sim Binomial(n=c_{i,j},p=p_m+p_h)$$
+$$M_{i,j} \sim Binomial(n=c_{i,j}, p=p_m)$$
+$$H_{i,j} \sim Binomial(n=c_{i,j},p=p_h)$$
+$$U_{i,j}=c_{i,j}-T_{i,j}$$
+$$L_{i,j}=c_{i,j}-M_{i,j}$$
+$$G_{i,j}=c_{i,j}-H_{i,j}$$
+where the random variables are defined in Table 1, and $c_{i,j}$ represents the coverage for CpG $i$ in sample $j$.
+
+
+```{r echo=FALSE,eval=FALSE}
+load("../data-raw/example1/results_exact.rds")
+load("../data-raw/Input.rds")
+```
+
+
+The following code produce the simulated data:
+
+```{r,echo=TRUE,eval=FALSE}
+set.seed(112017)
+
+index <- sample(1:dim(results_exact$mC)[1],1000,replace=FALSE) # 1000 CpGs
+
+Coverage <- round(MethylatedBS+UnMethylatedBS)[index,1:2] # considering 2 samples
+
+temp1 <- data.frame(n=as.vector(Coverage),
+                    p_m=c(results_exact$mC[index,1],results_exact$mC[index,1]),
+                    p_h=c(results_exact$hmC[index,1],results_exact$hmC[index,1]))
+
+MethylatedBS_temp <- c()
+for (i in 1:dim(temp1)[1])
+{
+  MethylatedBS_temp[i] <- rbinom(n=1, size=temp1$n[i], prob=(temp1$p_m[i]+temp1$p_h[i]))
+}
+
+UnMethylatedBS_sim2 <- matrix(Coverage - MethylatedBS_temp,ncol=2)
+MethylatedBS_sim2 <- matrix(MethylatedBS_temp,ncol=2)
+
+
+MethylatedOxBS_temp <- c()
+for (i in 1:dim(temp1)[1])
+{
+  MethylatedOxBS_temp[i] <- rbinom(n=1, size=temp1$n[i], prob=temp1$p_m[i])
+}
+
+UnMethylatedOxBS_sim2 <- matrix(Coverage - MethylatedOxBS_temp,ncol=2)
+MethylatedOxBS_sim2 <- matrix(MethylatedOxBS_temp,ncol=2)
+
+
+MethylatedTAB_temp <- c()
+for (i in 1:dim(temp1)[1])
+{
+  MethylatedTAB_temp[i] <- rbinom(n=1, size=temp1$n[i], prob=temp1$p_h[i])
+}
+
+
+UnMethylatedTAB_sim2 <- matrix(Coverage - MethylatedTAB_temp,ncol=2)
+MethylatedTAB_sim2 <- matrix(MethylatedTAB_temp,ncol=2)
+
+true_parameters_sim2 <- data.frame(p_m=results_exact$mC[index,1],p_h=results_exact$hmC[index,1])
+true_parameters_sim2$p_u <- 1-true_parameters_sim2$p_m-true_parameters_sim2$p_h
+```
+
+
+```{r eval=FALSE,echo=FALSE}
+save(true_parameters_sim2,MethylatedBS_sim2,UnMethylatedBS_sim2,MethylatedOxBS_sim2,UnMethylatedOxBS_sim2,MethylatedTAB_sim2,UnMethylatedTAB_sim2,file="Data_sim2.rds")
+```
+
+
+```{r plot2,echo=FALSE,eval=FALSE}
+pdf(file="True_parameters.pdf",width=15,height=5)
+par(mfrow =c(1,3))
+plot(density(results_exact$hmC[index,1]),main= "True 5-hmC",xlab="Proportions",xlim=c(0,1),ylim=c(0,10),cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
+plot(density(results_exact$mC[index,1]),main= "True 5-mC",xlab="Proportions",xlim=c(0,1),ylim=c(0,10),cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
+plot(density(results_exact$C[index,1]),main= "True 5-C",ylim=c(0,10),xlab="Proportions",xlim=c(0,1),cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
+dev.off()
+```
+
+```{r,echo=FALSE,fig.width=15,fig.height=5,fig.cap="True proportions of hydroxymethylation, methylation and unmethylation for the CpGs used to generate the datasets."}
+knitr::include_graphics("True_parameters.pdf") 
+```
+
+
+
+### BS and oxBS methods
+
+
+```{r,echo=FALSE,eval=TRUE}
+load("Data_sim2.rds")
+```
+
+When only two methods are available, the default option returns the exact constrained maximum likelihood estimates  using the the pool-adjacent-violators algorithm (PAVA) [@ayer1955].
+
+
+```{r}
+library(MLML2R)
+ results_exactBO1 <- MLML(T.matrix = MethylatedBS_sim2 , U.matrix = UnMethylatedBS_sim2,
+ L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2)
+```
+
+Maximum likelihood estimate via EM-algorithm approach [@Qu:MLML] is obtained with the option \verb|iterative=TRUE|. In this case, the default (or user specified) \verb|tol| is considered in the iterative method.
+
+```{r}
+ results_emBO1 <- MLML(T.matrix = MethylatedBS_sim2 , U.matrix = UnMethylatedBS_sim2,
+ L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,iterative=TRUE)
+```
+
+ When only two methods are available, we highly recommend the default option \Rcode{iterative=FALSE} since the difference in the estimates obtained via EM and exact constrained is very small, but the former requires more computational effort:
+
+```{r}
+ all.equal(results_emBO1$hmC,results_exactBO1$hmC,scale=1)
+```
+
+```{r}
+ library(microbenchmark)
+ mbmBO1 = microbenchmark(
+    EXACT = MLML(T.matrix = MethylatedBS_sim2 , U.matrix = UnMethylatedBS_sim2,
+                 L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2),
+    EM =    MLML(T.matrix = MethylatedBS_sim2, U.matrix = UnMethylatedBS_sim2,
+                 L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
+                 iterative=TRUE),
+    times=10)
+ mbmBO1
+```
+
+
+Comparison between approximate exact constrained and true hydroxymethylation proportion used in simulation:
+```{r}
+all.equal(true_parameters_sim2$p_h,results_exactBO1$hmC[,1],scale=1)
+```
+
+Comparison between EM-algorithm and true hydroxymethylation proportion used in simulation:
+```{r}
+all.equal(true_parameters_sim2$p_h,results_emBO1$hmC[,1],scale=1)
+```
+
+### BS and TAB methods
+
+Using PAVA:
+```{r}
+results_exactBT1 <- MLML(T.matrix = MethylatedBS_sim2 , U.matrix = UnMethylatedBS_sim2,
+G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2)
+```
+
+Using EM-algorithm:
+```{r}
+ results_emBT1 <- MLML(T.matrix = MethylatedBS_sim2 , U.matrix = UnMethylatedBS_sim2,
+ G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2,iterative=TRUE)
+```
+
+Comparison between PAVA and EM:
+
+```{r}
+ all.equal(results_emBT1$hmC,results_exactBT1$hmC,scale=1)
+```
+
+```{r}
+ mbmBT1 = microbenchmark(
+    EXACT = MLML(T.matrix = MethylatedBS_sim2, U.matrix = UnMethylatedBS_sim2,
+                 G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2),
+    EM =    MLML(T.matrix = MethylatedBS_sim2, U.matrix = UnMethylatedBS_sim2,
+                 G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2,
+                 iterative=TRUE),
+    times=10)
+ mbmBT1
+```
+
+
+Comparison between approximate exact constrained and true hydroxymethylation proportion used in simulation:
+```{r}
+all.equal(true_parameters_sim2$p_h,results_exactBT1$hmC[,1],scale=1)
+```
+
+Comparison between EM-algorithm and true hydroxymethylation proportion used in simulation:
+```{r}
+all.equal(true_parameters_sim2$p_h,results_emBT1$hmC[,1],scale=1)
+```
+
+### oxBS and TAB methods
+
+ Using PAVA:
+```{r}
+ results_exactOT1 <- MLML(L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
+ G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2)
+```
+
+ Using EM-algorithm:
+```{r}
+ results_emOT1 <- MLML(L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
+ G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2,iterative=TRUE)
+```
+
+Comparison between PAVA and EM:
+
+```{r}
+ all.equal(results_emOT1$hmC,results_exactOT1$hmC,scale=1)
+```
+
+```{r}
+ mbmOT1 = microbenchmark(
+    EXACT = MLML(L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
+                 G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2),
+    EM =    MLML(L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
+                 G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2,
+                 iterative=TRUE),
+    times=10)
+ mbmOT1
+```
+
+Comparison between approximate exact constrained and true hydroxymethylation proportion used in simulation:
+```{r}
+all.equal(true_parameters_sim2$p_h,results_exactOT1$hmC[,1],scale=1)
+```
+
+Comparison between EM-algorithm and true hydroxymethylation proportion used in simulation:
+```{r}
+all.equal(true_parameters_sim2$p_h,results_emOT1$hmC[,1],scale=1)
+```
+
+### BS, oxBS and TAB methods
+
+When data from the three methods are available, the default otion in the \Rfunction{MLML} function returns the constrained maximum likelihood estimates using an approximated solution for Lagrange multipliers method.
+
+
+```{r}
+
+results_exactBOT1 <- MLML(T.matrix = MethylatedBS_sim2 , U.matrix = UnMethylatedBS_sim2,
+L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
+G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2)
+```
+
+Maximum likelihood estimate via EM-algorithm approach [@Qu:MLML] is obtained with the option \verb|iterative=TRUE|. In this case, the default (or user specified) \verb|tol| is considered in the iterative method.
+
+```{r}
+ results_emBOT1 <- MLML(T.matrix = MethylatedBS_sim2 , U.matrix = UnMethylatedBS_sim2,
+ L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
+ G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2,iterative=TRUE)
+```
+
+
+We recommend the default option \Rcode{iterative=FALSE} since the difference in the estimates obtained via EM and the approximate exact constrained is very small, but the former requires more computational effort:
+
+```{r}
+ all.equal(results_emBOT1$hmC,results_exactBOT1$hmC,scale=1)
+```
+
+
+```{r}
+ mbmBOT1 = microbenchmark(
+    EXACT = MLML(T.matrix = MethylatedBS_sim2, U.matrix = UnMethylatedBS_sim2,
+                 L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
+                 G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2),
+    EM =    MLML(T.matrix = MethylatedBS_sim2, U.matrix = UnMethylatedBS_sim2,
+                 L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
+                 G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2,
+                 iterative=TRUE),
+    times=10)
+ mbmBOT1
+```
+
+
+Comparison between approximate exact constrained and true hydroxymethylation proportion used in simulation:
+```{r}
+all.equal(true_parameters_sim2$p_h,results_exactBOT1$hmC[,1],scale=1)
+```
+
+Comparison between EM-algorithm and true hydroxymethylation proportion used in simulation:
+```{r}
+all.equal(true_parameters_sim2$p_h,results_emBOT1$hmC[,1],scale=1)
+```
+
+<!-- ## Simulated data -->
+
+<!-- \Biocpkg{MLML2R} includes small example datasets for illustration. -->
+
+<!--  We simulated counts from Binomial model with true proportions of methylation, hydroxymethylation and unmethylated being $0.3$, $0.2$, and $0.5$, respectively. For instance, \verb|MethylatedBS_sim| is a matrix of simulated counts from BS corresponding to 100 CpGs and 2 samples. Similarly we simulated matrices with methylated and unmethylated counts for all the three methods: BS, oxBS and TAB. The rows and columns in the input matrices are consistent. -->
+
+<!-- ### BS and oxBS methods -->
+
+<!--  Load the package: -->
+
+<!-- ```{r} -->
+<!--  library(MLML2R) -->
+<!-- ``` -->
+
+<!--  When only two methods are available, the default option returns the exact constrained maximum likelihood estimates  using the the pool-adjacent-violators algorithm (PAVA) [@ayer1955]. -->
+
+
+<!-- ```{r} -->
+<!--  results_exactBO1 <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim, -->
+<!--  L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim) -->
+<!-- ``` -->
+
+<!-- Maximum likelihood estimate via EM-algorithm approach [@Qu:MLML] is obtained with the option \verb|iterative=TRUE|. In this case, the default (or user specified) \verb|tol| is considered in the iterative method. -->
+
+<!-- ```{r} -->
+<!--  results_emBO1 <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim, -->
+<!--  L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,iterative=TRUE) -->
+<!-- ``` -->
+
+<!--  When only two methods are available, we highly recommend the default option \Rcode{iterative=FALSE} since the difference in the estimates obtained via EM and exact constrained is very small, but the former requires more computational effort: -->
+
+<!-- ```{r} -->
+<!--  all.equal(results_emBO1$hmC,results_exactBO1$hmC,scale=1) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!--  library(microbenchmark) -->
+<!--  mbmBO1 = microbenchmark( -->
+<!--     EXACT = MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim, -->
+<!--                  L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim), -->
+<!--     EM =    MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim, -->
+<!--                  L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim, -->
+<!--                  iterative=TRUE), -->
+<!--     times=10) -->
+<!--  mbmBO1 -->
+<!-- ``` -->
+
+
+<!-- ### BS and TAB methods -->
+
+<!-- Using PAVA: -->
+<!-- ```{r} -->
+<!-- results_exactBT1 <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim, -->
+<!-- G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim) -->
+<!-- ``` -->
+
+<!-- Using EM-algorithm: -->
+<!-- ```{r} -->
+<!--  results_emBT1 <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim, -->
+<!--  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE) -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!--  all.equal(results_emBT1$hmC,results_exactBT1$hmC,scale=1) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!--  mbmBT1 = microbenchmark( -->
+<!--     EXACT = MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim, -->
+<!--                  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim), -->
+<!--     EM =    MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim, -->
+<!--                  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim, -->
+<!--                  iterative=TRUE), -->
+<!--     times=10) -->
+<!--  mbmBT1 -->
+<!-- ``` -->
+
+
+<!-- ### oxBS and TAB methods -->
+
+<!--  Using PAVA: -->
+<!-- ```{r} -->
+<!--  results_exactOT1 <- MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim, -->
+<!--  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim) -->
+<!-- ``` -->
+
+<!--  Using EM-algorithm: -->
+<!-- ```{r} -->
+<!--  results_emOT1 <- MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim, -->
+<!--  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE) -->
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!--  all.equal(results_emOT1$hmC,results_exactOT1$hmC,scale=1) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!--  mbmOT1 = microbenchmark( -->
+<!--     EXACT = MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim, -->
+<!--                  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim), -->
+<!--     EM =    MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim, -->
+<!--                  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim, -->
+<!--                  iterative=TRUE), -->
+<!--     times=10) -->
+<!--  mbmOT1 -->
+<!-- ``` -->
+
+
+
+<!-- ### BS, oxBS and TAB methods -->
+
+<!-- When data from the three methods are available, the default otion in the \Rfunction{MLML} function returns the constrained maximum likelihood estimates using an approximated solution for Lagrange multipliers method. -->
+
+
+<!-- ```{r} -->
+<!-- results_exactBOT1 <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim, -->
+<!-- L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim, -->
+<!-- G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim) -->
+<!-- ``` -->
+
+<!-- Maximum likelihood estimate via EM-algorithm approach [@Qu:MLML] is obtained with the option \verb|iterative=TRUE|. In this case, the default (or user specified) \verb|tol| is considered in the iterative method. -->
+
+<!-- ```{r} -->
+<!--  results_emBOT1 <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim, -->
+<!--  L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim, -->
+<!--  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE) -->
+<!-- ``` -->
+
+
+<!-- We recommend the default option \Rcode{iterative=FALSE} since the difference in the estimates obtained via EM and the approximate exact constrained is very small, but the former requires more computational effort: -->
+
+<!-- ```{r} -->
+<!--  all.equal(results_emBOT1$hmC,results_exactBOT1$hmC,scale=1) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!--  mbmBOT1 = microbenchmark( -->
+<!--     EXACT = MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim, -->
+<!--                  L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim, -->
+<!--                  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim), -->
+<!--     EM =    MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim, -->
+<!--                  L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim, -->
+<!--                  G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim, -->
+<!--                  iterative=TRUE), -->
+<!--     times=10) -->
+<!--  mbmBOT1 -->
+<!-- ``` -->
+
+
+
+# References
