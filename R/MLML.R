@@ -156,9 +156,9 @@ MLML <- function(G.matrix       = NULL,
         ph0 <- ph <- h/(h+g)
         pc0 <- pc <- u/(u+t)
         ss <- pm0+ph0+pc0+1e-08
-        pm0 <- pm <- ifelse( m/(m+l)<1 & h/(h+g)<1 & u/(u+t)<1 & m >0 & h > 0 & u > 0 , pm0 , pm0/ss)
-        ph0 <- ph <- ifelse( m/(m+l)<1 & h/(h+g)<1 & u/(u+t)<1 & m >0 & h > 0 & u > 0 , ph0 , ph0/ss)
-        pc0 <- pc <- ifelse( m/(m+l)<1 & h/(h+g)<1 & u/(u+t)<1 & m >0 & h > 0 & u > 0 , pc0 , pc0/ss)
+        pm0 <- pm <- ifelse( (m == 0 | h == 0 | u == 0 | g==0 | l==0 | t==0)  & (m/(m+l) + h/(h+g) + u/(u+t)) >= 1, pm0/ss , pm0)
+        ph0 <- ph <- ifelse( (m == 0 | h == 0 | u == 0 | g==0 | l==0 | t==0)  & (m/(m+l) + h/(h+g) + u/(u+t)) >= 1, ph0/ss , ph0)
+        pc0 <- pc <- ifelse( (m == 0 | h == 0 | u == 0 | g==0 | l==0 | t==0)  & (m/(m+l) + h/(h+g) + u/(u+t)) >= 1, pc0/ss , pc0)
 
         Vm <- pm*(1-pm)/(m+l)
         Vh <- ph*(1-ph)/(h+g)
