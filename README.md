@@ -1,8 +1,5 @@
 # `MLML2R`: Maximum Likelihood Estimation of DNA Methylation and Hydroxymethylation Levels
 
-Samara F. Kiihl, Maria Tellez-Plaza  
-
-
 The function `MLML` provides maximum likelihood estimates (MLE) for 5-hmC and 5-mC levels using data from the methods: BS-seq, TAB-seq or oxBS-seq (all three methods or any combination of two methods). 
 
 Estimates can be obtained using the Expectation-Maximization (EM) algorithm proposed by [Qu *et al.* (2013)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3789553/), the pool-adjacent-violators algorithm (PAVA) or an approximated solution of the Lagrange multiplier method. 
