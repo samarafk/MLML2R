@@ -6,10 +6,15 @@ Estimates can be obtained using the Expectation-Maximization (EM) algorithm prop
 
 Furthermore, our routine is flexible and can be used with both next generation sequencing and Infinium Methylation microarray data in the R-statistical language.
 
-To install the development version, use the following commands on the R console:
+
+The package is available on CRAN:
+
+[https://CRAN.R-project.org/package=MLML2R](https://CRAN.R-project.org/package=MLML2R).
+
+
+To install and load the package, use the following commands on the R console:
 
 ```r
-install.packages("devtools")
-devtools::install_github("samarafk/MLML2R")
+install.packages("MLML2R")
 library(MLML2R)
 ```
