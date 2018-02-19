@@ -1,28 +1,31 @@
 Package: MLML2R
 Type: Package
-Title: Maximum Likelihood Estimation of DNA Methylation and Hydroxymethylation Levels
-Version: 0.99.0
+Title: Maximum Likelihood Estimation of DNA Methylation and Hydroxymethylation Proportions
+Version: 0.1.0
 Author: Samara Kiihl [aut, cre],
   Maria Jose Martinez-Garrido [aut],
   Arce Domingo-Relloso [aut],
   Jose Bermudez [aut],
   Maria Tellez-Plaza [aut]
 Maintainer: Samara Kiihl <samara@ime.unicamp.br>
-Description: Maximum likelihood estimates (MLE) of the levels of 5-mC and 5-hmC 
-    in the DNA using information from BS-conversion, TAB-conversion, 
-    and oxBS-conversion methods. One can use information from all three methods 
-    or any combination of two of them. Estimates are based on Binomial model.
+Description: Maximum likelihood estimates (MLE) of the proportions
+    of 5-mC and 5-hmC in the DNA using information from BS-conversion,
+    TAB-conversion, and oxBS-conversion methods. One can use information from all three methods 
+    or any combination of two of them. Estimates are based on Binomial model by
+    Qu et al. (2013) <doi:10.1093/bioinformatics/btt459> and
+    Kiihl et al. (2018, to appear).
 License: MIT + file LICENSE
 Encoding: UTF-8
 VignetteBuilder: knitr
 LazyData: true
 biocViews: Software, MethylationArray, Epigenetics, DNAMethylation, Microarray, TwoChannel, OneChannel
 RoxygenNote: 6.0.1
+URL: https://github.com/samarafk/MLML2R
 Suggests:
   minfi,
-  BiocStyle,
   microbenchmark,
   GEOquery,
   knitr,
+  BiocStyle,
   rmarkdown
 BugReports: https://github.com/samarafk/MLML2R/issues
