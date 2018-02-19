@@ -151,7 +151,7 @@ UnMethylatedOxBS <- getUnmeth(MSet.noob)[,c(7,8,2,4)]
  When only two methods are available, the default option of \Rfunction{MLML} function returns the exact constrained maximum likelihood estimates  using the the pool-adjacent-violators algorithm (PAVA) [@ayer1955].
 
 ```{r,eval=FALSE}
-results_exactPD1 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
+results_exact <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
                       L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS)
 ```
 
@@ -160,14 +160,14 @@ Maximum likelihood estimate via EM-algorithm approach [@Qu:MLML] is obtained wit
 
 
 ```{r,eval=FALSE}
-results_emPD1 <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
+results_em <- MLML(T.matrix = MethylatedBS , U.matrix = UnMethylatedBS,
                    L.matrix = UnMethylatedOxBS, M.matrix = MethylatedOxBS,
                    iterative = TRUE)
 ```
 
 The estimates are very similar for both methods:
 ```{r,echo=TRUE,eval=FALSE}
-all.equal(results_exactPD1$hmC,results_emPD1$hmC,scale=1)
+all.equal(results_exact$hmC,results_em$hmC,scale=1)
 ```
 
 
