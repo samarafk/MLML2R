@@ -3,7 +3,7 @@ title: "MLML2R package User's Guide"
 shorttitle: "MLML2R"
 package: MLML2R
 abstract: >
-  We present a guide to the Bioconductor package \Biocpkg{MLML2R}. The package provides computational efficient maximum likelihood estimates of DNA methylation and hydroxymethylation proportions when data from the DNA processing methods bisulfite conversion (BS), oxidative bisulfite conversion (ox-BS), and Tet-assisted bisulfite conversion (TAB) are available. Estimates can be obtained when data from all the three methods are available or when any combination of only two of them are available. The package does not depend on other \R{} packages, allowing the user to read and preprocess the data with any given software, to import the results into \R{} in matrix format, to obtain the maximum likelihood 5-hmC and 5-mC estimates and use them as input for other packages traditionally used in genomic data analysis, such as \Biocpkg{minfi}, \Biocpkg{sva} and \Biocpkg{limma}.
+  We present a guide to the \R{} package \CRANpkg{MLML2R}. The package provides computational efficient maximum likelihood estimates of DNA methylation and hydroxymethylation proportions when data from the DNA processing methods bisulfite conversion (BS), oxidative bisulfite conversion (ox-BS), and Tet-assisted bisulfite conversion (TAB) are available. Estimates can be obtained when data from all the three methods are available or when any combination of only two of them are available. The package does not depend on other \R{} packages, allowing the user to read and preprocess the data with any given software, to import the results into \R{} in matrix format, to obtain the maximum likelihood 5-hmC and 5-mC estimates and use them as input for other packages traditionally used in genomic data analysis, such as \Biocpkg{minfi}, \Biocpkg{sva} and \Biocpkg{limma}.
 bibliography: refs.bib
 author: "Samara F. Kiihl and Maria Tellez-Plaza"
 date: "`r Sys.Date()`"
@@ -35,7 +35,7 @@ In a given CpG site from a single cell we will either have a $C$ or a $T$ after 
 
 $T$ reads are referred to as converted cytosine and $C$ reads are referred to as unconverted cytosine. Conventionally, $T$ counts are also referred to as unmethylated counts, and $C$ counts as methylated counts. In case of Infinium Methylation arrays, we have intensities representing the methylated (M) and unmethylated (U) channels that are proportional to the number of unconverted and converted cytosines ($C$ and $T$, respectively). The most used summary from these experiments is  the proportion $\beta=\frac{M}{M+U}$, commonly referred to as \textit{beta-value}, which reflects the methylation level at a CpG site. Naïvely using the difference between betas from BS and oxBS as an estimate of 5-hmC (hydroxymethylated cytosine), and the difference between betas from BS and TAB as an estimate of 5-mC (methylated cytosine) can many times provide negative proportions and instances where the sum of 5-C (unmodified cytosine), 5-mC and 5-hmC proportions is greater than one due to measurement errors.
 
-\Biocpkg{MLML2R} package allows the user to jointly estimate hydroxymethylation and methylation consistently and efficiently.
+\CRANpkg{MLML2R} package allows the user to jointly estimate hydroxymethylation and methylation consistently and efficiently.
 
 The function \Rfunction{MLML} takes as input the data from the different methods and returns the estimated proportion of methylation, hydroxymethylation and unmethylation for a given CpG site. Table 1 presents the arguments of the \Rfunction{MLML} and Table 2 lists the results returned by the function.
 
@@ -69,7 +69,7 @@ Value | Description
 
 We will use the dataset from @10.1371/journal.pone.0118202, which consists of eight DNA samples from the same DNA source treated with oxBS-BS and hybridized to the Infinium 450K array.
 
-When data is obtained through Infinium Methylation arrays, we recommend the use of the \Biocpkg{minfi} package [@minfi], a well-established tool for reading, preprocessing and analysing DNA methylation data from these platforms. Although our example relies on \Biocpkg{minfi} and other \Bioconductor{} tools, \Biocpkg{MLML2R} does not depend on any packages. Thus, the user is free to read and preprocess the data using any software of preference and then import the intensities (or $T$ and $C$ counts) for the methylated and unmethylated channel (or converted and uncoverted cytosines) into \R{} in matrix format.
+When data is obtained through Infinium Methylation arrays, we recommend the use of the \Biocpkg{minfi} package [@minfi], a well-established tool for reading, preprocessing and analysing DNA methylation data from these platforms. Although our example relies on \Biocpkg{minfi} and other \Bioconductor{} tools, \CRANpkg{MLML2R} does not depend on any packages. Thus, the user is free to read and preprocess the data using any software of preference and then import the intensities (or $T$ and $C$ counts) for the methylated and unmethylated channel (or converted and uncoverted cytosines) into \R{} in matrix format.
 
 To start this example we will need the following packages:
 ```{r,eval=FALSE,message=FALSE}
@@ -134,7 +134,7 @@ MSet.noob<- preprocessNoob(rgSet)
 ```
 
 
-After the preprocessed steps we can use \Rfunction{MLML} from the \Biocpkg{MLML2R} package.
+After the preprocessed steps we can use \Rfunction{MLML} from the \CRANpkg{MLML2R} package.
 
 
 The BS replicates are in columns 1, 3, 5, and 6 (information from `pD$title`). The remaining columns are from the oxBS treated replicates.
