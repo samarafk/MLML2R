@@ -39,7 +39,7 @@
 #'
 #' # obtain MLE via EM-algorithm for BS+TAB:
 #' results_em <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
-#' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
+#' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE)
 #'
 #' # obtain constrained exact MLE for BS+TAB:
 #' results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
