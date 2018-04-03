@@ -108,3 +108,11 @@ data-raw/simulatedCounts/0.1-0.1.rda
 data-raw/Input.rds
 
 data-raw/README.html
+
+vignettes/GSE71398/filelist.txt
+
+vignettes/GSE71398/GSE71398_RAW.tar
+
+*.gz
+
+vignettes/data_processed1.rds
