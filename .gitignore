@@ -116,3 +116,7 @@ vignettes/GSE71398/GSE71398_RAW.tar
 *.gz
 
 vignettes/data_processed1.rds
+
+data-raw/GSE71398/filelist.txt
+
+data-raw/GSE71398/GSE71398_RAW.tar
