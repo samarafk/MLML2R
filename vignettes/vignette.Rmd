@@ -53,9 +53,9 @@ Arguments           |       Description
 
 Value | Description
 ------|------------------
-\Robject{mC}	| maximum likelihood estimate for the 5-mC proportion
-\Robject{hmC}	| maximum likelihood estimate for the 5-hmC proportion
-\Robject{C}	| maximum likelihood estimate for the 5-mC proportion
+\Robject{mC}	| maximum likelihood estimate for the proportion of methylation
+\Robject{hmC}	| maximum likelihood estimate for the proportion of hydroxymethylation
+\Robject{C}	| maximum likelihood estimate for the proportion of unmethylation
 \Robject{methods}	| the conversion methods used to produce the MLE
 : Results returned from the \Rfunction{MLML} function
 
@@ -69,7 +69,7 @@ We will use the dataset from @10.1371/journal.pone.0118202, which consists of ei
 When data is obtained through Infinium Methylation arrays, we recommend the use of the \Biocpkg{minfi} package [@minfi], a well-established tool for reading, preprocessing and analysing DNA methylation data from these platforms. Although our example relies on \Biocpkg{minfi} and other \Bioconductor{} tools, \CRANpkg{MLML2R} does not depend on any packages. Thus, the user is free to read and preprocess the data using any software of preference and then import the intensities (or $T$ and $C$ counts) for the methylated and unmethylated channel (or converted and uncoverted cytosines) into \R{} in matrix format.
 
 To start this example we will need the following packages:
-```{r packages,eval=TRUE,message=FALSE}
+```{r packages,eval=TRUE,message=FALSE,warning=FALSE}
 library(MLML2R)
 library(minfi)
 library(GEOquery)
