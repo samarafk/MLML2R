@@ -31,9 +31,9 @@ BiocStyle::markdown()
 # Introduction
 
 
-In a given CpG site from a single cell we will either have a $C$ or a $T$ after DNA processing conversion methods, with a different interpretation for each of the available methods. This is a binary outcome and we assume a Binomial model and use the maximum likelihood estimation method to obtain the estimates for hydroxymethylation and methylation proportions.
+In a given CpG site from a single cell we will either have a C or a T after DNA processing conversion methods, with a different interpretation for each of the available methods. This is a binary outcome and we assume a Binomial model and use the maximum likelihood estimation method to obtain the estimates for hydroxymethylation and methylation proportions.
 
-$T$ reads are referred to as converted cytosine and $C$ reads are referred to as unconverted cytosine. Conventionally, $T$ counts are also referred to as unmethylated counts, and $C$ counts as methylated counts. In case of Infinium Methylation arrays, we have intensities representing the methylated (M) and unmethylated (U) channels that are proportional to the number of unconverted and converted cytosines ($C$ and $T$, respectively). The most used summary from these experiments is  the proportion $\beta=\frac{M}{M+U}$, commonly referred to as \textit{beta-value}, which reflects the methylation level at a CpG site. Naïvely using the difference between betas from BS and oxBS as an estimate of 5-hmC (hydroxymethylated cytosine), and the difference between betas from BS and TAB as an estimate of 5-mC (methylated cytosine) can many times provide negative proportions and instances where the sum of 5-C (unmodified cytosine), 5-mC and 5-hmC proportions is greater than one due to measurement errors.
+T reads are referred to as converted cytosine and C reads are referred to as unconverted cytosine. Conventionally, T counts are also referred to as unmethylated counts, and C counts as methylated counts. In case of Infinium Methylation arrays, we have intensities representing the methylated (M) and unmethylated (U) channels that are proportional to the number of unconverted and converted cytosines (C and T, respectively). The most used summary from these experiments is  the proportion $\beta=\frac{M}{M+U}$, commonly referred to as \textit{beta-value}, which reflects the methylation level at a CpG site. Naïvely using the difference between betas from BS and oxBS as an estimate of 5-hmC (hydroxymethylated cytosine), and the difference between betas from BS and TAB as an estimate of 5-mC (methylated cytosine) can many times provide negative proportions and instances where the sum of uC (unmodified cytosine), 5-mC and 5-hmC proportions is greater than one due to measurement errors.
 
 \CRANpkg{MLML2R} package allows the user to jointly estimate hydroxymethylation and methylation consistently and efficiently.
 
@@ -66,7 +66,7 @@ Value | Description
 
 We will use the dataset from @10.1371/journal.pone.0118202, which consists of eight DNA samples from the same DNA source treated with oxBS-BS and hybridized to the Infinium 450K array.
 
-When data is obtained through Infinium Methylation arrays, we recommend the use of the \Biocpkg{minfi} package [@minfi], a well-established tool for reading, preprocessing and analysing DNA methylation data from these platforms. Although our example relies on \Biocpkg{minfi} and other \Bioconductor{} tools, \CRANpkg{MLML2R} does not depend on any packages. Thus, the user is free to read and preprocess the data using any software of preference and then import the intensities (or $T$ and $C$ counts) for the methylated and unmethylated channel (or converted and uncoverted cytosines) into \R{} in matrix format.
+When data is obtained through Infinium Methylation arrays, we recommend the use of the \Biocpkg{minfi} package [@minfi], a well-established tool for reading, preprocessing and analysing DNA methylation data from these platforms. Although our example relies on \Biocpkg{minfi} and other \Bioconductor{} tools, \CRANpkg{MLML2R} does not depend on any packages. Thus, the user is free to read and preprocess the data using any software of preference and then import the intensities (or T and C counts) for the methylated and unmethylated channel (or converted and uncoverted cytosines) into \R{} in matrix format.
 
 To start this example we will need the following packages:
 ```{r packages,eval=TRUE,message=FALSE,warning=FALSE}
@@ -179,9 +179,9 @@ all.equal(results_exact$hmC,results_em$hmC,scale=1)
 ```{r plot,echo=FALSE,eval=FALSE}
 pdf(file="Real1_estimates.pdf",width=15,height=5)
 par(mfrow =c(1,3))
-densityPlot(results_exact$hmC,main= "5-hmC using PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion")
-densityPlot(results_exact$mC,main= "5-mC using PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion")
-densityPlot(results_exact$C,main= "5-C using PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion")
+densityPlot(results_exact$hmC,main= "5-hmC estimates - PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion")
+densityPlot(results_exact$mC,main= "5-mC estimates - PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion")
+densityPlot(results_exact$C,main= "uC estimates - PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion")
 dev.off()
 ```
 
@@ -298,9 +298,9 @@ all.equal(results_exact$mC,results_em$mC,scale=1)
 ```{r plot3,echo=FALSE,eval=FALSE}
 pdf(file="Real2_estimates.pdf",width=15,height=5)
 par(mfrow =c(1,3))
-densityPlot(results_exact$hmC,main= "5-hmC using PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=pD$group)
-densityPlot(results_exact$mC,main= "5-mC using PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=pD$group)
-densityPlot(results_exact$C,main= "5-C using PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=pD$group)
+densityPlot(results_exact$hmC,main= "5-hmC estimates - PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=pD$group)
+densityPlot(results_exact$mC,main= "5-mC estimates - PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=pD$group)
+densityPlot(results_exact$C,main= "uC estimates - PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=pD$group)
 dev.off()
 ```
 
@@ -314,7 +314,7 @@ knitr::include_graphics("Real2_estimates.pdf")
 
 To illustrate the package when all the three methods are available or when any combination of only two of them are available, we will simulate a dataset. 
 
-We will use a sample of the estimates of 5-mC, 5-hmC and 5-C of the previous oxBS+BS example as the true proportions, as shown in Figure 3.
+We will use a sample of the estimates of 5-mC, 5-hmC and uC of the previous oxBS+BS example as the true proportions, as shown in Figure 3.
 
 
 
@@ -389,7 +389,7 @@ pdf(file="True_parameters.pdf",width=15,height=5)
 par(mfrow =c(1,3))
 plot(density(results_exact$hmC[index,1]),main= "True 5-hmC",xlab="Proportions",xlim=c(0,1),ylim=c(0,10),cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
 plot(density(results_exact$mC[index,1]),main= "True 5-mC",xlab="Proportions",xlim=c(0,1),ylim=c(0,10),cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
-plot(density(results_exact$C[index,1]),main= "True 5-C",ylim=c(0,10),xlab="Proportions",xlim=c(0,1),cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
+plot(density(results_exact$C[index,1]),main= "True uC",ylim=c(0,10),xlab="Proportions",xlim=c(0,1),cex.axis=1.5,cex.main=1.5,cex.lab=1.5)
 dev.off()
 ```
 
