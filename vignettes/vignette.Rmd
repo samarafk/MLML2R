@@ -102,8 +102,8 @@ In this example the phenotype is not really relevant, since we have only one sam
 ```{r getPheno1,eval=FALSE}
 if (!file.exists("GSE63179/GSE63179_series_matrix.txt.gz"))
 download.file(
-  "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE63nnn/GSE63179/matrix/GSE63179_series_matrix.txt.gz",
-  "GSE63179/GSE63179_series_matrix.txt.gz")
+"https://ftp.ncbi.nlm.nih.gov/geo/series/GSE63nnn/GSE63179/matrix/GSE63179_series_matrix.txt.gz",
+"GSE63179/GSE63179_series_matrix.txt.gz")
 
 geoMat <- getGEO(filename="GSE63179/GSE63179_series_matrix.txt.gz",getGPL=FALSE)
 pD.all <- pData(geoMat)
@@ -220,14 +220,16 @@ We need to correctly identify the 24 DNA samples: 12 normoxic and 12 hypoxic non
 ```{r getPheno2,eval=FALSE}
 if (!file.exists("GSE71398/GSE71398_series_matrix.txt.gz"))
 download.file(
-  "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE71nnn/GSE71398/matrix/GSE71398_series_matrix.txt.gz",
-  "GSE71398/GSE71398_series_matrix.txt.gz")
+"https://ftp.ncbi.nlm.nih.gov/geo/series/GSE71nnn/GSE71398/matrix/GSE71398_series_matrix.txt.gz",
+"GSE71398/GSE71398_series_matrix.txt.gz")
 
 geoMat <- getGEO(filename="GSE71398/GSE71398_series_matrix.txt.gz",getGPL=FALSE)
 pD.all <- pData(geoMat)
 pD <- pD.all[, c("title", "geo_accession", "source_name_ch1")]
-pD$method <- sapply(pD$source_name_ch1,function(x) strsplit(as.character(x),",")[[1]][3]) 
-pD$group <- sapply(pD$source_name_ch1,function(x) strsplit(as.character(x),",")[[1]][2]) 
+pD$method <- sapply(pD$source_name_ch1,function(x) 
+  strsplit(as.character(x),",")[[1]][3]) 
+pD$group <- sapply(pD$source_name_ch1,function(x) 
+  strsplit(as.character(x),",")[[1]][2]) 
 pD$sample <- as.numeric(substr(as.character(pD$title),start=7,stop=8))
 ```
 
@@ -235,7 +237,8 @@ pD$sample <- as.numeric(substr(as.character(pD$title),start=7,stop=8))
 This phenotype data needs to be merged into the methylation data. The following commands guarantee we have the same replicate identifier in both datasets before merging.
 
 ```{r,eval=FALSE}
-sampleNames(rgSet) <- sapply(sampleNames(rgSet),function(x)   strsplit(x,"_")[[1]][1])
+sampleNames(rgSet) <- sapply(sampleNames(rgSet),function(x)   
+  strsplit(x,"_")[[1]][1])
 rownames(pD) <- as.character(pD$geo_accession)
 pD <- pD[sampleNames(rgSet),]
 pData(rgSet) <- as(pD,"DataFrame")
@@ -340,13 +343,16 @@ index <- sample(1:dim(results_exact$mC)[1],1000,replace=FALSE) # 1000 CpGs
 Coverage <- round(MethylatedBS+UnMethylatedBS)[index,1:2] # considering 2 samples
 
 temp1 <- data.frame(n=as.vector(Coverage),
-                    p_m=c(results_exact$mC[index,1],results_exact$mC[index,1]),
-                    p_h=c(results_exact$hmC[index,1],results_exact$hmC[index,1]))
+                    p_m=c(results_exact$mC[index,1],
+                          results_exact$mC[index,1]),
+                    p_h=c(results_exact$hmC[index,1],
+                          results_exact$hmC[index,1]))
 
 MethylatedBS_temp <- c()
 for (i in 1:dim(temp1)[1])
 {
-  MethylatedBS_temp[i] <- rbinom(n=1, size=temp1$n[i], prob=(temp1$p_m[i]+temp1$p_h[i]))
+  MethylatedBS_temp[i] <- rbinom(n=1, size=temp1$n[i], 
+                                 prob=(temp1$p_m[i]+temp1$p_h[i]))
 }
 
 
@@ -374,7 +380,8 @@ for (i in 1:dim(temp1)[1])
 UnMethylatedTAB_sim2 <- matrix(Coverage - MethylatedTAB_temp,ncol=2)
 MethylatedTAB_sim2 <- matrix(MethylatedTAB_temp,ncol=2)
 
-true_parameters_sim2 <- data.frame(p_m=results_exact$mC[index,1],p_h=results_exact$hmC[index,1])
+true_parameters_sim2 <- data.frame(p_m=results_exact$mC[index,1],
+                                   p_h=results_exact$hmC[index,1])
 true_parameters_sim2$p_u <- 1-true_parameters_sim2$p_m-true_parameters_sim2$p_h
 ```
 
@@ -411,15 +418,20 @@ When only two methods are available, the default option returns the exact constr
 
 ```{r}
 library(MLML2R)
- results_exactBO1 <- MLML(T.matrix = MethylatedBS_sim2 , U.matrix = UnMethylatedBS_sim2,
- L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2)
+ results_exactBO1 <- MLML(T.matrix = MethylatedBS_sim2 , 
+                          U.matrix = UnMethylatedBS_sim2,
+                          L.matrix = UnMethylatedOxBS_sim2, 
+                          M.matrix = MethylatedOxBS_sim2)
 ```
 
 Maximum likelihood estimate via EM-algorithm approach [@Qu:MLML] is obtained with the option \verb|iterative=TRUE|. In this case, the default (or user specified) \verb|tol| is considered in the iterative method.
 
 ```{r}
- results_emBO1 <- MLML(T.matrix = MethylatedBS_sim2 , U.matrix = UnMethylatedBS_sim2,
- L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,iterative=TRUE)
+ results_emBO1 <- MLML(T.matrix = MethylatedBS_sim2, 
+                       U.matrix = UnMethylatedBS_sim2,
+                       L.matrix = UnMethylatedOxBS_sim2, 
+                       M.matrix = MethylatedOxBS_sim2,
+                       iterative=TRUE)
 ```
 
  When only two methods are available, we highly recommend the default option \Rcode{iterative=FALSE} since the difference in the estimates obtained via EM and exact constrained is very small, but the former requires more computational effort:
@@ -431,10 +443,14 @@ Maximum likelihood estimate via EM-algorithm approach [@Qu:MLML] is obtained wit
 ```{r}
  library(microbenchmark)
  mbmBO1 = microbenchmark(
-    EXACT = MLML(T.matrix = MethylatedBS_sim2 , U.matrix = UnMethylatedBS_sim2,
-                 L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2),
-    EM =    MLML(T.matrix = MethylatedBS_sim2, U.matrix = UnMethylatedBS_sim2,
-                 L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
+    EXACT = MLML(T.matrix = MethylatedBS_sim2, 
+                 U.matrix = UnMethylatedBS_sim2,
+                 L.matrix = UnMethylatedOxBS_sim2, 
+                 M.matrix = MethylatedOxBS_sim2),
+    EM =    MLML(T.matrix = MethylatedBS_sim2, 
+                 U.matrix = UnMethylatedBS_sim2,
+                 L.matrix = UnMethylatedOxBS_sim2, 
+                 M.matrix = MethylatedOxBS_sim2,
                  iterative=TRUE),
     times=10)
  mbmBO1
@@ -455,14 +471,19 @@ all.equal(true_parameters_sim2$p_h,results_emBO1$hmC[,1],scale=1)
 
 Using PAVA:
 ```{r}
-results_exactBT1 <- MLML(T.matrix = MethylatedBS_sim2 , U.matrix = UnMethylatedBS_sim2,
-G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2)
+results_exactBT1 <- MLML(T.matrix = MethylatedBS_sim2, 
+                         U.matrix = UnMethylatedBS_sim2,
+                         G.matrix = UnMethylatedTAB_sim2, 
+                         H.matrix = MethylatedTAB_sim2)
 ```
 
 Using EM-algorithm:
 ```{r}
- results_emBT1 <- MLML(T.matrix = MethylatedBS_sim2 , U.matrix = UnMethylatedBS_sim2,
- G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2,iterative=TRUE)
+ results_emBT1 <- MLML(T.matrix = MethylatedBS_sim2, 
+                       U.matrix = UnMethylatedBS_sim2,
+                       G.matrix = UnMethylatedTAB_sim2, 
+                       H.matrix = MethylatedTAB_sim2,
+                       iterative=TRUE)
 ```
 
 Comparison between PAVA and EM:
@@ -473,10 +494,14 @@ Comparison between PAVA and EM:
 
 ```{r}
  mbmBT1 = microbenchmark(
-    EXACT = MLML(T.matrix = MethylatedBS_sim2, U.matrix = UnMethylatedBS_sim2,
-                 G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2),
-    EM =    MLML(T.matrix = MethylatedBS_sim2, U.matrix = UnMethylatedBS_sim2,
-                 G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2,
+    EXACT = MLML(T.matrix = MethylatedBS_sim2, 
+                 U.matrix = UnMethylatedBS_sim2,
+                 G.matrix = UnMethylatedTAB_sim2, 
+                 H.matrix = MethylatedTAB_sim2),
+    EM =    MLML(T.matrix = MethylatedBS_sim2, 
+                 U.matrix = UnMethylatedBS_sim2,
+                 G.matrix = UnMethylatedTAB_sim2, 
+                 H.matrix = MethylatedTAB_sim2,
                  iterative=TRUE),
     times=10)
  mbmBT1
@@ -497,14 +522,19 @@ all.equal(true_parameters_sim2$p_h,results_emBT1$hmC[,1],scale=1)
 
  Using PAVA:
 ```{r}
- results_exactOT1 <- MLML(L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
- G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2)
+ results_exactOT1 <- MLML(L.matrix = UnMethylatedOxBS_sim2, 
+                          M.matrix = MethylatedOxBS_sim2,
+                          G.matrix = UnMethylatedTAB_sim2, 
+                          H.matrix = MethylatedTAB_sim2)
 ```
 
  Using EM-algorithm:
 ```{r}
- results_emOT1 <- MLML(L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
- G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2,iterative=TRUE)
+ results_emOT1 <- MLML(L.matrix = UnMethylatedOxBS_sim2, 
+                       M.matrix = MethylatedOxBS_sim2,
+                       G.matrix = UnMethylatedTAB_sim2, 
+                       H.matrix = MethylatedTAB_sim2,
+                       iterative=TRUE)
 ```
 
 Comparison between PAVA and EM:
@@ -515,10 +545,14 @@ Comparison between PAVA and EM:
 
 ```{r}
  mbmOT1 = microbenchmark(
-    EXACT = MLML(L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
-                 G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2),
-    EM =    MLML(L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
-                 G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2,
+    EXACT = MLML(L.matrix = UnMethylatedOxBS_sim2, 
+                 M.matrix = MethylatedOxBS_sim2,
+                 G.matrix = UnMethylatedTAB_sim2, 
+                 H.matrix = MethylatedTAB_sim2),
+    EM =    MLML(L.matrix = UnMethylatedOxBS_sim2, 
+                 M.matrix = MethylatedOxBS_sim2,
+                 G.matrix = UnMethylatedTAB_sim2, 
+                 H.matrix = MethylatedTAB_sim2,
                  iterative=TRUE),
     times=10)
  mbmOT1
@@ -542,17 +576,23 @@ When data from the three methods are available, the default otion in the \Rfunct
 
 ```{r}
 
-results_exactBOT1 <- MLML(T.matrix = MethylatedBS_sim2 , U.matrix = UnMethylatedBS_sim2,
-L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
-G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2)
+results_exactBOT1 <- MLML(T.matrix = MethylatedBS_sim2, 
+                          U.matrix = UnMethylatedBS_sim2,
+                          L.matrix = UnMethylatedOxBS_sim2, 
+                          M.matrix = MethylatedOxBS_sim2,
+                          G.matrix = UnMethylatedTAB_sim2, 
+                          H.matrix = MethylatedTAB_sim2)
 ```
 
 Maximum likelihood estimate via EM-algorithm approach [@Qu:MLML] is obtained with the option \verb|iterative=TRUE|. In this case, the default (or user specified) \verb|tol| is considered in the iterative method.
 
 ```{r}
- results_emBOT1 <- MLML(T.matrix = MethylatedBS_sim2 , U.matrix = UnMethylatedBS_sim2,
- L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
- G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2,iterative=TRUE)
+ results_emBOT1 <- MLML(T.matrix = MethylatedBS_sim2, 
+                        U.matrix = UnMethylatedBS_sim2,
+                        L.matrix = UnMethylatedOxBS_sim2, 
+                        M.matrix = MethylatedOxBS_sim2,
+                        G.matrix = UnMethylatedTAB_sim2, 
+                        H.matrix = MethylatedTAB_sim2,iterative=TRUE)
 ```
 
 
@@ -565,12 +605,18 @@ We recommend the default option \Rcode{iterative=FALSE} since the difference in 
 
 ```{r computationCost}
  mbmBOT1 = microbenchmark(
-    EXACT = MLML(T.matrix = MethylatedBS_sim2, U.matrix = UnMethylatedBS_sim2,
-                 L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
-                 G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2),
-    EM =    MLML(T.matrix = MethylatedBS_sim2, U.matrix = UnMethylatedBS_sim2,
-                 L.matrix = UnMethylatedOxBS_sim2, M.matrix = MethylatedOxBS_sim2,
-                 G.matrix = UnMethylatedTAB_sim2, H.matrix = MethylatedTAB_sim2,
+    EXACT = MLML(T.matrix = MethylatedBS_sim2, 
+                 U.matrix = UnMethylatedBS_sim2,
+                 L.matrix = UnMethylatedOxBS_sim2, 
+                 M.matrix = MethylatedOxBS_sim2,
+                 G.matrix = UnMethylatedTAB_sim2, 
+                 H.matrix = MethylatedTAB_sim2),
+    EM =    MLML(T.matrix = MethylatedBS_sim2, 
+                 U.matrix = UnMethylatedBS_sim2,
+                 L.matrix = UnMethylatedOxBS_sim2, 
+                 M.matrix = MethylatedOxBS_sim2,
+                 G.matrix = UnMethylatedTAB_sim2, 
+                 H.matrix = MethylatedTAB_sim2,
                  iterative=TRUE),
     times=10)
  mbmBOT1
