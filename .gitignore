@@ -120,3 +120,13 @@ vignettes/data_processed1.rds
 data-raw/GSE71398/filelist.txt
 
 data-raw/GSE71398/GSE71398_RAW.tar
+
+*.txt
+
+data-raw/example4/BS-seq.Rds
+
+data-raw/example4/GSE70090/GSE70090_RAW.tar
+
+data-raw/example4/oxBS-seq.Rds
+
+data-raw/example4/MethOxy.rds
