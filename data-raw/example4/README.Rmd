@@ -335,17 +335,18 @@ ggplot(df,aes(x=y,y=z)) + geom_point(alpha = 0.3) + xlab("EM") +
 
 ## Comparison of processing times from different methods
 
-```{r,eval=FALSE,echo=TRUE}
+```{r,eval=TRUE,echo=TRUE}
 library(OxyBS)
 library(microbenchmark)
 library(MLML2R)
-signalBS <- MethylatedBS+UnMethylatedBS
-signalOxBS <- MethylatedOxBS+UnMethylatedOxBS
-betaBS <- MethylatedBS/signalBS
-betaOxBS <- MethylatedOxBS/signalOxBS
+source("testeMLML/MLML2R.R")
+signalBS <- MethylatedBS[aa,]+UnMethylatedBS[aa,]
+signalOxBS <- MethylatedOxBS[aa,]+UnMethylatedOxBS[aa,]
+betaBS <- MethylatedBS[aa,]/signalBS
+betaOxBS <- MethylatedOxBS[aa,]/signalOxBS
 
-nCpGs <- dim(UnMethylatedOxBS)[1]
-nSpecimens <- dim(UnMethylatedOxBS)[2]
+nCpGs <- dim(signalBS)[1]
+nSpecimens <- dim(signalBS)[2]
 MethOxy1 <- array(NA,dim=c(nCpGs,nSpecimens,3))
 dimnames(MethOxy1) <- list(
   rownames(MethylatedBS)[1:nCpGs],
@@ -359,17 +360,25 @@ MethOxy1[,i,] <-fitOxBS(betaBS[,i],betaOxBS[,i],signalBS[,i],signalOxBS[,i])
 }
 
 mbm = microbenchmark(
-  EXACT = MLML(T.matrix = MethylatedBS[aa,] , U.matrix = UnMethylatedBS[aa,], L.matrix = UnMethylatedOxBS[aa,], 
-               M.matrix = MethylatedOxBS[aa,]),
-  EM = MLML2(T.matrix = MethylatedBS[aa,] , U.matrix = UnMethylatedBS[aa,], L.matrix = UnMethylatedOxBS[aa,], 
-               M.matrix = MethylatedOxBS[aa,],iterative=TRUE),
-  oxBSMLE = oxBS.MLE(beta.BS=beta_BS,beta.oxBS=beta_OxBS,
-                     N.BS=N_BS,N.oxBS=N_OxBS),
+  EXACT = MLML(T.matrix = as.matrix(MethylatedBS[aa,]), 
+               U.matrix = as.matrix(UnMethylatedBS[aa,]), 
+               L.matrix = as.matrix(UnMethylatedOxBS[aa,]), 
+               M.matrix = as.matrix(MethylatedOxBS[aa,])),
+  EM = MLML2(T.matrix = as.matrix(MethylatedBS[aa,]), 
+             U.matrix = as.matrix(UnMethylatedBS[aa,]), 
+             L.matrix = as.matrix(UnMethylatedOxBS[aa,]), 
+             M.matrix = as.matrix(MethylatedOxBS[aa,]),
+             iterative=TRUE),
+  oxBSMLE = oxBS.MLE(beta.BS=beta_BS,
+                     beta.oxBS=beta_OxBS,
+                     N.BS=N_BS,
+                     N.oxBS=N_OxBS),
   oxyBS_res = oxyBS(),
   times=1)
+mbm
 ```
 
-```{r,eval=FALSE,echo=FALSE}
+```{r,eval=TRUE,echo=FALSE}
 save(mbm,file="mbm.rds")
 ```
 
