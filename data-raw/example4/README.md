@@ -260,6 +260,15 @@ MethOxy[,i,] <-fitOxBS(betaBS[,i],betaOxBS[,i],signalBS[,i],signalOxBS[,i])
 }
 ```
 
+```
+## 5000 
+## 5000 
+## 5000 
+## 5000 
+## 5000 
+## 5000
+```
+
 
 
 
@@ -269,22 +278,13 @@ Plot of the results (we have 4 replicates)
 
 
 ```r
-par(mfrow =c(1,3)) 
-plot(density(MethOxy[,1,3]),main= "5-hmC using OxyBS",xlab="")
-lines(density(MethOxy[,2,3]),col=2)
-lines(density(MethOxy[,3,3]),col=3)
-lines(density(MethOxy[,4,3]),col=4)
-
-plot(density(MethOxy[,1,2]),main= "5-mC using OxyBS",ylim=c(0,5),xlab="")
-lines(density(MethOxy[,2,2]),col=2)
-lines(density(MethOxy[,3,2]),col=3)
-lines(density(MethOxy[,4,2]),col=4)
-
-plot(density(MethOxy[,1,1]),main= "5-C using OxyBS",ylim=c(0,5),xlab="")
-lines(density(MethOxy[,2,1]),col=2)
-lines(density(MethOxy[,3,1]),col=3)
-lines(density(MethOxy[,4,1]),col=4)
+par(mfrow =c(1,3))
+densityPlot(MethOxy[,,3],main= "5-hmC estimates - OxyBS",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=c(rep("normal",3),rep("tumor",3)))
+densityPlot(MethOxy[,,2],main= "5-mC estimates - OxyBS",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=c(rep("normal",3),rep("tumor",3)))
+densityPlot(MethOxy[,,1],main= "uC estimates - OxyBS",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=c(rep("normal",3),rep("tumor",3)))
 ```
+
+<img src="README_files/figure-html/unnamed-chunk-17-1.png" style="display: block; margin: auto;" />
 
 ## `oxBS.MLE` estimates
 
@@ -312,6 +312,21 @@ oxBSMLEresults <- oxBS.MLE(beta.BS=beta_BS,beta.oxBS=beta_OxBS,
 
 
 
+```
+##             x            y          z            t             w
+## 1  0.00000000 2.106090e-06 0.00000000 1.034765e-05 -0.0114942529
+## 2  0.02898551 2.898568e-02 0.02898551 2.978900e-02  0.0289855072
+## 3  0.00000000 4.142422e-04 0.00000000 1.099311e-05 -0.0008944544
+## 4  0.00000000 8.917197e-09 0.00000000 2.948675e-06 -0.3738095238
+## 5  0.00000000 2.538461e-08 0.00000000 1.612550e-05 -0.0769230769
+## 6  0.04347826 4.347826e-02 0.04347826 4.346826e-02  0.0434782609
+## 7  0.00000000 0.000000e+00 0.00000000 6.666667e-06 -0.5000000000
+## 8  0.08333333 8.333337e-02 0.08333333 7.598255e-02  0.0833333333
+## 9  0.33974359 3.397436e-01 0.33974359 3.135257e-01  0.3397435897
+## 10 0.00000000 0.000000e+00 0.00000000 9.999900e-06  0.0000000000
+```
+
+<img src="README_files/figure-html/unnamed-chunk-19-1.png" style="display: block; margin: auto;" />
 
 
 

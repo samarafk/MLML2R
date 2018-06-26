@@ -158,7 +158,7 @@ devtools::install_github("samarafk/MLML2R")
 
 Getting the MLE estimates using PAVA:
 
-```{r}
+```{r,echo=TRUE,eval=TRUE}
 load("oxBS-seq.Rds")
 load("BS-seq.Rds")
 
@@ -207,13 +207,12 @@ densityPlot(results_exact$C,main= "uC estimates - PAVA",cex.axis=1.4,cex.main=1.
 
 The naive approach to obtain 5-hmC levels is $\beta_{BS} -  \beta_{OxBS}$. This approach results in negative values for the 5-hmC levels.
 
-```{r,echo=TRUE}
+```{r,echo=TRUE,eval=TRUE}
 beta_BS <- as.matrix(MethylatedBS[aa,]/(MethylatedBS[aa,]+UnMethylatedBS[aa,]))
 beta_OxBS <- as.matrix(MethylatedOxBS[aa,]/(MethylatedOxBS[aa,]+UnMethylatedOxBS[aa,]))
 hmC_naive <- beta_BS-beta_OxBS
 C_naive <- 1-beta_BS
 mC_naive <- beta_OxBS
-
 ```
 
 ```{r,fig.align='center',fig.height=3,fig.width=9,echo=FALSE}
@@ -230,7 +229,7 @@ For the specific case where only ox-BS and BS data are available, `OxyBS` packag
 
 
 
-```{r,echo=TRUE,eval=FALSE}
+```{r,echo=TRUE,eval=TRUE,warning=FALSE,message=FALSE}
 library(OxyBS)
 
 # Methylated signals from the BS and oxBS arrays
@@ -268,12 +267,12 @@ MethOxy[,i,] <-fitOxBS(betaBS[,i],betaOxBS[,i],signalBS[,i],signalOxBS[,i])
 }
 ```
 
-```{r,echo=FALSE,eval=FALSE}
+```{r,echo=FALSE,eval=TRUE}
 save(MethOxy,file="MethOxy.rds")
 ```
 
 
-```{r,echo=FALSE,eval=T}
+```{r,echo=FALSE,eval=TRUE}
 load("MethOxy.rds")
 ```
 
@@ -291,7 +290,7 @@ densityPlot(MethOxy[,,1],main= "uC estimates - OxyBS",cex.axis=1.4,cex.main=1.5,
 `ENmix` package had the function `oxBS.MLE` from [Xu *et al.* (2016)](https://www.ncbi.nlm.nih.gov/pubmed/27522082) that can be uses to obtain estimates for the specific case where ox-BS and BS data are available.
 
 
-```{r,eval=T,echo=TRUE,message=FALSE}
+```{r,eval=TRUE,echo=TRUE,message=FALSE}
 beta_BS <- as.matrix(MethylatedBS[aa,]/(MethylatedBS[aa,]+UnMethylatedBS[aa,]))
 beta_OxBS <- as.matrix(MethylatedOxBS[aa,]/(MethylatedOxBS[aa,]+UnMethylatedOxBS[aa,]))
 N_BS <- as.matrix(MethylatedBS[aa,]+UnMethylatedBS[aa,])
@@ -310,11 +309,14 @@ oxBSMLEresults <- oxBS.MLE(beta.BS=beta_BS,beta.oxBS=beta_OxBS,
 ## Comparison of 5-hmC estimates from different methods
 
 
-```{r,message=FALSE,warning=FALSE,fig.align='center',echo=FALSE,eval=T}
+```{r,message=FALSE,warning=FALSE,fig.align='center',echo=FALSE,eval=TRUE}
 library(GGally)
 # data for replicate 1 is shown
 df <- data.frame(x = as.numeric(results_exact$hmC[,1]),y=as.numeric(results_em1$hmC[,1]),
                  z = as.numeric(oxBSMLEresults[[2]][,1]),t=as.numeric(MethOxy[,1,3]),w=as.numeric(hmC_naive[,1]))
+
+df[1:10,]
+
 g <- ggpairs(df, title = " ",
    axisLabels = "show", columnLabels = c("MLML - exact","MLML - EM","oxBS.MLE","OxyBS","Naive"))
 g
