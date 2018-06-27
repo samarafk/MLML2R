@@ -162,12 +162,24 @@ Getting the MLE estimates using PAVA:
 load("oxBS-seq.Rds")
 load("BS-seq.Rds")
 
+bb <- which(MethylatedBS == 0 & MethylatedOxBS == 0 & UnMethylatedBS == 0 & UnMethylatedOxBS == 0,arr.ind = TRUE) # CpGs with 0 total counts in both conversion methods
+
+
 aa <- sample(1:dim(MethylatedBS)[1],5000)
+
+#aa <- -bb
+
+
+Tm = as.matrix(MethylatedBS[aa,])
+Um = as.matrix(UnMethylatedBS[aa,])
+Lm = as.matrix(UnMethylatedOxBS[aa,])
+Mm = as.matrix(MethylatedOxBS[aa,])
+
 library(MLML2R)
-results_exact <- MLML(T.matrix = as.matrix(MethylatedBS[aa,]), 
-                   U.matrix = as.matrix(UnMethylatedBS[aa,]), 
-                   L.matrix = as.matrix(UnMethylatedOxBS[aa,]), 
-                   M.matrix = as.matrix(MethylatedOxBS[aa,]))
+results_exact <- MLML(T.matrix = Tm, 
+                   U.matrix = Um, 
+                   L.matrix = Lm, 
+                   M.matrix = Mm)
 
 #results_em <- MLML(T.matrix = as.matrix(MethylatedBS[aa,]), 
 #                   U.matrix = as.matrix(UnMethylatedBS[aa,]), 
@@ -335,7 +347,7 @@ ggplot(df,aes(x=y,y=z)) + geom_point(alpha = 0.3) + xlab("EM") +
 
 ## Comparison of processing times from different methods
 
-```{r,eval=TRUE,echo=TRUE}
+```{r,eval=TRUE,echo=TRUE,message=FALSE,warning=FALSE}
 library(OxyBS)
 library(microbenchmark)
 library(MLML2R)
@@ -359,15 +371,17 @@ MethOxy1[,i,] <-fitOxBS(betaBS[,i],betaOxBS[,i],signalBS[,i],signalOxBS[,i])
   }
 }
 
+
+
 mbm = microbenchmark(
-  EXACT = MLML(T.matrix = as.matrix(MethylatedBS[aa,]), 
-               U.matrix = as.matrix(UnMethylatedBS[aa,]), 
-               L.matrix = as.matrix(UnMethylatedOxBS[aa,]), 
-               M.matrix = as.matrix(MethylatedOxBS[aa,])),
-  EM = MLML2(T.matrix = as.matrix(MethylatedBS[aa,]), 
-             U.matrix = as.matrix(UnMethylatedBS[aa,]), 
-             L.matrix = as.matrix(UnMethylatedOxBS[aa,]), 
-             M.matrix = as.matrix(MethylatedOxBS[aa,]),
+  EXACT = MLML2(T.matrix = Tm, 
+               U.matrix = Um, 
+               L.matrix = Lm, 
+               M.matrix = Mm),
+  EM = MLML2(T.matrix = Tm, 
+               U.matrix = Um, 
+               L.matrix = Lm, 
+               M.matrix = Mm,
              iterative=TRUE),
   oxBSMLE = oxBS.MLE(beta.BS=beta_BS,
                      beta.oxBS=beta_OxBS,
@@ -375,7 +389,6 @@ mbm = microbenchmark(
                      N.oxBS=N_OxBS),
   oxyBS_res = oxyBS(),
   times=1)
-mbm
 ```
 
 ```{r,eval=TRUE,echo=FALSE}
@@ -385,3 +398,13 @@ save(mbm,file="mbm.rds")
 ```{r,eval=F,echo=FALSE}
 load("mbm.rds")
 ```
+
+
+
+
+| Method    |      Function           |  Package | Time (Seconds)                             |
+|-----------|:-----------------------:|---------:|-------------------------------------------:|
+| Iterative |  `MLML` (`iterative=TRUE`) | `MLML2R` | `r round(mbm$time[mbm$expr=="EM"]/(1e9),3)`  |
+| Iterative |  `fitOxBS`              | `OxyBS`  | `r round(mbm$time[mbm$expr=="oxyBS_res"]/(1e9),3)`  |
+| Closed-form analytical |  `MLML` (`iterative=FALSE`) | `MLML2R` | `r round(mbm$time[mbm$expr=="EXACT"]/(1e9),3)`  |
+| Closed-form analytical |  `oxBS.MLE` | `ENmix` | `r round(mbm$time[mbm$expr=="oxBSMLE"]/(1e9),3)`  |

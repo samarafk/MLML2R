@@ -130,3 +130,5 @@ data-raw/example4/GSE70090/GSE70090_RAW.tar
 data-raw/example4/oxBS-seq.Rds
 
 data-raw/example4/MethOxy.rds
+
+data-raw/example4/mbm.rds

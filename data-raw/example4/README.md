@@ -165,11 +165,18 @@ load("oxBS-seq.Rds")
 load("BS-seq.Rds")
 
 aa <- sample(1:dim(MethylatedBS)[1],5000)
+
+
+Tm = as.matrix(MethylatedBS[aa,])
+Um = as.matrix(UnMethylatedBS[aa,])
+Lm = as.matrix(UnMethylatedOxBS[aa,])
+Mm = as.matrix(MethylatedOxBS[aa,])
+
 library(MLML2R)
-results_exact <- MLML(T.matrix = as.matrix(MethylatedBS[aa,]), 
-                   U.matrix = as.matrix(UnMethylatedBS[aa,]), 
-                   L.matrix = as.matrix(UnMethylatedOxBS[aa,]), 
-                   M.matrix = as.matrix(MethylatedOxBS[aa,]))
+results_exact <- MLML(T.matrix = Tm, 
+                   U.matrix = Um, 
+                   L.matrix = Lm, 
+                   M.matrix = Mm)
 
 #results_em <- MLML(T.matrix = as.matrix(MethylatedBS[aa,]), 
 #                   U.matrix = as.matrix(UnMethylatedBS[aa,]), 
@@ -313,17 +320,17 @@ oxBSMLEresults <- oxBS.MLE(beta.BS=beta_BS,beta.oxBS=beta_OxBS,
 
 
 ```
-##             x            y          z            t             w
-## 1  0.00000000 2.106090e-06 0.00000000 1.034765e-05 -0.0114942529
-## 2  0.02898551 2.898568e-02 0.02898551 2.978900e-02  0.0289855072
-## 3  0.00000000 4.142422e-04 0.00000000 1.099311e-05 -0.0008944544
-## 4  0.00000000 8.917197e-09 0.00000000 2.948675e-06 -0.3738095238
-## 5  0.00000000 2.538461e-08 0.00000000 1.612550e-05 -0.0769230769
-## 6  0.04347826 4.347826e-02 0.04347826 4.346826e-02  0.0434782609
-## 7  0.00000000 0.000000e+00 0.00000000 6.666667e-06 -0.5000000000
-## 8  0.08333333 8.333337e-02 0.08333333 7.598255e-02  0.0833333333
-## 9  0.33974359 3.397436e-01 0.33974359 3.135257e-01  0.3397435897
-## 10 0.00000000 0.000000e+00 0.00000000 9.999900e-06  0.0000000000
+##             x            y          z            t           w
+## 1          NA           NA         NA          NaN         NaN
+## 2  0.00000000 3.571427e-08 0.00000000 1.144974e-05 -0.13725490
+## 3  0.00000000 8.222189e-08 0.00000000 1.176584e-05 -0.02100840
+## 4  0.00000000 3.857139e-08 0.00000000 1.698971e-05 -0.04117647
+## 5  0.00000000 2.142857e-08 0.00000000 1.507480e-05 -0.11666667
+## 6  0.26666667 2.666667e-01 0.26666667 2.530626e-01  0.26666667
+## 7  0.00000000 0.000000e+00 0.00000000 9.999900e-06  0.00000000
+## 8          NA           NA         NA          NaN         NaN
+## 9  0.03673469 3.673480e-02 0.03673469 3.974478e-02  0.03673469
+## 10 0.23529412 2.352941e-01 0.23529412 2.352841e-01  0.23529412
 ```
 
 <img src="README_files/figure-html/unnamed-chunk-19-1.png" style="display: block; margin: auto;" />
@@ -338,13 +345,14 @@ oxBSMLEresults <- oxBS.MLE(beta.BS=beta_BS,beta.oxBS=beta_OxBS,
 library(OxyBS)
 library(microbenchmark)
 library(MLML2R)
-signalBS <- MethylatedBS+UnMethylatedBS
-signalOxBS <- MethylatedOxBS+UnMethylatedOxBS
-betaBS <- MethylatedBS/signalBS
-betaOxBS <- MethylatedOxBS/signalOxBS
+source("testeMLML/MLML2R.R")
+signalBS <- MethylatedBS[aa,]+UnMethylatedBS[aa,]
+signalOxBS <- MethylatedOxBS[aa,]+UnMethylatedOxBS[aa,]
+betaBS <- MethylatedBS[aa,]/signalBS
+betaOxBS <- MethylatedOxBS[aa,]/signalOxBS
 
-nCpGs <- dim(UnMethylatedOxBS)[1]
-nSpecimens <- dim(UnMethylatedOxBS)[2]
+nCpGs <- dim(signalBS)[1]
+nSpecimens <- dim(signalBS)[2]
 MethOxy1 <- array(NA,dim=c(nCpGs,nSpecimens,3))
 dimnames(MethOxy1) <- list(
   rownames(MethylatedBS)[1:nCpGs],
@@ -357,17 +365,63 @@ MethOxy1[,i,] <-fitOxBS(betaBS[,i],betaOxBS[,i],signalBS[,i],signalOxBS[,i])
   }
 }
 
+
+
 mbm = microbenchmark(
-  EXACT = MLML(T.matrix = MethylatedBS[aa,] , U.matrix = UnMethylatedBS[aa,], L.matrix = UnMethylatedOxBS[aa,], 
-               M.matrix = MethylatedOxBS[aa,]),
-  EM = MLML2(T.matrix = MethylatedBS[aa,] , U.matrix = UnMethylatedBS[aa,], L.matrix = UnMethylatedOxBS[aa,], 
-               M.matrix = MethylatedOxBS[aa,],iterative=TRUE),
-  oxBSMLE = oxBS.MLE(beta.BS=beta_BS,beta.oxBS=beta_OxBS,
-                     N.BS=N_BS,N.oxBS=N_OxBS),
+  EXACT = MLML2(T.matrix = Tm, 
+               U.matrix = Um, 
+               L.matrix = Lm, 
+               M.matrix = Mm),
+  EM = MLML2(T.matrix = Tm, 
+               U.matrix = Um, 
+               L.matrix = Lm, 
+               M.matrix = Mm,
+             iterative=TRUE),
+  oxBSMLE = oxBS.MLE(beta.BS=beta_BS,
+                     beta.oxBS=beta_OxBS,
+                     N.BS=N_BS,
+                     N.oxBS=N_OxBS),
   oxyBS_res = oxyBS(),
   times=1)
+```
+
+```
+## 5000 
+## 5000 
+## 5000 
+## 5000 
+## 5000 
+## 5000
+```
+
+```r
+mbm
+```
+
+```
+## Unit: milliseconds
+##       expr         min          lq        mean      median          uq
+##      EXACT    25.11299    25.11299    25.11299    25.11299    25.11299
+##         EM  2442.44303  2442.44303  2442.44303  2442.44303  2442.44303
+##    oxBSMLE    53.79866    53.79866    53.79866    53.79866    53.79866
+##  oxyBS_res 20633.95373 20633.95373 20633.95373 20633.95373 20633.95373
+##          max neval
+##     25.11299     1
+##   2442.44303     1
+##     53.79866     1
+##  20633.95373     1
 ```
 
 
 
 
+
+
+
+
+| Method    |      Function           |  Package | Time (Seconds)                             |
+|-----------|:-----------------------:|---------:|-------------------------------------------:|
+| Iterative |  `MLML` (`iterative=TRUE`) | `MLML2R` | 2.442  |
+| Iterative |  `fitOxBS`              | `OxyBS`  | 20.634  |
+| Closed-form analytical |  `MLML` (`iterative=FALSE`) | `MLML2R` | 0.025  |
+| Closed-form analytical |  `oxBS.MLE` | `ENmix` | 0.054  |
