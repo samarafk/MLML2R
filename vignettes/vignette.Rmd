@@ -62,7 +62,7 @@ Value | Description
 
 # Worked examples
 
-## Publicly available data: oxBS and BS methods
+## Publicly available array data: oxBS and BS methods
 
 We will use the dataset from @10.1371/journal.pone.0118202, which consists of eight DNA samples from the same DNA source treated with oxBS-BS and hybridized to the Infinium 450K array.
 
@@ -189,7 +189,7 @@ dev.off()
 knitr::include_graphics("Real1_estimates.pdf") 
 ```
 
-## Publicly available data: TAB and BS methods
+## Publicly available array data: TAB and BS methods
 
 We will use the dataset from @Thienpont2016, which consists of 24 DNA samples treated with TAB-BS and hybridized to the Infinium 450K array from newly diagnosed and untreated non-small-cell lung cancer patients (12 normoxic and 12 hypoxic tumours). The dataset is deposited under GEO accession number [GSE71398](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE71398).
 
