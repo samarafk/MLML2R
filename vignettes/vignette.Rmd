@@ -33,7 +33,7 @@ BiocStyle::markdown()
 
 In a given CpG site from a single cell we will either have a C or a T after DNA processing conversion methods, with a different interpretation for each of the available methods. This is a binary outcome and we assume a Binomial model and use the maximum likelihood estimation method to obtain the estimates for hydroxymethylation and methylation proportions.
 
-T reads are referred to as converted cytosine and C reads are referred to as unconverted cytosine. Conventionally, T counts are also referred to as unmethylated counts, and C counts as methylated counts. In case of Infinium Methylation arrays, we have intensities representing the methylated (M) and unmethylated (U) channels that are proportional to the number of unconverted and converted cytosines (C and T, respectively). The most used summary from these experiments is  the proportion $\beta=\frac{M}{M+U}$, commonly referred to as \textit{beta-value}, which reflects the methylation level at a CpG site. Naïvely using the difference between betas from BS and oxBS as an estimate of 5-hmC (hydroxymethylated cytosine), and the difference between betas from BS and TAB as an estimate of 5-mC (methylated cytosine) can many times provide negative proportions and instances where the sum of uC (unmodified cytosine), 5-mC and 5-hmC proportions is greater than one due to measurement errors.
+T reads are referred to as converted cytosine and C reads are referred to as unconverted cytosine. Conventionally, T counts are also referred to as unmethylated counts, and C counts as methylated counts. In case of Infinium Methylation arrays, we have intensities representing the methylated (M) and unmethylated (U) channels that are proportional to the number of unconverted and converted cytosines (C and T, respectively). The most used summary from these experiments is  the proportion $\beta=\frac{M}{M+U}$, commonly referred to as \textit{beta-value}, which reflects the methylation level at a CpG site. Naïvely using the difference between betas from BS and oxBS as an estimate of 5-hmC (hydroxymethylated cytosine), and the difference between betas from BS and TAB as an estimate of 5-mC (methylated cytosine) can many times provide negative proportions and instances where the sum of uC (unmodified cytosine), 5-mC and 5-hmC proportions is greater than one due.
 
 \CRANpkg{MLML2R} package allows the user to jointly estimate hydroxymethylation and methylation consistently and efficiently.
 
@@ -130,7 +130,7 @@ pData(rgSet) <- as(pD,"DataFrame")
 rgSet
 ```
 
-The \Robject{rgSet} object is a class called \Rclass{RGChannelSet} used for two color data (green and a red channel). The input in the \Rfunction{MLML} funcion is  \Rclass{MethylSet}, which contains the methylated and unmethylated signals. The most basic way to construct a \Rclass{MethylSet} is  using the function \Rfunction{preprocessRaw}. Here we chose the function \Rfunction{preprocessNoob} [@noob] for background correction and construction of the \Rclass{MethylSet}.
+The \Robject{rgSet} is an object from \Rclass{RGChannelSet} class used for two color data (green and red channels). The input in the \Rfunction{MLML} function are matrices with methylated and unmethylated information from each conversion method. We can use the \Rclass{MethylSet} class, which contains the methylated and unmethylated signals. The most basic way to construct a \Rclass{MethylSet} is  using the function \Rfunction{preprocessRaw}. Here we chose the function \Rfunction{preprocessNoob} [@noob] for background correction, dye bias normalization and construction of the \Rclass{MethylSet}.
 
 
 ```{r Preprocess1,eval=FALSE}
@@ -252,7 +252,7 @@ rgSet
 ```
 
 
-The input in the \Rfunction{MLML} funcion is  \Rclass{MethylSet}, which contains the methylated and unmethylated signals. We chose the function \Rfunction{preprocessNoob} [@noob] for background correction and construction of the \Rclass{MethylSet}.
+The input in the \Rfunction{MLML} function accepts as input a \Rclass{MethylSet}, which contains the methylated and unmethylated signals. We chose the function \Rfunction{preprocessNoob} [@noob] for background correction, dye-bias normalization and construction of the \Rclass{MethylSet}.
 
 
 ```{r preprocess2,eval=FALSE}
