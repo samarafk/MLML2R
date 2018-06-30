@@ -97,7 +97,13 @@ MethylatedBS    <- do.call(cbind,lapply(files,function(fn) fread(fn,data.table=F
 
 TotalBS    <- do.call(cbind,lapply(files,function(fn) fread(fn,data.table=FALSE,select=c("total_read_count"))))
 
+TotalBS[TotalBS==0] <- NA # 0 total counts = no information
+
+MethylatedBS[is.na(TotalBS)] <- NA # 0 total counts = no information
+
 UnMethylatedBS <- TotalBS - MethylatedBS
+
+
 
 tmp <- fread(files[1], data.table=FALSE, select=c("chr","position"))
 CpG <- paste(tmp[,1],tmp[,2],sep="-")
@@ -117,6 +123,10 @@ files <- phenoLung$file[phenoLung$convMeth=="oxBS"]
 MethylatedOxBS    <- do.call(cbind,lapply(files,function(fn) fread(fn,data.table=FALSE,select=c("methylated_read_count"))))
 
 TotalOxBS    <- do.call(cbind,lapply(files,function(fn) fread(fn,data.table=FALSE,select=c("total_read_count"))))
+
+TotalOxBS[TotalOxBS==0] <- NA 
+
+MethylatedOxBS[is.na(TotalOxBS)] <- NA 
 
 UnMethylatedOxBS <- TotalOxBS - MethylatedOxBS
 
