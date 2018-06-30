@@ -14,13 +14,6 @@ output:
 
 This document presents an example of the usage of the `MLML2R` package for R.
 
-Install the R package using the following commands on the R console:
-
-```{r,echo=TRUE,eval=FALSE}
-install.packages("devtools")
-devtools::install_github("samarafk/MLML2R")
-library(MLML2R)
-```
 
 The function `MLML` provides maximum likelihood estimates (MLE) for 5-hmC and 5-mC levels using data from any combination of two of the methods: BS-seq, TAB-seq or oxBS-seq. The function also provides MLE when combining these three methods.
 
@@ -45,8 +38,7 @@ source("http://www.bioconductor.org/biocLite.R")
 biocLite(c("GEOquery"))
 ```
 
-It is usually best practice to start the analysis from the raw data, which in the case of the 450K array is a .IDAT file.
-The raw files from \cite{10.1371/journal.pone.0118202} are deposited in GEO and can be downloaded by doing:
+The processed data are deposited in GEO and can be downloaded by doing:
 ```{r,echo=FALSE}
 if(! file.exists("GSE70090/GSE70090_RAW.tar"))
 {
@@ -65,7 +57,7 @@ head(list.files("GSE70090/data", pattern = "data"))
 ```
 
 
-Decompress the compressed IDAT files:
+Decompress the compressed files:
 
 ```{r,message=FALSE,warning=FALSE,eval=FALSE}
 dataFiles <- list.files("GSE70090/data", pattern = "txt.gz$", full = TRUE)
@@ -107,11 +99,11 @@ TotalBS    <- do.call(cbind,lapply(files,function(fn) fread(fn,data.table=FALSE,
 
 UnMethylatedBS <- TotalBS - MethylatedBS
 
-#tmp <- fread(files[1], data.table=FALSE, select=c("chr","position"))
-#CpG <- paste(tmp[,1],tmp[,2],sep="-")
+tmp <- fread(files[1], data.table=FALSE, select=c("chr","position"))
+CpG <- paste(tmp[,1],tmp[,2],sep="-")
 
-#rownames(MethylatedBS) <- CpG 
-#rownames(UnMethylatedBS) <- CpG
+rownames(MethylatedBS) <- CpG 
+rownames(UnMethylatedBS) <- CpG
 
 colnames(MethylatedBS) <- phenoLung$id[phenoLung$convMeth=="BS"]
 colnames(UnMethylatedBS) <- phenoLung$id[phenoLung$convMeth=="BS"]
@@ -128,11 +120,8 @@ TotalOxBS    <- do.call(cbind,lapply(files,function(fn) fread(fn,data.table=FALS
 
 UnMethylatedOxBS <- TotalOxBS - MethylatedOxBS
 
-#tmp <- fread(files[1], data.table=FALSE, select=c("chr","position"))
-#CpG <- paste(tmp[,1],tmp[,2],sep="-")
-
-#rownames(MethylatedoxBS) <- CpG 
-#rownames(UnMethylatedoxBS) <- CpG
+rownames(MethylatedOxBS) <- CpG 
+rownames(UnMethylatedOxBS) <- CpG
 
 colnames(MethylatedOxBS) <- phenoLung$id[phenoLung$convMeth=="oxBS"]
 colnames(UnMethylatedOxBS) <- phenoLung$id[phenoLung$convMeth=="oxBS"]
@@ -147,57 +136,137 @@ save(MethylatedOxBS,UnMethylatedOxBS,file="oxBS-seq.Rds")
 
 After all the preprocessing procedures, we now can use the `MLML2R` package to obtain the maximum likelihood estimates for the 5-hmC and 5-mC levels.
 
-Install the R package using the following commands on the R console:
-
-
-```{r,eval=FALSE}
-install.packages("devtools")
-devtools::install_github("samarafk/MLML2R")
-```
-
 
 Getting the MLE estimates using PAVA:
 
-```{r,echo=TRUE,eval=TRUE}
+```{r,echo=TRUE,eval=FALSE}
 load("oxBS-seq.Rds")
 load("BS-seq.Rds")
 
-bb <- which(MethylatedBS == 0 & MethylatedOxBS == 0 & UnMethylatedBS == 0 & UnMethylatedOxBS == 0,arr.ind = TRUE) # CpGs with 0 total counts in both conversion methods
-
-
-aa <- sample(1:dim(MethylatedBS)[1],5000)
-
-#aa <- -bb
-
+tmp1 <- apply(MethylatedBS+UnMethylatedBS,1,function(x) min(x,na.rm=TRUE))
+tmp2 <- apply(MethylatedOxBS+UnMethylatedOxBS,1,function(x) min(x,na.rm=TRUE))
+aa <- which(tmp1>9 & tmp2>9) # only CpGs with at least 10 total read counts in BS and in oxBS across samples
+set.seed(2018)
+aa <- sample(aa,1000000)
 
 Tm = as.matrix(MethylatedBS[aa,])
 Um = as.matrix(UnMethylatedBS[aa,])
 Lm = as.matrix(UnMethylatedOxBS[aa,])
 Mm = as.matrix(MethylatedOxBS[aa,])
 
+rm(MethylatedBS,UnMethylatedBS,UnMethylatedOxBS,MethylatedOxBS,tmp1,tmp2)
+
+gc()
+
 library(MLML2R)
+
+start <- Sys.time()
 results_exact <- MLML(T.matrix = Tm, 
-                   U.matrix = Um, 
-                   L.matrix = Lm, 
-                   M.matrix = Mm)
+        U.matrix = Um, 
+        L.matrix = Lm, 
+        M.matrix = Mm)
+print(Sys.time()-start) # 3.442421 secs
+save(results_exact,file="results_exact.rds")
 
-#results_em <- MLML(T.matrix = as.matrix(MethylatedBS[aa,]), 
-#                   U.matrix = as.matrix(UnMethylatedBS[aa,]), 
-#                   L.matrix = as.matrix(UnMethylatedOxBS[aa,]), 
-#                   M.matrix = as.matrix(MethylatedOxBS[aa,]),
-#                   iterative=TRUE)
+# library(foreach)
+# library(doParallel)
+# 
+# # Set-up parallel backend to use all but one available processors
+# no_cores <- detectCores()-1
+# 
+# cl <- makeCluster(no_cores)
+# 
+# registerDoParallel(cl)
+# nCpGs <- dim(Tm)[1]
+# nSpecimens <- dim(Tm)[2]
+# 
+# # Create container for the MLML results
+# results_exact <- array(NA,dim=c(nCpGs,nSpecimens,4))
+# dimnames(results_exact) <- list(
+#   rownames(Tm)[1:nCpGs],
+#   colnames(Tm)[1:nSpecimens], c("mC","hmC","C","methods"))
+# 
+# start <- Sys.time()
+# results_exact[,1:nSpecimens,] <- foreach(i = 1:nSpecimens, .combine=cbind,
+#                                          .multicombine=TRUE,
+#                                          .packages='MLML2R') %dopar% {
+#   MLML(T.matrix = Tm[,i], 
+#         U.matrix = Um[,i], 
+#         L.matrix = Lm[,i], 
+#         M.matrix = Mm[,i])
+# }
+# print(Sys.time()-start) # 
+# stopCluster(cl)
+# save(results_exact,file="results_exact.rds")
+```
 
 
-source("testeMLML/MLML2R.R")
+Getting the MLE estimates using EM-algorithm:
 
-results_exact1 <- MLML2(T.matrix = as.matrix(MethylatedBS[aa,]), 
-                   U.matrix = as.matrix(UnMethylatedBS[aa,]),                                    L.matrix = as.matrix(UnMethylatedOxBS[aa,]), 
-                   M.matrix = as.matrix(MethylatedOxBS[aa,]))
 
-results_em1 <- MLML2(T.matrix = as.matrix(MethylatedBS[aa,]), 
-                   U.matrix = as.matrix(UnMethylatedBS[aa,]),                                    L.matrix = as.matrix(UnMethylatedOxBS[aa,]), 
-                   M.matrix = as.matrix(MethylatedOxBS[aa,]),
-                   iterative=TRUE)
+```{r,eval=FALSE}
+load("oxBS-seq.Rds")
+load("BS-seq.Rds")
+
+tmp1 <- apply(MethylatedBS+UnMethylatedBS,1,function(x) min(x,na.rm=TRUE))
+tmp2 <- apply(MethylatedOxBS+UnMethylatedOxBS,1,function(x) min(x,na.rm=TRUE))
+aa <- which(tmp1>9 & tmp2>9) # only CpGs with at least 10 total read counts in BS and in oxBS across samples
+set.seed(2018)
+aa <- sample(aa,1000000)
+
+Tm = as.matrix(MethylatedBS[aa,])
+Um = as.matrix(UnMethylatedBS[aa,])
+Lm = as.matrix(UnMethylatedOxBS[aa,])
+Mm = as.matrix(MethylatedOxBS[aa,])
+
+rm(MethylatedBS,UnMethylatedBS,UnMethylatedOxBS,MethylatedOxBS,tmp1,tmp2)
+
+gc()
+
+library(MLML2R)
+
+start <- Sys.time()
+results_em <- MLML(T.matrix = Tm, 
+        U.matrix = Um, 
+        L.matrix = Lm, 
+        M.matrix = Mm,
+        iterative = TRUE)
+print(Sys.time()-start) # 7.671951 mins
+
+save(results_em,file="results_em.rds")
+                                        
+                                        
+# library(foreach)
+# library(doParallel)
+# 
+# # Set-up parallel backend to use all but one available processors
+# no_cores <- detectCores()-1
+# 
+# cl <- makeCluster(no_cores)
+# registerDoParallel(cl)
+# 
+# # Create container for the MLML results
+# results_em <- array(NA,dim=c(nCpGs,nSpecimens,4))
+# dimnames(results_em) <- list(
+#   rownames(Tm)[1:nCpGs],
+#   colnames(Tm)[1:nSpecimens], c("mC","hmC","C","methods"))
+# 
+# start <- Sys.time()
+# 
+# results_em[,1:nSpecimens,] <- foreach(i = 1:nSpecimens, .combine=cbind,
+#                                       .packages='MLML2R') %dopar% {
+#   MLML(T.matrix = Tm[,i], 
+#         U.matrix = Um[,i], 
+#         L.matrix = Lm[,i], 
+#         M.matrix = Mm[,i],
+#         iterative = TRUE)
+# }
+# 
+# print(Sys.time()-start) # 
+# stopCluster(cl)
+# 
+# 
+# save(results_em,file="results_em.rds")
 ```
 
 
@@ -206,12 +275,19 @@ Plot of the results (we have 6 samples)
 ```{r,fig.align='center',fig.height=3,fig.width=9,echo=FALSE,warning=FALSE,message=FALSE}
 library(minfi)
 par(mfrow =c(1,3))
-densityPlot(results_exact$hmC,main= "5-hmC estimates - PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=c(rep("normal",3),rep("tumor",3)))
-densityPlot(results_exact$mC,main= "5-mC estimates - PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=c(rep("normal",3),rep("tumor",3)))
-densityPlot(results_exact$C,main= "uC estimates - PAVA",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=c(rep("normal",3),rep("tumor",3)))
+densityPlot(results_exact$hmC,main= "5-hmC estimates - MLML",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=c(rep("normal",3),rep("tumor",3)))
+densityPlot(results_exact$mC,main= "5-mC estimates - MLML",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=c(rep("normal",3),rep("tumor",3)))
+densityPlot(results_exact$C,main= "uC estimates - MLML",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=c(rep("normal",3),rep("tumor",3)))
 ```
 
 
+```{r,fig.align='center',fig.height=3,fig.width=9,echo=FALSE,warning=FALSE,message=FALSE}
+library(minfi)
+par(mfrow =c(1,3))
+densityPlot(results_em1$hmC,main= "5-hmC estimates - MLML (EM)",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=c(rep("normal",3),rep("tumor",3)))
+densityPlot(results_em1$mC,main= "5-mC estimates - MLML (EM)",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=c(rep("normal",3),rep("tumor",3)))
+densityPlot(results_em1$C,main= "uC estimates - MLML (EM)",cex.axis=1.4,cex.main=1.5,cex.lab=1.4,xlab="Proportion",sampGroups=c(rep("normal",3),rep("tumor",3)))
+```
 
 # Other methods to obtain the estimates
 
@@ -220,11 +296,23 @@ densityPlot(results_exact$C,main= "uC estimates - PAVA",cex.axis=1.4,cex.main=1.
 The naive approach to obtain 5-hmC levels is $\beta_{BS} -  \beta_{OxBS}$. This approach results in negative values for the 5-hmC levels.
 
 ```{r,echo=TRUE,eval=TRUE}
+load("oxBS-seq.Rds")
+load("BS-seq.Rds")
+
+tmp1 <- apply(MethylatedBS+UnMethylatedBS,1,function(x) min(x,na.rm=TRUE))
+tmp2 <- apply(MethylatedOxBS+UnMethylatedOxBS,1,function(x) min(x,na.rm=TRUE))
+aa <- which(tmp1>9 & tmp2>9) # only CpGs with at least 10 total read counts in BS and in oxBS across samples
+set.seed(2018)
+aa <- sample(aa,1000000)
+
+
 beta_BS <- as.matrix(MethylatedBS[aa,]/(MethylatedBS[aa,]+UnMethylatedBS[aa,]))
 beta_OxBS <- as.matrix(MethylatedOxBS[aa,]/(MethylatedOxBS[aa,]+UnMethylatedOxBS[aa,]))
 hmC_naive <- beta_BS-beta_OxBS
 C_naive <- 1-beta_BS
 mC_naive <- beta_OxBS
+
+save(hmC_naive,mC_naive,C_naive,file="results_naive.rds")
 ```
 
 ```{r,fig.align='center',fig.height=3,fig.width=9,echo=FALSE}
@@ -241,15 +329,15 @@ For the specific case where only ox-BS and BS data are available, `OxyBS` packag
 
 
 
-```{r,echo=TRUE,eval=TRUE,warning=FALSE,message=FALSE}
+```{r,echo=TRUE,eval=FALSE,warning=FALSE,message=FALSE}
 library(OxyBS)
 
 # Methylated signals from the BS and oxBS arrays
-methBS <- MethylatedBS[aa,]
-methOxBS <- MethylatedOxBS[aa,]
+methBS <- MethylatedBS
+methOxBS <- MethylatedOxBS
 # Unmethylated signals from the BS and oxBS arrays
-unmethBS <- UnMethylatedBS[aa,]
-unmethOxBS <- UnMethylatedOxBS[aa,]
+unmethBS <- UnMethylatedBS
+unmethOxBS <- UnMethylatedOxBS
 
 # Calculate Total Signals
 signalBS <- methBS+unmethBS
@@ -274,12 +362,31 @@ dimnames(MethOxy) <- list(
   colnames(methBS)[1:nSpecimens], c("C","5mC","5hmC"))
 
 # Process results (one array at a time, slow)
-for(i in 1:nSpecimens){
-MethOxy[,i,] <-fitOxBS(betaBS[,i],betaOxBS[,i],signalBS[,i],signalOxBS[,i])
+#for(i in 1:nSpecimens){
+#MethOxy[,i,] <-fitOxBS(betaBS[,i],betaOxBS[,i],signalBS[,i],signalOxBS[,i])
+#}
+
+
+library(foreach)
+library(doParallel)
+
+# Set-up parallel backend to use all but one available processors
+no_cores <- detectCores()
+cl <- makeCluster(no_cores)
+registerDoParallel(cl)
+
+start <- Sys.time()
+
+MethOxy[,1:nSpecimens,] <- foreach(i = 1:nSpecimens, .combine=cbind, .packages='OxyBS') %dopar% {
+  fitOxBS(betaBS[,i],betaOxBS[,i],signalBS[,i],signalOxBS[,i])
 }
+
+print(Sys.time()-start) # 
+stopCluster(cl)
+
 ```
 
-```{r,echo=FALSE,eval=TRUE}
+```{r,echo=FALSE,eval=FALSE}
 save(MethOxy,file="MethOxy.rds")
 ```
 
@@ -347,7 +454,7 @@ ggplot(df,aes(x=y,y=z)) + geom_point(alpha = 0.3) + xlab("EM") +
 
 ## Comparison of processing times from different methods
 
-```{r,eval=TRUE,echo=TRUE,message=FALSE,warning=FALSE}
+```{r,eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
 library(OxyBS)
 library(microbenchmark)
 library(MLML2R)
@@ -391,7 +498,7 @@ mbm = microbenchmark(
   times=1)
 ```
 
-```{r,eval=TRUE,echo=FALSE}
+```{r,eval=FALSE,echo=FALSE}
 save(mbm,file="mbm.rds")
 ```
 

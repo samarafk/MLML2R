@@ -132,3 +132,9 @@ data-raw/example4/oxBS-seq.Rds
 data-raw/example4/MethOxy.rds
 
 data-raw/example4/mbm.rds
+
+data-raw/example4/results_em.rds
+
+data-raw/example4/results_exact.rds
+
+data-raw/example4/results_naive.rds
