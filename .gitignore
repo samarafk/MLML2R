@@ -138,3 +138,9 @@ data-raw/example4/results_em.rds
 data-raw/example4/results_exact.rds
 
 data-raw/example4/results_naive.rds
+
+data-raw/example4/results_naive1.rds
+
+data-raw/example4/results_em1.rds
+
+data-raw/example4/results_exact1.rds

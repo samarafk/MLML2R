@@ -176,7 +176,7 @@ results_exact <- MLML(T.matrix = Tm,
         L.matrix = Lm, 
         M.matrix = Mm)
 print(Sys.time()-start) # 3.442421 secs
-save(results_exact,file="results_exact.rds")
+save(results_exact,file="results_exact1.rds")
 
 # library(foreach)
 # library(doParallel)
@@ -243,7 +243,18 @@ results_em <- MLML(T.matrix = Tm,
         iterative = TRUE)
 print(Sys.time()-start) # 7.671951 mins
 
-save(results_em,file="results_em.rds")
+save(results_em,file="results_em1.rds")
+
+source("testeMLML/MLML2R.R")
+start <- Sys.time()
+results_em <- MLML2(T.matrix = Tm, 
+        U.matrix = Um, 
+        L.matrix = Lm, 
+        M.matrix = Mm,
+        iterative = TRUE)
+print(Sys.time()-start) # 7.671951 mins
+
+save(results_em,file="results_em1.rds")
                                         
                                         
 # library(foreach)
@@ -322,7 +333,7 @@ hmC_naive <- beta_BS-beta_OxBS
 C_naive <- 1-beta_BS
 mC_naive <- beta_OxBS
 
-save(hmC_naive,mC_naive,C_naive,file="results_naive.rds")
+save(hmC_naive,mC_naive,C_naive,file="results_naive1.rds")
 ```
 
 ```{r,fig.align='center',fig.height=3,fig.width=9,echo=FALSE}
