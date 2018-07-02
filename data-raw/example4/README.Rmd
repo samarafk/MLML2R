@@ -104,7 +104,7 @@ MethylatedBS[is.na(TotalBS)] <- NA # 0 total counts = no information
 UnMethylatedBS <- TotalBS - MethylatedBS
 
 
-
+# make sure rownames are the same across files
 tmp <- fread(files[1], data.table=FALSE, select=c("chr","position"))
 CpG <- paste(tmp[,1],tmp[,2],sep="-")
 
@@ -113,9 +113,6 @@ rownames(UnMethylatedBS) <- CpG
 
 colnames(MethylatedBS) <- phenoLung$id[phenoLung$convMeth=="BS"]
 colnames(UnMethylatedBS) <- phenoLung$id[phenoLung$convMeth=="BS"]
-
-save(MethylatedBS,UnMethylatedBS,file="BS-seq.Rds")
-
 
 # oxBS
 files <- phenoLung$file[phenoLung$convMeth=="oxBS"]
@@ -136,6 +133,16 @@ rownames(UnMethylatedOxBS) <- CpG
 colnames(MethylatedOxBS) <- phenoLung$id[phenoLung$convMeth=="oxBS"]
 colnames(UnMethylatedOxBS) <- phenoLung$id[phenoLung$convMeth=="oxBS"]
 
+tmp1 <- which(rowMeans(is.na(MethylatedBS+UnMethylatedBS)) == 1) # CpGs with missing data for BS across all samples
+tmp2 <- which(rowMeans(is.na(MethylatedOxBS+UnMethylatedOxBS)) == 1) # CpGs with missing data for oxBS across all samples
+tmp <- union(tmp1,tmp2) # CpGs with missing data for all BS samples or all oxBS samples
+
+MethylatedBS <- MethylatedBS[-tmp,]
+UnMethylatedBS <- UnMethylatedBS[-tmp,]
+MethylatedOxBS <- MethylatedOxBS[-tmp,]
+UnMethylatedOxBS <- UnMethylatedOxBS[-tmp,]
+
+save(MethylatedBS,UnMethylatedBS,file="BS-seq.Rds")
 save(MethylatedOxBS,UnMethylatedOxBS,file="oxBS-seq.Rds")
 ```
 
@@ -153,9 +160,15 @@ Getting the MLE estimates using PAVA:
 load("oxBS-seq.Rds")
 load("BS-seq.Rds")
 
-tmp1 <- apply(MethylatedBS+UnMethylatedBS,1,function(x) min(x,na.rm=TRUE))
-tmp2 <- apply(MethylatedOxBS+UnMethylatedOxBS,1,function(x) min(x,na.rm=TRUE))
-aa <- which(tmp1>9 & tmp2>9) # only CpGs with at least 10 total read counts in BS and in oxBS across samples
+
+library(matrixStats) 
+
+TotalBS <- as.matrix(MethylatedBS+UnMethylatedBS)
+tmp1 <- rowMins(TotalBS,na.rm=TRUE)
+TotalOxBS <- as.matrix(MethylatedOxBS+UnMethylatedOxBS)
+tmp2 <- rowMins(TotalOxBS,na.rm=TRUE)
+aa <- which(tmp1>9 & tmp2>9)
+              
 set.seed(2018)
 aa <- sample(aa,1000000)
 
@@ -164,7 +177,7 @@ Um = as.matrix(UnMethylatedBS[aa,])
 Lm = as.matrix(UnMethylatedOxBS[aa,])
 Mm = as.matrix(MethylatedOxBS[aa,])
 
-rm(MethylatedBS,UnMethylatedBS,UnMethylatedOxBS,MethylatedOxBS,tmp1,tmp2)
+rm(MethylatedBS,UnMethylatedBS,UnMethylatedOxBS,MethylatedOxBS)
 
 gc()
 
@@ -175,7 +188,7 @@ results_exact <- MLML(T.matrix = Tm,
         U.matrix = Um, 
         L.matrix = Lm, 
         M.matrix = Mm)
-print(Sys.time()-start) # 3.442421 secs
+print(Sys.time()-start) # 3.505538 secs
 save(results_exact,file="results_exact1.rds")
 
 # library(foreach)
@@ -218,9 +231,14 @@ Getting the MLE estimates using EM-algorithm:
 load("oxBS-seq.Rds")
 load("BS-seq.Rds")
 
-tmp1 <- apply(MethylatedBS+UnMethylatedBS,1,function(x) min(x,na.rm=TRUE))
-tmp2 <- apply(MethylatedOxBS+UnMethylatedOxBS,1,function(x) min(x,na.rm=TRUE))
-aa <- which(tmp1>9 & tmp2>9) # only CpGs with at least 10 total read counts in BS and in oxBS across samples
+library(matrixStats) 
+
+TotalBS <- as.matrix(MethylatedBS+UnMethylatedBS)
+tmp1 <- rowMins(TotalBS,na.rm=TRUE)
+TotalOxBS <- as.matrix(MethylatedOxBS+UnMethylatedOxBS)
+tmp2 <- rowMins(TotalOxBS,na.rm=TRUE)
+aa <- which(tmp1>9 & tmp2>9)
+              
 set.seed(2018)
 aa <- sample(aa,1000000)
 
@@ -229,21 +247,21 @@ Um = as.matrix(UnMethylatedBS[aa,])
 Lm = as.matrix(UnMethylatedOxBS[aa,])
 Mm = as.matrix(MethylatedOxBS[aa,])
 
-rm(MethylatedBS,UnMethylatedBS,UnMethylatedOxBS,MethylatedOxBS,tmp1,tmp2)
+rm(MethylatedBS,UnMethylatedBS,UnMethylatedOxBS,MethylatedOxBS)
 
 gc()
 
-library(MLML2R)
+# library(MLML2R)
+# 
+# start <- Sys.time()
+# results_em <- MLML(T.matrix = Tm, 
+#         U.matrix = Um, 
+#         L.matrix = Lm, 
+#         M.matrix = Mm,
+#         iterative = TRUE)
+# print(Sys.time()-start) # 7.671951 mins
 
-start <- Sys.time()
-results_em <- MLML(T.matrix = Tm, 
-        U.matrix = Um, 
-        L.matrix = Lm, 
-        M.matrix = Mm,
-        iterative = TRUE)
-print(Sys.time()-start) # 7.671951 mins
-
-save(results_em,file="results_em1.rds")
+# save(results_em,file="results_em1.rds")
 
 source("testeMLML/MLML2R.R")
 start <- Sys.time()
@@ -252,7 +270,7 @@ results_em <- MLML2(T.matrix = Tm,
         L.matrix = Lm, 
         M.matrix = Mm,
         iterative = TRUE)
-print(Sys.time()-start) # 7.671951 mins
+print(Sys.time()-start) # 9.888107 mins
 
 save(results_em,file="results_em1.rds")
                                         
@@ -320,9 +338,14 @@ The naive approach to obtain 5-hmC levels is $\beta_{BS} -  \beta_{OxBS}$. This 
 load("oxBS-seq.Rds")
 load("BS-seq.Rds")
 
-tmp1 <- apply(MethylatedBS+UnMethylatedBS,1,function(x) min(x,na.rm=TRUE))
-tmp2 <- apply(MethylatedOxBS+UnMethylatedOxBS,1,function(x) min(x,na.rm=TRUE))
-aa <- which(tmp1>9 & tmp2>9) # only CpGs with at least 10 total read counts in BS and in oxBS across samples
+library(matrixStats) 
+
+TotalBS <- as.matrix(MethylatedBS+UnMethylatedBS)
+tmp1 <- rowMins(TotalBS,na.rm=TRUE)
+TotalOxBS <- as.matrix(MethylatedOxBS+UnMethylatedOxBS)
+tmp2 <- rowMins(TotalOxBS,na.rm=TRUE)
+aa <- which(tmp1>9 & tmp2>9)
+              
 set.seed(2018)
 aa <- sample(aa,1000000)
 
