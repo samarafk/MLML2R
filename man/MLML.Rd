@@ -4,8 +4,9 @@
 \alias{MLML}
 \title{MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.}
 \usage{
-MLML(G.matrix = NULL, H.matrix = NULL, L.matrix = NULL, M.matrix = NULL,
-  T.matrix = NULL, U.matrix = NULL, iterative = FALSE, tol = 1e-05)
+MLML(G.matrix = NULL, H.matrix = NULL, L.matrix = NULL,
+  M.matrix = NULL, T.matrix = NULL, U.matrix = NULL,
+  iterative = FALSE, tol = 1e-05)
 }
 \arguments{
 \item{G.matrix}{Unmethylated channel (Converted cytosines/ T counts) from TAB-conversion (reflecting 5-C + 5-mC).}
@@ -90,6 +91,25 @@ results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_si
 L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
 G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
 
+
+# Example of datasets with zero counts and missing values:
+
+MethylatedBS_sim[1,1] <- 0
+MethylatedOxBS_sim[1,1] <- 0
+MethylatedTAB_sim[1,1] <- 0
+UnMethylatedBS_sim[1,1] <- 0
+UnMethylatedOxBS_sim[1,1] <- 0
+UnMethylatedTAB_sim[1,1] <- 0
+
+MethylatedBS_sim[2,2] <- NA
+MethylatedOxBS_sim[2,2] <- NA
+MethylatedTAB_sim[2,2] <- NA
+UnMethylatedBS_sim[2,2] <- NA
+UnMethylatedOxBS_sim[2,2] <- NA
+UnMethylatedTAB_sim[2,2] <- NA
+
+
+
 }
 \references{
 Qu J, Zhou M, Song Q, Hong EE, Smith AD. MLML: consistent simultaneous estimates of
@@ -97,13 +117,13 @@ Qu J, Zhou M, Song Q, Hong EE, Smith AD. MLML: consistent simultaneous estimates
   doi:10.1093/bioinformatics/btt459.
 
   Ayer M, Brunk HD, Ewing GM, Reid WT, Silverman E. An Empirical Distribution Function
-  for Sampling with Incomplete Information. Ann. Math. Statist. 1955, 26(4), 641–647.
+  for Sampling with Incomplete Information. Ann. Math. Statist. 1955, 26(4), 641-647.
   doi:10.1214/aoms/1177728423.
 
   Zongli Xu, Jack A. Taylor, Yuet-Kin Leung, Shuk-Mei Ho, Liang Niu;
   oxBS-MLE: an efficient method to estimate 5-methylcytosine and 5-hydroxymethylcytosine
   in paired bisulfite and oxidative bisulfite treated DNA,
-  Bioinformatics, 2016;32(23):3667–3669.
+  Bioinformatics, 2016;32(23):3667-3669.
 }
 \author{
 Samara Kiihl samara@ime.unicamp.br;

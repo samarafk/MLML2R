@@ -62,25 +62,25 @@
 #' results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
 #' L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
 #' G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
-#' 
-#' 
-#' Example of datasets with zero counts and missing values:
-#' 
+#'
+#'
+#' # Example of datasets with zero counts and missing values:
+#'
 #' MethylatedBS_sim[1,1] <- 0
 #' MethylatedOxBS_sim[1,1] <- 0
 #' MethylatedTAB_sim[1,1] <- 0
 #' UnMethylatedBS_sim[1,1] <- 0
 #' UnMethylatedOxBS_sim[1,1] <- 0
 #' UnMethylatedTAB_sim[1,1] <- 0
-#' 
+#'
 #' MethylatedBS_sim[2,2] <- NA
 #' MethylatedOxBS_sim[2,2] <- NA
 #' MethylatedTAB_sim[2,2] <- NA
 #' UnMethylatedBS_sim[2,2] <- NA
 #' UnMethylatedOxBS_sim[2,2] <- NA
 #' UnMethylatedTAB_sim[2,2] <- NA
-#' 
-#' 
+#'
+#'
 #'
 #' @author
 #' Samara Kiihl samara@ime.unicamp.br;
@@ -142,29 +142,29 @@ MLML <- function(G.matrix       = NULL,
   } else {
     round(T.matrix)
   }
-  
+
   four <-function(x1,x2,x3,x4){
     return(identical(x1,x2) & identical(x1,x3) & identical(x1,x4))
   }
-  
+
   six <-function(x1,x2,x3,x4,x5,x6){
     return(identical(x1,x2) & identical(x1,x3) & identical(x1,x4) &
              identical(x1,x5) & identical(x1,x6))
   }
-  
+
   pme <- 0.3
   phe <- 0.5
   diff <- 1
-  
+
   pm <- matrix()
   ph <- matrix()
-  
+
   if (!is.null(G.matrix) &
       !is.null(H.matrix) &
       !is.null(L.matrix) & !is.null(M.matrix) &
       !is.null(T.matrix) & !is.null(U.matrix)) {
     ######### 3 methods
-    
+
     if (!six(rownames(L.matrix),rownames(M.matrix),rownames(T.matrix),
              rownames(U.matrix),rownames(G.matrix),rownames(H.matrix)))
     {stop("Row names are inconsistent")}
@@ -178,7 +178,7 @@ MLML <- function(G.matrix       = NULL,
         pm0 <- pm <- ifelse( (m == 0 | h == 0 | u == 0 | g==0 | l==0 | t==0)  & (m/(m+l) + h/(h+g) + u/(u+t)) >= 1, pm0/ss , pm0)
         ph0 <- ph <- ifelse( (m == 0 | h == 0 | u == 0 | g==0 | l==0 | t==0)  & (m/(m+l) + h/(h+g) + u/(u+t)) >= 1, ph0/ss , ph0)
         pc0 <- pc <- ifelse( (m == 0 | h == 0 | u == 0 | g==0 | l==0 | t==0)  & (m/(m+l) + h/(h+g) + u/(u+t)) >= 1, pc0/ss , pc0)
-        
+
         Vm <- pm*(1-pm)/(m+l)
         Vh <- ph*(1-ph)/(h+g)
         Vc <- pc*(1-pc)/(u+t)
@@ -193,7 +193,7 @@ MLML <- function(G.matrix       = NULL,
         pme <- pm0 + lam*Vm
         phe <- ph0 + lam*Vh
       } else {
-        
+
         while (diff > tol) {
           pme_ant <- pme
           phe_ant <- phe
@@ -207,18 +207,18 @@ MLML <- function(G.matrix       = NULL,
         }
       }
     }
-    
+
     methods <-
       c("TAB-conversion +  oxBS-conversion + standard BS-conversion")
-    
-    
+
+
   } else if (is.null(G.matrix) || is.null(H.matrix)) {
     ##### oxBS-seq + BS-seq
-    
+
     if (!four(rownames(L.matrix),rownames(M.matrix),rownames(T.matrix),
               rownames(U.matrix))){stop("Row names are inconsistent")}
     else {
-      
+
       if (!iterative)
       {
         pme = ifelse(t / (t + u) >= m / (m + l) , m / (m + l) ,
@@ -235,21 +235,21 @@ MLML <- function(G.matrix       = NULL,
           diff_phe <- abs(max(phe - phe_ant,na.rm=TRUE))
           diff <- abs(max(diff_pme, diff_phe,na.rm=TRUE))
         }
-        
+
       }
-      
+
     }
-    
+
     methods <- c("oxBS-conversion + standard BS-conversion")
-    
-    
+
+
   } else if (is.null(M.matrix) || is.null(L.matrix)) {
     ##### TAB-seq + BS-seq
-    
+
     if (!four(rownames(G.matrix),rownames(H.matrix),rownames(T.matrix),
               rownames(U.matrix))){stop("Row names are inconsistent")}
     else {
-      
+
       if (!iterative)
       {
         pme = ifelse(t / (t + u) >= h / (g + h) , t / (t + u) - h / (g + h) , 0)
@@ -261,7 +261,7 @@ MLML <- function(G.matrix       = NULL,
           phe_ant <- phe
           k <- t * (pme / (pme + phe + 1e-08))
           j <- g * (pme / (1 - phe + 1e-08))
-          
+
           pme <- (j + k) / (g + h + t + u)
           phe <- ((h - k + t) / (g + h + t + u - k - j)) * (1 - pme)
           diff_pme <- abs(max(pme - pme_ant,na.rm=TRUE))
@@ -271,15 +271,15 @@ MLML <- function(G.matrix       = NULL,
       }
     }
     methods <- c("TAB-conversion + standard BS-conversion")
-    
-    
+
+
   } else {
     ##### TAB-seq + Ox-seq
-    
+
     if (!four(rownames(G.matrix),rownames(H.matrix),rownames(M.matrix),
               rownames(L.matrix))){stop("Row names are inconsistent")}
     else {
-      
+
       if (!iterative)
       {
         pme = ifelse(m/(m+l)<=g/(h+g),m/(m+l),(g+m)/(g+h+m+l))
@@ -289,7 +289,7 @@ MLML <- function(G.matrix       = NULL,
           pme_ant <- pme
           phe_ant <- phe
           j <- g * (pme / (1 - phe + 1e-08))
-          
+
           pme <- (j + m) / (g + h + m + l)
           phe <- ((h) / (h + g - j)) * (1 - pme)
           diff_pme <- abs(max(pme - pme_ant,na.rm=TRUE))
@@ -299,24 +299,24 @@ MLML <- function(G.matrix       = NULL,
       }
     }
     methods <- c("TAB-conversion +  oxBS-conversion")
-    
-    
-    
+
+
+
   }
-  
+
   pm <- pme
   ph <- phe
-  
+
   pm[is.nan(pm)] <- NA
   ph[is.nan(ph)] <- NA
-  
+
   pu <- (1 - pm - ph)
-  
+
   proportions <- list()
   proportions$mC <- pm
   proportions$hmC <- ph
   proportions$C <- pu
   proportions$methods <- methods
-  
+
   return(proportions)
 }
