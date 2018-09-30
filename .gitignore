@@ -144,3 +144,4 @@ data-raw/example4/results_naive1.rds
 data-raw/example4/results_em1.rds
 
 data-raw/example4/results_exact1.rds
+.DS_Store
