@@ -200,7 +200,7 @@ library(MLML2R)
 library(minfi)
 library(GEOquery)
 library(IlluminaHumanMethylation450kmanifest)
-library(wateRmelon)
+library(ENmix)
 ```
 
 Obtaining the data:
