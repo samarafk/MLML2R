@@ -274,7 +274,7 @@ TABindex <- which(pD$method=="TABchip")
 
 ## BMIQ
 anno <- getAnnotation(MSet.noob)
-beta.b <- getBeta(MSet.noob, type = "Illumina")
+beta.b <- getBeta(MSet.noob)
 design.v <- as.vector(anno$Type)
 design.v[design.v == "I"] = 1
 design.v[design.v == "II"] = 2
