@@ -262,7 +262,7 @@ rgSet
 ```
 
 
-The input in the \Rfunction{MLML} function accepts as input a \Rclass{MethylSet}, which contains the methylated and unmethylated signals. We chose the function \Rfunction{preprocessNoob} [@noob] for background correction, dye-bias normalization and construction of the \Rclass{MethylSet}. In addition, the function \Rfunction{BMIQ} [@Teschendorff2012] from the package \Biocpkg{wateRmelon} [@Pidsley2013] was used for probe-type bias correction. A discussion of this preprocessing procedure is presented by @Liu2016.
+The input in the \Rfunction{MLML} function accepts as input a \Rclass{MethylSet}, which contains the methylated and unmethylated signals. We chose the function \Rfunction{preprocessNoob} [@noob] for background correction, dye-bias normalization and construction of the \Rclass{MethylSet}. In addition, the function \Rfunction{rcp} [@rcp] from the package \Biocpkg{ENmix} [@pmid26384415] was used for probe-type bias correction. 
 
 
 ```{r preprocess2,eval=FALSE}
@@ -272,19 +272,11 @@ MSet.noob<- preprocessNoob(rgSet)
 BSindex <- which(pD$method=="BSchip")
 TABindex <- which(pD$method=="TABchip")  
 
-## BMIQ
-anno <- getAnnotation(MSet.noob)
-beta.b <- getBeta(MSet.noob)
-design.v <- as.vector(anno$Type)
-design.v[design.v == "I"] = 1
-design.v[design.v == "II"] = 2
-design.v <- as.numeric(design.v)
-coln = colnames(beta.b)
+## RCP
+nbeta <- rcp(MSet.noob)
 
-beta.noob.bmiq <- BMIQ(beta.b, design.v = design.v,sampleID = 1:48)
-
-beta_BS <- beta.noob.bmiq$nbeta[,BSindex]
-beta_TAB <- beta.noob.bmiq$nbeta[,TABindex]
+beta_BS <- nbeta[,BSindex]
+beta_TAB <- nbeta[,TABindex]
 
 # Total Signal = methylated + unmethylated
 TotalBS <- getMeth(MSet.noob[,BSindex]) + getUnmeth(MSet.noob[,BSindex])
