@@ -1,4 +1,4 @@
-#' Methylated counts from BS
+#' C (unconverted) counts from BS
 #'
 #' A matrix of simulated counts corresponding to 100 CpGs and 2 samples.
 #' True proportions of methylation, hydroxymethylation and unmethylated
@@ -8,9 +8,9 @@
 #'
 #' 100 x 2 matrix (CpGs in the rows and  Samples in the columns).
 #'
-"MethylatedBS_sim"
+"C_BS_sim"
 
-#' Methylated counts from oxBS
+#' C (unconverted) counts from oxBS
 #'
 #' A matrix of simulated counts corresponding to 100 CpGs and 2 samples.
 #' True proportions of methylation, hydroxymethylation and unmethylated
@@ -20,9 +20,9 @@
 #'
 #' 100 x 2 matrix (CpGs in the rows and  Samples in the columns).
 #'
-"MethylatedOxBS_sim"
+"C_OxBS_sim"
 
-#' Methylated counts from TAB
+#' C (unconverted) counts from TAB
 #'
 #' A matrix of simulated counts corresponding to 100 CpGs and 2 samples.
 #' True proportions of methylation, hydroxymethylation and unmethylated
@@ -32,9 +32,9 @@
 #'
 #' 100 x 2 matrix (CpGs in the rows and  Samples in the columns).
 #'
-"MethylatedTAB_sim"
+"C_TAB_sim"
 
-#' Unmethylated counts from oxBS
+#' T (converted) counts from oxBS
 #'
 #' A matrix of simulated counts corresponding to 100 CpGs and 2 samples.
 #' True proportions of methylation, hydroxymethylation and unmethylated
@@ -44,9 +44,9 @@
 #'
 #' 100 x 2 matrix (CpGs in the rows and  Samples in the columns).
 #'
-"UnMethylatedOxBS_sim"
+"T_OxBS_sim"
 
-#' Unmethylated counts from BS
+#' T (converted) counts from BS
 #'
 #' A matrix of simulated counts corresponding to 100 CpGs and 2 samples.
 #' True proportions of methylation, hydroxymethylation and unmethylated
@@ -56,9 +56,9 @@
 #'
 #' 100 x 2 matrix (CpGs in the rows and  Samples in the columns).
 #'
-"UnMethylatedBS_sim"
+"T_BS_sim"
 
-#' Unmethylated counts from TAB
+#' T (converted) counts from TAB
 #'
 #' A matrix of simulated counts corresponding to 100 CpGs and 2 samples.
 #' True proportions of methylation, hydroxymethylation and unmethylated
@@ -68,4 +68,4 @@
 #'
 #' 100 x 2 matrix (CpGs in the rows and  Samples in the columns).
 #'
-"UnMethylatedTAB_sim"
+"T_TAB_sim"

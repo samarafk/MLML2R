@@ -9,17 +9,17 @@ MLML(G.matrix = NULL, H.matrix = NULL, L.matrix = NULL,
   iterative = FALSE, tol = 1e-05)
 }
 \arguments{
-\item{G.matrix}{Unmethylated channel (Converted cytosines/ T counts) from TAB-conversion (reflecting 5-C + 5-mC).}
+\item{G.matrix}{Converted cytosines (T counts or U channel) from TAB-conversion (reflecting 5-C + 5-mC).}
 
-\item{H.matrix}{Methylated channel (Unconverted cytosines/ C counts) from TAB-conversion(reflecting True 5-hmC).}
+\item{H.matrix}{Unconverted cytosines (C counts or M channel) from TAB-conversion(reflecting True 5-hmC).}
 
-\item{L.matrix}{Unmethylated channel (Converted cytosines/ T counts) from oxBS-conversion (reflecting 5-C + 5-hmC).}
+\item{L.matrix}{Converted cytosines (T counts or U channel) from oxBS-conversion (reflecting 5-C + 5-hmC).}
 
-\item{M.matrix}{Methylated channel (Unconverted cytosines/ C counts) from oxBS-conversion (reflecting True 5-mC).}
+\item{M.matrix}{Unconverted cytosines (C counts or M channel) from oxBS-conversion (reflecting True 5-mC).}
 
-\item{T.matrix}{Methylated channel (Unconverted cytosines/ C counts) from standard BS-conversion (reflecting 5-mC+5-hmC).}
+\item{T.matrix}{Unconverted cytosines (C counts or M channel) from standard BS-conversion (reflecting 5-mC+5-hmC).}
 
-\item{U.matrix}{Unmethylated channel (Converted cytosines/ T counts) from standard BS-conversion (True 5-C).}
+\item{U.matrix}{Converted cytosines (T counts or U channel) from standard BS-conversion (True 5-C).}
 
 \item{iterative}{logical. If iterative=TRUE EM-algorithm is used. For the combination of
 two methods, iterative=FALSE returns the exact constrained MLE using the
@@ -50,63 +50,63 @@ The function returns MLE estimates (binomial model assumed).
 }
 \examples{
 # load the example datasets from BS, oxBS and TAB methods
-data(MethylatedBS_sim)
-data(MethylatedOxBS_sim)
-data(UnMethylatedBS_sim)
-data(UnMethylatedOxBS_sim)
-data(MethylatedTAB_sim)
-data(UnMethylatedTAB_sim)
+data(C_BS_sim)
+data(C_OxBS_sim)
+data(T_BS_sim)
+data(T_OxBS_sim)
+data(C_TAB_sim)
+data(T_TAB_sim)
 
 # obtain MLE via EM-algorithm for BS+oxBS:
-results_em <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
-L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,iterative=TRUE)
+results_em <- MLML(T.matrix = C_BS_sim , U.matrix = T_BS_sim,
+L.matrix = T_OxBS_sim, M.matrix = C_OxBS_sim,iterative=TRUE)
 
 # obtain constrained exact MLE for BS+oxBS:
-results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
-L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim)
+results_exact <- MLML(T.matrix = C_BS_sim , U.matrix = T_BS_sim,
+L.matrix = T_OxBS_sim, M.matrix = C_OxBS_sim)
 
 # obtain MLE via EM-algorithm for BS+TAB:
-results_em <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
-G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE)
+results_em <- MLML(T.matrix = C_BS_sim , U.matrix = T_BS_sim,
+G.matrix = T_TAB_sim, H.matrix = C_TAB_sim,iterative=TRUE)
 
 # obtain constrained exact MLE for BS+TAB:
-results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
-G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
+results_exact <- MLML(T.matrix = C_BS_sim , U.matrix = T_BS_sim,
+G.matrix = T_TAB_sim, H.matrix = C_TAB_sim)
 
 # obtain MLE via EM-algorithm for oxBS+TAB:
-results_em <- MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
-G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE)
+results_em <- MLML(L.matrix = T_OxBS_sim, M.matrix = C_OxBS_sim,
+G.matrix = T_TAB_sim, H.matrix = C_TAB_sim,iterative=TRUE)
 
 # obtain constrained exact MLE for oxBS+TAB:
-results_exact <- MLML(L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
-G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
+results_exact <- MLML(L.matrix = T_OxBS_sim, M.matrix = C_OxBS_sim,
+G.matrix = T_TAB_sim, H.matrix = C_TAB_sim)
 
 # obtain MLE via EM-algorithm for BS+oxBS+TAB:
-results_em <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
-L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
-G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim,iterative=TRUE)
+results_em <- MLML(T.matrix = C_BS_sim , U.matrix = T_BS_sim,
+L.matrix = T_OxBS_sim, M.matrix = C_OxBS_sim,
+G.matrix = T_TAB_sim, H.matrix = C_TAB_sim,iterative=TRUE)
 
 #' # obtain MLE via Lagrange multiplier for BS+oxBS+TAB:
-results_exact <- MLML(T.matrix = MethylatedBS_sim , U.matrix = UnMethylatedBS_sim,
-L.matrix = UnMethylatedOxBS_sim, M.matrix = MethylatedOxBS_sim,
-G.matrix = UnMethylatedTAB_sim, H.matrix = MethylatedTAB_sim)
+results_exact <- MLML(T.matrix = C_BS_sim , U.matrix = T_BS_sim,
+L.matrix = T_OxBS_sim, M.matrix = C_OxBS_sim,
+G.matrix = T_TAB_sim, H.matrix = C_TAB_sim)
 
 
 # Example of datasets with zero counts and missing values:
 
-MethylatedBS_sim[1,1] <- 0
-MethylatedOxBS_sim[1,1] <- 0
-MethylatedTAB_sim[1,1] <- 0
-UnMethylatedBS_sim[1,1] <- 0
-UnMethylatedOxBS_sim[1,1] <- 0
-UnMethylatedTAB_sim[1,1] <- 0
+C_BS_sim[1,1] <- 0
+C_OxBS_sim[1,1] <- 0
+C_TAB_sim[1,1] <- 0
+T_BS_sim[1,1] <- 0
+T_OxBS_sim[1,1] <- 0
+T_TAB_sim[1,1] <- 0
 
-MethylatedBS_sim[2,2] <- NA
-MethylatedOxBS_sim[2,2] <- NA
-MethylatedTAB_sim[2,2] <- NA
-UnMethylatedBS_sim[2,2] <- NA
-UnMethylatedOxBS_sim[2,2] <- NA
-UnMethylatedTAB_sim[2,2] <- NA
+C_BS_sim[2,2] <- NA
+C_OxBS_sim[2,2] <- NA
+C_TAB_sim[2,2] <- NA
+T_BS_sim[2,2] <- NA
+T_OxBS_sim[2,2] <- NA
+T_TAB_sim[2,2] <- NA
 
 
 

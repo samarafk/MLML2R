@@ -1,7 +1,7 @@
 Package: MLML2R
 Type: Package
 Title: Maximum Likelihood Estimation of DNA Methylation and Hydroxymethylation Proportions
-Version: 0.3.0
+Version: 0.3.1
 Author: Samara Kiihl [aut, cre],
   Maria Jose Martinez-Garrido [aut],
   Arce Domingo-Relloso [aut],
