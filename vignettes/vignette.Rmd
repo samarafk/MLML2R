@@ -33,7 +33,7 @@ BiocStyle::markdown()
 
 In a given CpG site from a single cell we will either have a C or a T after DNA processing conversion methods, with a different interpretation for each of the available methods. This is a binary outcome and we assume a Binomial model and use the maximum likelihood estimation method to obtain the estimates for hydroxymethylation and methylation proportions.
 
-T reads are referred to as converted cytosine and C reads are referred to as unconverted cytosine. Conventionally, T counts are also referred to as unmethylated counts, and C counts as methylated counts. In case of Infinium Methylation arrays, we have intensities representing the methylated (M) and unmethylated (U) channels that are proportional to the number of unconverted and converted cytosines (C and T, respectively). The most used summary from these experiments is  the proportion $\beta=\frac{M}{M+U}$, commonly referred to as \textit{beta-value}, which reflects the methylation level at a CpG site. Naively using the difference between betas from BS and oxBS as an estimate of 5-hmC (hydroxymethylated cytosine), and the difference between betas from BS and TAB as an estimate of 5-mC (methylated cytosine) can many times provide negative proportions and instances where the sum of uC (unmodified cytosine), 5-mC and 5-hmC proportions is greater than one due.
+T reads are referred to as converted cytosine and C reads are referred to as unconverted cytosine. In case of Infinium Methylation arrays, we have intensities representing the unconverted (M) and converted (U) channels. The most used summary from these experiments is  the proportion $\beta=\frac{M}{M+U}$, commonly referred to as \textit{beta-value}. Naively using the difference between betas from BS and oxBS as an estimate of 5-hmC (hydroxymethylated cytosine), and the difference between betas from BS and TAB as an estimate of 5-mC (methylated cytosine) can many times provide negative proportions and instances where the sum of uC (unmodified cytosine), 5-mC and 5-hmC proportions is greater than one due.
 
 \CRANpkg{MLML2R} package allows the user to jointly estimate hydroxymethylation and methylation consistently and efficiently.
 
@@ -43,13 +43,16 @@ The function assumes that the order of the samples by rows and columns in the in
 
 Arguments           |       Description      
 --------------------|----------------------------------------------------
-\Robject{G.matrix}  | Unmethylated channel (Converted cytosines/ T counts) from  TAB-conversion (reflecting 5-C + 5-mC). 
-\Robject{H.matrix}  | Methylated channel (Unconverted cytosines/ C counts) from TAB-conversion (reflecting True 5-hmC). 
-\Robject{L.matrix}	| Unmethylated channel (Converted cytosines/ T counts) from oxBS-conversion (reflecting 5-C + 5-hmC). 
-\Robject{M.matrix}	| Methylated channel (Unconverted cytosines/ C counts) from  oxBS-conversion (reflecting True 5-mC). 
-\Robject{T.matrix}	| Methylated channel (Unconverted cytosines/ C counts) from  standard BS-conversion (reflecting 5-mC+5-hmC). 
-\Robject{U.matrix}	| Unmethylated channel (Converted cytosines/ T counts) from standard BS-conversion (reflecting True 5-C). 
+\Robject{G.matrix}  | Converted cytosines (T counts or U channel) from TAB-conversion (reflecting 5-C + 5-mC). 
+\Robject{H.matrix}  | Unconverted cytosines (C counts or M channel) from TAB-conversion (reflecting True 5-hmC). 
+\Robject{L.matrix}	| Converted cytosines (T counts or U channel) from oxBS-conversion (reflecting 5-C + 5-hmC). 
+\Robject{M.matrix}	| Unconverted cytosines (C counts or M channel) from  oxBS-conversion (reflecting True 5-mC). 
+\Robject{U.matrix}	| Converted cytosines (T counts or U channel) from standard BS-conversion (reflecting True 5-C). 
+\Robject{T.matrix}	| Unconverted cytosines (C counts or M channel) from  standard BS-conversion (reflecting 5-mC+5-hmC). 
 : `MLML` function and random variable notation.
+
+
+
 
 Value | Description
 ------|------------------
