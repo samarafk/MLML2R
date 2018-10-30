@@ -135,24 +135,29 @@ pData(rgSet) <- as(pD,"DataFrame")
 rgSet
 ```
 
-The \Robject{rgSet} is an object from \Rclass{RGChannelSet} class used for two color data (green and red channels). The input in the \Rfunction{MLML} function are matrices with methylated and unmethylated information from each conversion method. We can use the \Rclass{MethylSet} class, which contains the methylated and unmethylated signals. The most basic way to construct a \Rclass{MethylSet} is  using the function \Rfunction{preprocessRaw}. Here we chose the function \Rfunction{preprocessNoob} [@noob] for background correction, dye bias normalization and construction of the \Rclass{MethylSet}.
-
-
-```{r Preprocess1,eval=FALSE}
-MSet.noob<- preprocessNoob(rgSet)
-```
-
-
-After the preprocessed steps we can use \Rfunction{MLML} from the \CRANpkg{MLML2R} package.
-
+The \Robject{rgSet} is an object from \Rclass{RGChannelSet} class used for two color data (green and red channels). The input in the \Rfunction{MLML} function are matrices with methylated and unmethylated information from each conversion method. We can use the \Rclass{MethylSet} class, which contains the methylated and unmethylated signals. The most basic way to construct a \Rclass{MethylSet} is  using the function \Rfunction{preprocessRaw}. Here we chose the function \Rfunction{preprocessNoob} [@noob] for background correction, dye bias normalization and construction of the \Rclass{MethylSet}. We then proceeded with the function \Rfunction{preprocessSwan} [@Maksimovic2012] for probe-type normalization.
 
 The BS replicates are in columns 1, 3, 5, and 6 (information from `pD$title`). The remaining columns are from the oxBS treated replicates.
 
+
+```{r Preprocess1,eval=FALSE}
+BSindex <- c(1,3,5,6)
+oxBSindex <- c(7,8,2,4)
+
+MSet.noob <- preprocessNoob(rgSet=rgSet)
+set.seed(123)
+MSet.swan <- preprocessSWAN(rgSet=rgSet,mSet=MSet.noob)
+```
+
+
+After the preprocessing steps we can use \Rfunction{MLML} from the \CRANpkg{MLML2R} package.
+
+
 ```{r,eval=FALSE}
-MChannelBS <- getMeth(MSet.noob)[,c(1,3,5,6)]
-UChannelBS <- getUnmeth(MSet.noob)[,c(1,3,5,6)]
-MChannelOxBS <- getMeth(MSet.noob)[,c(7,8,2,4)]
-UChannelOxBS <- getUnmeth(MSet.noob)[,c(7,8,2,4)]
+MChannelBS <- getMeth(MSet.swan)[,BSindex]
+UChannelBS <- getUnmeth(MSet.swan)[,BSindex]
+MChannelOxBS <- getMeth(MSet.swan)[,oxBSindex]
+UChannelOxBS <- getUnmeth(MSet.swan)[,oxBSindex]
 ```
 
 
@@ -180,6 +185,7 @@ results_em <- MLML(T.matrix = MChannelBS , U.matrix = UChannelBS,
 The estimates are very similar for both methods:
 ```{r,echo=TRUE,eval=FALSE}
 all.equal(results_exact$hmC,results_em$hmC,scale=1)
+plot(results_exact$hmC,results_em$hmC)
 ```
 
 
@@ -217,7 +223,6 @@ library(MLML2R)
 library(minfi)
 library(GEOquery)
 library(IlluminaHumanMethylation450kmanifest)
-library(ENmix)
 ```
 
 Obtaining the data:
@@ -287,32 +292,25 @@ qcReport(rgSet, pdf= "qcReport_tab_bs.pdf")
 
 After looking at the quality control report, we notice a problematic sample: GSM1833667. This sample and its corresponding pair in the TAB experiment, GSM1833691, were removed from subsequent analysis.
 
-The input in the \Rfunction{MLML} function accepts as input a \Rclass{MethylSet}, which contains the methylated and unmethylated signals. We chose the function \Rfunction{preprocessNoob} [@noob] for background correction, dye-bias normalization and construction of the \Rclass{MethylSet}. In addition, the function \Rfunction{rcp} [@rcp] from the package \Biocpkg{ENmix} [@pmid26384415] was used for probe-type bias correction. 
+The input in the \Rfunction{MLML} function accepts as input a \Rclass{MethylSet}, which contains the methylated and unmethylated signals. We used the function \Rfunction{preprocessNoob} [@noob] for background correction, dye bias normalization and construction of the \Rclass{MethylSet}. We then proceeded with the function \Rfunction{preprocessSwan} [@Maksimovic2012] for probe-type normalization.
+
 
 
 ```{r preprocess2,eval=FALSE}
-## Noob
-MSet.noob<- preprocessNoob(rgSet)
-
 BSindex <- which(pD$method=="BSchip")[-which(pD$geo_accession 
                                              %in% c("GSM1833667","GSM1833691"))]
 TABindex <- which(pD$method=="TABchip")[-which(pD$geo_accession 
                                                %in% c("GSM1833667","GSM1833691"))]   
 
-## RCP
-nbeta <- rcp(MSet.noob)
+MSet.noob <- preprocessNoob(rgSet)
+set.seed(123)
+MSet.swan <- preprocessSWAN(rgSet=rgSet,mSet=MSet.noob)
 
-beta_BS <- nbeta[,BSindex]
-beta_TAB <- nbeta[,TABindex]
 
-# Total Signal = methylated + unmethylated
-TotalBS <- getMeth(MSet.noob[,BSindex]) + getUnmeth(MSet.noob[,BSindex])
-TotalTAB <- getMeth(MSet.noob[,TABindex]) + getUnmeth(MSet.noob[,TABindex])
-
-MChannelBS <- beta_BS*TotalBS
-UChannelBS <- (1-beta_BS)*TotalBS
-MChannelTAB <- beta_TAB*TotalTAB
-UChannelTAB <- (1-beta_TAB)*TotalTAB
+MChannelBS <- getMeth(MSet.swan)[,BSindex]
+UChannelBS <- getUnmeth(MSet.swan)[,BSindex]
+MChannelTAB <- getMeth(MSet.swan)[,TABindex]
+UChannelTAB <- getUnmeth(MSet.swan)[,TABindex]
 ```
 
 
@@ -321,7 +319,7 @@ We can now use \Rfunction{MLML} from the \CRANpkg{MLML2R} package.
 One needs to carefully check if the columns across the different input matrices represent the same sample. In this example, all matrices have the samples consistently represented in the columns: sample 1 in the first column, sample 2 in the second, and so forth.
 
 
- When any two of the methods are available, the default option of \Rfunction{MLML} function returns the exact constrained maximum likelihood estimates  using the the pool-adjacent-violators algorithm (PAVA) [@ayer1955].
+When any two of the methods are available, the default option of \Rfunction{MLML} function returns the exact constrained maximum likelihood estimates  using the the pool-adjacent-violators algorithm (PAVA) [@ayer1955].
 
 ```{r,eval=FALSE}
 results_exact <- MLML(T.matrix = MChannelBS , U.matrix = UChannelBS,
@@ -351,6 +349,8 @@ all.equal(results_exact$mC,results_em$mC,scale=1)
 
 
 ```{r plot3,echo=FALSE,eval=FALSE}
+beta_BS <- MChannelBS/(MChannelBS+UChannelBS)
+beta_TAB <- MChannelTAB/(MChannelTAB+UChannelTAB)
 hmC_naive <- beta_TAB #5-hmC naive estimate
 C_naive <- 1-beta_BS #uC naive estimate
 mC_naive <- beta_BS-beta_TAB #5-mC naive estimate
@@ -367,7 +367,7 @@ densityPlot(C_naive,main= "uC estimates - Naïve",cex.axis=1.4,cex.main=1.5,cex.
 dev.off()
 ```
 
-```{r,echo=FALSE,fig.width=15,fig.height=10,fig.cap="Estimated proportions of hydroxymethylation, methylation and unmethylation for the CpGs in the dataset from Thienpont et al. (2016), using the MLML function with default (PAVA) options (top row) and the naïve (subtraction) method (bottom row)."}
+```{r,echo=FALSE,fig.width=15,fig.height=10,fig.cap="Estimated proportions of hydroxymethylation, methylation and unmethylation for the CpGs in the dataset from Thienpont et al (2016), using the MLML function with default (PAVA) options (top row) and the naïve (subtraction) method (bottom row)."}
 knitr::include_graphics("Real2a_estimates.pdf") 
 ```
 
@@ -425,43 +425,43 @@ Preparing the data for input in the \Rfunction{MLML} function:
 ```{r,echo=TRUE,eval=FALSE}
 ### BS
 files <- phenoLung$file[phenoLung$convMeth=="BS"]
-MChannelBS    <- do.call(cbind,lapply(files,function(fn) 
+C_BS    <- do.call(cbind,lapply(files,function(fn) 
   fread(fn,data.table=FALSE,select=c("methylated_read_count"))))
 TotalBS    <- do.call(cbind,lapply(files,function(fn) 
   fread(fn,data.table=FALSE,select=c("total_read_count"))))
-UChannelBS <- TotalBS - MChannelBS
+T_BS <- TotalBS - C_BS
 
 
 ### oxBS
 files <- phenoLung$file[phenoLung$convMeth=="oxBS"]
-MChannelOxBS    <- do.call(cbind,lapply(files,function(fn) 
+C_OxBS    <- do.call(cbind,lapply(files,function(fn) 
   fread(fn,data.table=FALSE,select=c("methylated_read_count"))))
 TotalOxBS    <- do.call(cbind,lapply(files,function(fn) 
   fread(fn,data.table=FALSE,select=c("total_read_count"))))
-UChannelOxBS <- TotalOxBS - MChannelOxBS
+T_OxBS <- TotalOxBS - C_OxBS
 
 
 # since rownames and colnames are the same across files:
 tmp <- fread(files[1], data.table=FALSE, select=c("chr","position"))
 CpG <- paste(tmp[,1],tmp[,2],sep="-")
 
-rownames(MChannelBS) <- CpG 
-rownames(UChannelBS) <- CpG
+rownames(C_BS) <- CpG 
+rownames(T_BS) <- CpG
 
-colnames(MChannelBS) <- phenoLung$id[phenoLung$convMeth=="BS"]
-colnames(UChannelBS) <- phenoLung$id[phenoLung$convMeth=="BS"]
+colnames(C_BS) <- phenoLung$id[phenoLung$convMeth=="BS"]
+colnames(T_BS) <- phenoLung$id[phenoLung$convMeth=="BS"]
 
 
-rownames(MChannelOxBS) <- CpG 
-rownames(UChannelOxBS) <- CpG
+rownames(C_OxBS) <- CpG 
+rownames(T_OxBS) <- CpG
 
-colnames(MChannelOxBS) <- phenoLung$id[phenoLung$convMeth=="oxBS"]
-colnames(UChannelOxBS) <- phenoLung$id[phenoLung$convMeth=="oxBS"]
+colnames(C_OxBS) <- phenoLung$id[phenoLung$convMeth=="oxBS"]
+colnames(T_OxBS) <- phenoLung$id[phenoLung$convMeth=="oxBS"]
 
-Tm = as.matrix(MChannelBS)
-Um = as.matrix(UChannelBS)
-Lm = as.matrix(UChannelOxBS)
-Mm = as.matrix(MChannelOxBS)
+Tm = as.matrix(C_BS)
+Um = as.matrix(T_BS)
+Lm = as.matrix(T_OxBS)
+Mm = as.matrix(C_OxBS)
 ```
 
 Only CpGs with coverage of at least 10 across all samples and all conversion procedures (BS and oxBS) were considered in the following results ($7685557$ CpGs).
@@ -529,7 +529,7 @@ densityPlot(C_naive[aa,],main= "uC estimates - Naïve",cex.axis=1.4,cex.main=1.5
 dev.off()
 ```
 
-```{r,echo=FALSE,fig.width=15,fig.height=10,fig.cap="Estimated proportions of hydroxymethylation, methylation and unmethylation for the CpGs in the dataset using the MLML function with default options (top row) and the naïve method (bottom row)."}
+```{r,echo=FALSE,fig.width=15,fig.height=10,fig.cap="Estimated proportions of hydroxymethylation, methylation and unmethylation for the CpGs in the dataset from Li et al (2016) using the MLML function with default options (top row) and the naïve method (bottom row)."}
 knitr::include_graphics("Real3a_estimates.pdf") 
 ```
 
