@@ -3,7 +3,7 @@ title: "MLML2R package User's Guide"
 shorttitle: "MLML2R"
 package: MLML2R
 abstract: >
-  We present a guide to the \R{} package \CRANpkg{MLML2R}. The package provides computationally efficient maximum likelihood estimates of DNA methylation and hydroxymethylation proportions when data from the DNA processing methods bisulfite conversion (BS), oxidative bisulfite conversion (ox-BS), and Tet-assisted bisulfite conversion (TAB) are available. Estimates can be obtained by combining any two of the methods, or all the three methods (if available). The package does not depend on other \R{} packages, allowing the user to read and preprocess the data with any given software, to import the results into \R{} in matrix format, to obtain the maximum likelihood 5-hmC and 5-mC estimates and use them as input for other packages traditionally used in genomic data analysis, such as \Biocpkg{minfi}, \Biocpkg{sva} and \Biocpkg{limma}.
+  We present a guide to the \R{} package \CRANpkg{MLML2R}. The package provides computationally efficient maximum likelihood estimates of DNA methylation and hydroxymethylation proportions when single nucleotide resolution data from the DNA processing methods bisulfite conversion (BS), oxidative bisulfite conversion (ox-BS), and Tet-assisted bisulfite conversion (TAB) are available. Estimates can be obtained by combining any two of the methods, or all the three methods (if available). The package does not depend on other \R{} packages, allowing the user to read and preprocess the data with any given software, to import the results into \R{} in matrix format, to obtain the maximum likelihood estimates for methylation and hydroxymethylation proportions and use them as input for other packages traditionally used in genomic data analysis, such as \Biocpkg{minfi}, \Biocpkg{sva} and \Biocpkg{limma}.
 bibliography: refs.bib
 author: "Samara F. Kiihl and Maria Tellez-Plaza"
 date: "`r Sys.Date()`"
@@ -31,24 +31,25 @@ BiocStyle::markdown()
 # Introduction
 
 
-In a given CpG site from a single cell we will either have a C or a T after DNA processing conversion methods, with a different interpretation for each of the available methods. This is a binary outcome and we assume a Binomial model and use the maximum likelihood estimation method to obtain the estimates for hydroxymethylation and methylation proportions.
+In a given CpG site from a single cell we will either have a C or a T after bisulfite-based DNA conversion methods. We asume a Binomial model and maximum likelihood estimation to obtain consistent hydroxymethylation and methylation proportions with single nucleotide resolution. \CRANpkg{MLML2R} package allows the user to jointly estimate hydroxymethylation and methylation consistently and efficiently.
 
 T reads are referred to as converted cytosine and C reads are referred to as unconverted cytosine. In case of Infinium Methylation arrays, we have intensities representing the unconverted (M) and converted (U) channels. The most used summary from these experiments is  the proportion $\beta=\frac{M}{M+U}$, commonly referred to as \textit{beta-value}. Naively using the difference between betas from BS and oxBS as an estimate of 5-hmC (hydroxymethylated cytosine), and the difference between betas from BS and TAB as an estimate of 5-mC (methylated cytosine) can many times provide negative proportions and instances where the sum of uC (unmodified cytosine), 5-mC and 5-hmC proportions is greater than one due.
 
-\CRANpkg{MLML2R} package allows the user to jointly estimate hydroxymethylation and methylation consistently and efficiently.
 
-The function \Rfunction{MLML} takes as input the data from the different methods and returns the estimated proportion of methylation, hydroxymethylation and unmethylation for a given CpG site. Table 1 presents the arguments of the \Rfunction{MLML} and Table 2 lists the results returned by the function.
+
+The function \Rfunction{MLML} takes as input the data from the different bisulfite-based methods and returns the estimated proportion of methylation, hydroxymethylation and unmethylation for a given CpG site. Table 1 presents the arguments of the \Rfunction{MLML} and Table 2 lists the results returned by the function.
 
 The function assumes that the order of the samples by rows and columns in the input matrices is consistent. In addition, all the input matrices must have the same dimension. In the provided examples, rows represent CpG loci and columns represent samples. Nonetheless transposed matrices can also be supplied.
 
 Arguments           |       Description      
 --------------------|----------------------------------------------------
+\Robject{U.matrix}	| Converted cytosines (T counts or U channel) from standard BS-conversion (reflecting True 5-C). 
+\Robject{T.matrix}	| Unconverted cytosines (C counts or M channel) from  standard BS-conversion (reflecting 5-mC+5-hmC). 
 \Robject{G.matrix}  | Converted cytosines (T counts or U channel) from TAB-conversion (reflecting 5-C + 5-mC). 
 \Robject{H.matrix}  | Unconverted cytosines (C counts or M channel) from TAB-conversion (reflecting True 5-hmC). 
 \Robject{L.matrix}	| Converted cytosines (T counts or U channel) from oxBS-conversion (reflecting 5-C + 5-hmC). 
 \Robject{M.matrix}	| Unconverted cytosines (C counts or M channel) from  oxBS-conversion (reflecting True 5-mC). 
-\Robject{U.matrix}	| Converted cytosines (T counts or U channel) from standard BS-conversion (reflecting True 5-C). 
-\Robject{T.matrix}	| Unconverted cytosines (C counts or M channel) from  standard BS-conversion (reflecting 5-mC+5-hmC). 
+
 : `MLML` function and random variable notation.
 
 
@@ -208,7 +209,7 @@ densityPlot(C_naive,main= "uC estimates - Naïve",cex.axis=1.4,cex.main=1.5,cex.
 dev.off()
 ```
 
-```{r,echo=FALSE,fig.width=15,fig.height=10,fig.cap="Estimated proportions of hydroxymethylation, methylation and unmethylation for the CpGs in the dataset from Field (2015) using the MLML function with default (PAVA) options (top row) and the naïve (subtraction) method (bottom row)."}
+```{r,echo=FALSE,fig.width=15,fig.height=10,fig.cap="Estimated proportions of 5-hmC, 5-mC and uC for the CpGs in the dataset from Field (2015) using the MLML function with default (PAVA) options (top row) and the naïve (subtraction) method (bottom row)."}
 knitr::include_graphics("Real1_estimates.pdf") 
 ```
 
@@ -363,7 +364,7 @@ densityPlot(C_naive,main= "uC estimates - Naïve",cex.axis=1.4,cex.main=1.5,cex.
 dev.off()
 ```
 
-```{r,echo=FALSE,fig.width=15,fig.height=10,fig.cap="Estimated proportions of hydroxymethylation, methylation and unmethylation for the CpGs in the dataset from Thienpont et al (2016), using the MLML function with default (PAVA) options (top row) and the naïve (subtraction) method (bottom row)."}
+```{r,echo=FALSE,fig.width=15,fig.height=10,fig.cap="Estimated proportions of 5-hmC, 5-mC and uC for the CpGs in the dataset from Thienpont et al (2016), using the MLML function with default (PAVA) options (top row) and the naïve (subtraction) method (bottom row)."}
 knitr::include_graphics("Real2a_estimates.pdf") 
 ```
 
@@ -522,7 +523,7 @@ densityPlot(C_naive[aa,],main= "uC estimates - Naïve",cex.axis=1.4,cex.main=1.5
 dev.off()
 ```
 
-```{r,echo=FALSE,fig.width=15,fig.height=10,fig.cap="Estimated proportions of hydroxymethylation, methylation and unmethylation for the CpGs in the dataset from Li et al (2016) using the MLML function with default options (top row) and the naïve method (bottom row)."}
+```{r,echo=FALSE,fig.width=15,fig.height=10,fig.cap="Estimated proportions of 5-hmC, 5-mC and uC for the CpGs in the dataset from Li et al (2016) using the MLML function with default options (top row) and the naïve method (bottom row)."}
 knitr::include_graphics("Real3a_estimates.pdf") 
 ```
 
