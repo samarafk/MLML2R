@@ -135,7 +135,9 @@ pData(rgSet) <- as(pD,"DataFrame")
 rgSet
 ```
 
-The \Robject{rgSet} is an object from \Rclass{RGChannelSet} class used for two color data (green and red channels). The input in the \Rfunction{MLML} function are matrices with methylated and unmethylated information from each conversion method. We can use the \Rclass{MethylSet} class, which contains the methylated and unmethylated signals. The most basic way to construct a \Rclass{MethylSet} is  using the function \Rfunction{preprocessRaw}. Here we chose the function \Rfunction{preprocessNoob} [@noob] for background correction, dye bias normalization and construction of the \Rclass{MethylSet}. We then proceeded with the function \Rfunction{preprocessSwan} [@Maksimovic2012] for probe-type normalization.
+The \Robject{rgSet} is an object from \Rclass{RGChannelSet} class used for two color data (green and red channels). The input in the \Rfunction{MLML} function are matrices with methylated and unmethylated information from each conversion method. We can use the \Rclass{MethylSet} class, which contains the methylated and unmethylated signals. The most basic way to construct a \Rclass{MethylSet} is  using the function \Rfunction{preprocessRaw}. 
+
+Here we chose the function \Rfunction{preprocessNoob} [@noob] for background correction, dye bias normalization and construction of the \Rclass{MethylSet}. We encourage the user to consider other normalization methods such as SWAN [@Maksimovic2012], BMIQ [@Teschendorff2012], RCP [@rcp], Funnorm [@funnorm], and others, as well as combination of some of these methods, as suggested by @Liu2016.
 
 The BS replicates are in columns 1, 3, 5, and 6 (information from `pD$title`). The remaining columns are from the oxBS treated replicates.
 
@@ -145,8 +147,6 @@ BSindex <- c(1,3,5,6)
 oxBSindex <- c(7,8,2,4)
 
 MSet.noob <- preprocessNoob(rgSet=rgSet)
-set.seed(123)
-MSet.swan <- preprocessSWAN(rgSet=rgSet,mSet=MSet.noob)
 ```
 
 
@@ -154,10 +154,10 @@ After the preprocessing steps we can use \Rfunction{MLML} from the \CRANpkg{MLML
 
 
 ```{r,eval=FALSE}
-MChannelBS <- getMeth(MSet.swan)[,BSindex]
-UChannelBS <- getUnmeth(MSet.swan)[,BSindex]
-MChannelOxBS <- getMeth(MSet.swan)[,oxBSindex]
-UChannelOxBS <- getUnmeth(MSet.swan)[,oxBSindex]
+MChannelBS <- getMeth(MSet.noob)[,BSindex]
+UChannelBS <- getUnmeth(MSet.noob)[,BSindex]
+MChannelOxBS <- getMeth(MSet.noob)[,oxBSindex]
+UChannelOxBS <- getUnmeth(MSet.noob)[,oxBSindex]
 ```
 
 
@@ -185,7 +185,6 @@ results_em <- MLML(T.matrix = MChannelBS , U.matrix = UChannelBS,
 The estimates are very similar for both methods:
 ```{r,echo=TRUE,eval=FALSE}
 all.equal(results_exact$hmC,results_em$hmC,scale=1)
-plot(results_exact$hmC,results_em$hmC)
 ```
 
 
@@ -292,7 +291,7 @@ qcReport(rgSet, pdf= "qcReport_tab_bs.pdf")
 
 After looking at the quality control report, we notice a problematic sample: GSM1833667. This sample and its corresponding pair in the TAB experiment, GSM1833691, were removed from subsequent analysis.
 
-The input in the \Rfunction{MLML} function accepts as input a \Rclass{MethylSet}, which contains the methylated and unmethylated signals. We used the function \Rfunction{preprocessNoob} [@noob] for background correction, dye bias normalization and construction of the \Rclass{MethylSet}. We then proceeded with the function \Rfunction{preprocessSwan} [@Maksimovic2012] for probe-type normalization.
+The input in the \Rfunction{MLML} function accepts as input a \Rclass{MethylSet}, which contains the methylated and unmethylated signals. We used the function \Rfunction{preprocessNoob} [@noob] for background correction, dye bias normalization and construction of the \Rclass{MethylSet}.
 
 
 
@@ -303,14 +302,11 @@ TABindex <- which(pD$method=="TABchip")[-which(pD$geo_accession
                                                %in% c("GSM1833667","GSM1833691"))]   
 
 MSet.noob <- preprocessNoob(rgSet)
-set.seed(123)
-MSet.swan <- preprocessSWAN(rgSet=rgSet,mSet=MSet.noob)
 
-
-MChannelBS <- getMeth(MSet.swan)[,BSindex]
-UChannelBS <- getUnmeth(MSet.swan)[,BSindex]
-MChannelTAB <- getMeth(MSet.swan)[,TABindex]
-UChannelTAB <- getUnmeth(MSet.swan)[,TABindex]
+MChannelBS <- getMeth(MSet.noob)[,BSindex]
+UChannelBS <- getUnmeth(MSet.noob)[,BSindex]
+MChannelTAB <- getMeth(MSet.noob)[,TABindex]
+UChannelTAB <- getUnmeth(MSet.noob)[,TABindex]
 ```
 
 
@@ -373,7 +369,7 @@ knitr::include_graphics("Real2a_estimates.pdf")
 
 ## Publicly available sequencing data: oxBS and BS methods
 
-We will use the dataset from @Li2016, which consists of three human lung normal-tumor pairs (six samples). Each sample was divided into two replicates: one treated with BS and the other with oxBS, which were then sequenced using the Illumina HiSeq 2000 (Homo sapiens) platform. The dataset is available at GEO accession [GSE70090](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE70090). 
+We will use the dataset from @Li2016, which consists of three human lung normal-tumor pairs (six samples). Each sample was divided into two replicates: one treated with BS and the other with oxBS, which were then sequenced using the Illumina HiSeq 2000 (Homo sapiens) platform. The preprocessed dataset is available at GEO accession [GSE70090](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE70090). The details of the preprocessing procedures are described in @Li2016.
 
 Obtaining the data:
 ```{r,echo=TRUE,eval=FALSE}
@@ -421,7 +417,6 @@ phenoLung <- phenoLung[order(phenoLung$convMeth,phenoLung$id),]
 
 Preparing the data for input in the \Rfunction{MLML} function:
 
-
 ```{r,echo=TRUE,eval=FALSE}
 ### BS
 files <- phenoLung$file[phenoLung$convMeth=="BS"]
@@ -440,7 +435,6 @@ TotalOxBS    <- do.call(cbind,lapply(files,function(fn)
   fread(fn,data.table=FALSE,select=c("total_read_count"))))
 T_OxBS <- TotalOxBS - C_OxBS
 
-
 # since rownames and colnames are the same across files:
 tmp <- fread(files[1], data.table=FALSE, select=c("chr","position"))
 CpG <- paste(tmp[,1],tmp[,2],sep="-")
@@ -450,7 +444,6 @@ rownames(T_BS) <- CpG
 
 colnames(C_BS) <- phenoLung$id[phenoLung$convMeth=="BS"]
 colnames(T_BS) <- phenoLung$id[phenoLung$convMeth=="BS"]
-
 
 rownames(C_OxBS) <- CpG 
 rownames(T_OxBS) <- CpG
@@ -472,8 +465,8 @@ TotalOxBS <- Lm+Mm
 
 library(matrixStats) 
 
-tmp1 <- rowMins(TotalBS,na.rm=TRUE) # minimum coverage across samples for each CpG
-tmp2 <- rowMins(TotalOxBS,na.rm=TRUE) # minimum coverage across samples for each CpG
+tmp1 <- rowMins(TotalBS,na.rm=TRUE) # minimum coverage across samples from BS for each CpG
+tmp2 <- rowMins(TotalOxBS,na.rm=TRUE) # minimum coverage across samples from oxBS for each CpG
 
 aa <-which(tmp1>=10 & tmp2>=10) 
 # CpGs with coverage at least 10 across all samples for both methods (BS and oxBS)
