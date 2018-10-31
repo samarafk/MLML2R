@@ -4,11 +4,15 @@
 \alias{MLML}
 \title{MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.}
 \usage{
-MLML(G.matrix = NULL, H.matrix = NULL, L.matrix = NULL,
-  M.matrix = NULL, T.matrix = NULL, U.matrix = NULL,
+MLML(U.matrix = NULL, T.matrix = NULL, G.matrix = NULL,
+  H.matrix = NULL, L.matrix = NULL, M.matrix = NULL,
   iterative = FALSE, tol = 1e-05)
 }
 \arguments{
+\item{U.matrix}{Converted cytosines (T counts or U channel) from standard BS-conversion (True 5-C).}
+
+\item{T.matrix}{Unconverted cytosines (C counts or M channel) from standard BS-conversion (reflecting 5-mC+5-hmC).}
+
 \item{G.matrix}{Converted cytosines (T counts or U channel) from TAB-conversion (reflecting 5-C + 5-mC).}
 
 \item{H.matrix}{Unconverted cytosines (C counts or M channel) from TAB-conversion(reflecting True 5-hmC).}
@@ -16,10 +20,6 @@ MLML(G.matrix = NULL, H.matrix = NULL, L.matrix = NULL,
 \item{L.matrix}{Converted cytosines (T counts or U channel) from oxBS-conversion (reflecting 5-C + 5-hmC).}
 
 \item{M.matrix}{Unconverted cytosines (C counts or M channel) from oxBS-conversion (reflecting True 5-mC).}
-
-\item{T.matrix}{Unconverted cytosines (C counts or M channel) from standard BS-conversion (reflecting 5-mC+5-hmC).}
-
-\item{U.matrix}{Converted cytosines (T counts or U channel) from standard BS-conversion (True 5-C).}
 
 \item{iterative}{logical. If iterative=TRUE EM-algorithm is used. For the combination of
 two methods, iterative=FALSE returns the exact constrained MLE using the

@@ -1,11 +1,11 @@
 #' MLE (maximum likelihood estimates) of 5-mC and 5-hmC levels.
 #'
+#' @param U.matrix Converted cytosines (T counts or U channel) from standard BS-conversion (True 5-C).
+#' @param T.matrix Unconverted cytosines (C counts or M channel) from standard BS-conversion (reflecting 5-mC+5-hmC).
 #' @param G.matrix Converted cytosines (T counts or U channel) from TAB-conversion (reflecting 5-C + 5-mC).
 #' @param H.matrix Unconverted cytosines (C counts or M channel) from TAB-conversion(reflecting True 5-hmC).
 #' @param L.matrix Converted cytosines (T counts or U channel) from oxBS-conversion (reflecting 5-C + 5-hmC).
 #' @param M.matrix Unconverted cytosines (C counts or M channel) from oxBS-conversion (reflecting True 5-mC).
-#' @param T.matrix Unconverted cytosines (C counts or M channel) from standard BS-conversion (reflecting 5-mC+5-hmC).
-#' @param U.matrix Converted cytosines (T counts or U channel) from standard BS-conversion (True 5-C).
 #' @param iterative logical. If iterative=TRUE EM-algorithm is used. For the combination of
 #'  two methods, iterative=FALSE returns the exact constrained MLE using the
 #'  pool-adjacent-violators algorithm (PAVA). When all three methods are combined,
@@ -103,12 +103,12 @@
 #'   in paired bisulfite and oxidative bisulfite treated DNA,
 #'   Bioinformatics, 2016;32(23):3667-3669.
 
-MLML <- function(G.matrix       = NULL,
+MLML <- function(U.matrix       = NULL,
+                  T.matrix       = NULL,
+                  G.matrix       = NULL,
                   H.matrix       = NULL,
                   L.matrix       = NULL,
                   M.matrix       = NULL,
-                  T.matrix       = NULL,
-                  U.matrix       = NULL,
                   iterative = FALSE,
                   tol=0.00001)
 {
