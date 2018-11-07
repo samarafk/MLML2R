@@ -74,7 +74,7 @@ When data is obtained through Infinium Methylation arrays, we recommend the use 
 
 
 To start this example we will need the following packages:
-```{r packages1,eval=TRUE,message=FALSE,warning=FALSE}
+```{r packages1,eval=FALSE,message=FALSE,warning=FALSE}
 library(MLML2R)
 library(minfi)
 library(GEOquery)
@@ -218,7 +218,7 @@ knitr::include_graphics("Real1_estimates.pdf")
 We will use the dataset from @Thienpont2016, which consists of 24 DNA samples treated with TAB-BS and hybridized to the Infinium 450K array from newly diagnosed and untreated non-small-cell lung cancer patients (12 normoxic and 12 hypoxic tumours). The dataset is deposited under GEO accession number [GSE71398](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE71398).
 
 We will need the following packages:
-```{r packages2,eval=TRUE,message=FALSE,warning=FALSE}
+```{r packages2,eval=FALSE,message=FALSE,warning=FALSE}
 library(MLML2R)
 library(minfi)
 library(GEOquery)
