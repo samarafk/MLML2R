@@ -1,0 +1,22 @@
+citHeader("To cite MLML2R in publications use:")
+
+citEntry(entry = "Article",
+  title        = "MLML2R: an R package for maximum likelihood estimation of DNA methylation and hydroxymethylation proportions",
+  author       = personList(as.person("Samara F. Kiihl"),
+                   as.person("Maria Jose Martinez-Garrido"),
+                   as.person("Arce Domingo-Relloso"),
+                   as.person("Jose Bermudez"),
+                   as.person("Maria Tellez-Plaza")),
+  journal      = "Statistical Applications in Genetics and Molecular Biology",
+  year         = "2019",
+  volume       = "18",
+  number       = "1",
+  pages        = " ",
+  url          = "http://doi.org/10.1515/sagmb-2018-0031",
+
+  textVersion  =
+  paste("Samara F. Kiihl, Maria Jose Martinez-Garrido, Arce Domingo-Relloso, Jose Bermudez, Maria Tellez-Plaza (2019).",
+        "MLML2R: an R package for maximum likelihood estimation of DNA methylation and hydroxymethylation proportions.",
+        "Statistical Applications in Genetics and Molecular Biology, 18(1).",
+        "URL http://doi.org/10.1515/sagmb-2018-003.")
+)

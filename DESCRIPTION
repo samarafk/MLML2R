@@ -1,7 +1,7 @@
 Package: MLML2R
 Type: Package
 Title: Maximum Likelihood Estimation of DNA Methylation and Hydroxymethylation Proportions
-Version: 0.3.1
+Version: 0.3.2
 Author: Samara Kiihl [aut, cre],
   Maria Jose Martinez-Garrido [aut],
   Arce Domingo-Relloso [aut],
@@ -13,7 +13,7 @@ Description: Maximum likelihood estimates (MLE) of the proportions
     TAB-conversion, and oxBS-conversion methods. One can use information from all three methods 
     or any combination of two of them. Estimates are based on Binomial model by
     Qu et al. (2013) <doi:10.1093/bioinformatics/btt459> and
-    Kiihl et al. (2018, to appear).
+    Kiihl et al. (2019) <doi:10.1515/sagmb-2018-0031>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 VignetteBuilder: knitr

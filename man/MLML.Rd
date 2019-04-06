@@ -112,7 +112,12 @@ T_TAB_sim[2,2] <- NA
 
 }
 \references{
-Qu J, Zhou M, Song Q, Hong EE, Smith AD. MLML: consistent simultaneous estimates of
+Kiihl SF, Martinez-Garrido MJ, Domingo-Relloso A, Bermudez J, Tellez-Plaza M. MLML2R: an
+  R package for maximum likelihood estimation of DNA methylation and hydroxymethylation
+  proportions. Statistical Applications in Genetics and Molecular Biology. 2019;18(1).
+  doi:10.1515/sagmb-2018-0031.
+
+  Qu J, Zhou M, Song Q, Hong EE, Smith AD. MLML: consistent simultaneous estimates of
   DNA methylation and hydroxymethylation. Bioinformatics. 2013;29(20):2645-2646.
   doi:10.1093/bioinformatics/btt459.
 
