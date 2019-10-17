@@ -3,17 +3,15 @@ title: "MLML2R package User's Guide"
 shorttitle: "MLML2R"
 package: MLML2R
 abstract: >
-  We present a guide to the \R{} package \CRANpkg{MLML2R}. The package provides computationally efficient maximum likelihood estimates of DNA methylation and hydroxymethylation proportions when single nucleotide resolution data from the DNA processing methods bisulfite conversion (BS), oxidative bisulfite conversion (ox-BS), and Tet-assisted bisulfite conversion (TAB) are available. Estimates can be obtained by combining any two of the methods, or all the three methods (if available). The package does not depend on other \R{} packages, allowing the user to read and preprocess the data with any given software, to import the results into \R{} in matrix format, to obtain the maximum likelihood estimates for methylation and hydroxymethylation proportions and use them as input for other packages traditionally used in genomic data analysis, such as \Biocpkg{minfi}, \Biocpkg{sva} and \Biocpkg{limma}.
+  We present a guide to the R package `MLML2R`. The package provides computationally efficient maximum likelihood estimates of DNA methylation and hydroxymethylation proportions when single nucleotide resolution data from the DNA processing methods bisulfite conversion (BS), oxidative bisulfite conversion (ox-BS), and Tet-assisted bisulfite conversion (TAB) are available. Estimates can be obtained by combining any two of the methods, or all the three methods (if available). The package does not depend on other R packages, allowing the user to read and preprocess the data with any given software, to import the results into R in matrix format, to obtain the maximum likelihood estimates for methylation and hydroxymethylation proportions and use them as input for other packages traditionally used in genomic data analysis, such as `minfi`, `sva` and `limma`.
 bibliography: refs.bib
 author: "Samara F. Kiihl and Maria Tellez-Plaza"
 date: "`r Sys.Date()`"
-output: 
-  BiocStyle::pdf_document:
-   fig_caption: yes
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using MLML2R}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  \usepackage[utf8]{inputenc}
 ---
 
 ```{r setup, include = FALSE,eval=FALSE}
@@ -23,32 +21,29 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r style, echo = FALSE, results = 'asis'}
-BiocStyle::markdown()
-```
 
 
 # Introduction
 
 
-In a given CpG site from a single cell we will either have a C or a T after bisulfite-based DNA conversion methods. We asume a Binomial model and maximum likelihood estimation to obtain consistent hydroxymethylation and methylation proportions with single nucleotide resolution. \CRANpkg{MLML2R} package allows the user to jointly estimate hydroxymethylation and methylation consistently and efficiently.
+In a given CpG site from a single cell we will either have a C or a T after bisulfite-based DNA conversion methods. We asume a Binomial model and maximum likelihood estimation to obtain consistent hydroxymethylation and methylation proportions with single nucleotide resolution. `MLML2R` package allows the user to jointly estimate hydroxymethylation and methylation consistently and efficiently.
 
 T reads are referred to as converted cytosine and C reads are referred to as unconverted cytosine. In case of Infinium Methylation arrays, we have intensities representing the unconverted (M) and converted (U) channels. The most used summary from these experiments is  the proportion $\beta=\frac{M}{M+U}$, commonly referred to as \textit{beta-value}. Naively using the difference between betas from BS and oxBS as an estimate of 5-hmC (hydroxymethylated cytosine), and the difference between betas from BS and TAB as an estimate of 5-mC (methylated cytosine) can many times provide negative proportions and instances where the sum of uC (unmodified cytosine), 5-mC and 5-hmC proportions is greater than one due.
 
 
 
-The function \Rfunction{MLML} takes as input the data from the different bisulfite-based methods and returns the estimated proportion of methylation, hydroxymethylation and unmethylation for a given CpG site. Table 1 presents the arguments of the \Rfunction{MLML} and Table 2 lists the results returned by the function.
+The function `MLML` takes as input the data from the different bisulfite-based methods and returns the estimated proportion of methylation, hydroxymethylation and unmethylation for a given CpG site. Table 1 presents the arguments of the `MLML` and Table 2 lists the results returned by the function.
 
 The function assumes that the order of the samples by rows and columns in the input matrices is consistent. In addition, all the input matrices must have the same dimension. In the provided examples, rows represent CpG loci and columns represent samples. Nonetheless transposed matrices can also be supplied.
 
 Arguments           |       Description      
 --------------------|----------------------------------------------------
-\Robject{U.matrix}	| Converted cytosines (T counts or U channel) from standard BS-conversion (reflecting True 5-C). 
-\Robject{T.matrix}	| Unconverted cytosines (C counts or M channel) from  standard BS-conversion (reflecting 5-mC+5-hmC). 
-\Robject{G.matrix}  | Converted cytosines (T counts or U channel) from TAB-conversion (reflecting 5-C + 5-mC). 
-\Robject{H.matrix}  | Unconverted cytosines (C counts or M channel) from TAB-conversion (reflecting True 5-hmC). 
-\Robject{L.matrix}	| Converted cytosines (T counts or U channel) from oxBS-conversion (reflecting 5-C + 5-hmC). 
-\Robject{M.matrix}	| Unconverted cytosines (C counts or M channel) from  oxBS-conversion (reflecting True 5-mC). 
+`U.matrix`	| Converted cytosines (T counts or U channel) from standard BS-conversion (reflecting True 5-C). 
+`T.matrix`	| Unconverted cytosines (C counts or M channel) from  standard BS-conversion (reflecting 5-mC+5-hmC). 
+`G.matrix`  | Converted cytosines (T counts or U channel) from TAB-conversion (reflecting 5-C + 5-mC). 
+`H.matrix`  | Unconverted cytosines (C counts or M channel) from TAB-conversion (reflecting True 5-hmC). 
+`L.matrix`	| Converted cytosines (T counts or U channel) from oxBS-conversion (reflecting 5-C + 5-hmC). 
+`M.matrix`	| Unconverted cytosines (C counts or M channel) from  oxBS-conversion (reflecting True 5-mC). 
 
 : `MLML` function and random variable notation.
 
@@ -57,11 +52,11 @@ Arguments           |       Description
 
 Value | Description
 ------|------------------
-\Robject{mC}	| maximum likelihood estimate for the proportion of methylation
-\Robject{hmC}	| maximum likelihood estimate for the proportion of hydroxymethylation
-\Robject{C}	| maximum likelihood estimate for the proportion of unmethylation
-\Robject{methods}	| the conversion methods used to produce the MLE
-: Results returned from the \Rfunction{MLML} function
+`mC`	| maximum likelihood estimate for the proportion of methylation
+`hmC`	| maximum likelihood estimate for the proportion of hydroxymethylation
+`C`	| maximum likelihood estimate for the proportion of unmethylation
+`methods`	| the conversion methods used to produce the MLE
+: Results returned from the `MLML` function
 
 
 # Worked examples
@@ -70,7 +65,7 @@ Value | Description
 
 We will use the dataset from @10.1371/journal.pone.0118202, which consists of eight DNA samples from the same DNA source treated with oxBS and BS and hybridized to the Infinium 450K array.
 
-When data is obtained through Infinium Methylation arrays, we recommend the use of the \Biocpkg{minfi} package [@minfi], a well-established tool for reading, preprocessing and analysing DNA methylation data from these platforms. Although our example relies on \Biocpkg{minfi} and other \Bioconductor{} tools, \CRANpkg{MLML2R} does not depend on any packages. Thus, the user is free to read and preprocess the data using any software of preference and then import into \R{} in matrix format the intensities from the M and U channels (or C and T counts from sequencing) reflecting unconverted and converted cytosines, respectively.
+When data is obtained through Infinium Methylation arrays, we recommend the use of the `minfi` package [@minfi], a well-established tool for reading, preprocessing and analysing DNA methylation data from these platforms. Although our example relies on `minfi` and other Bioconductor tools, `MLML2R` does not depend on any packages. Thus, the user is free to read and preprocess the data using any software of preference and then import into R in matrix format the intensities from the M and U channels (or C and T counts from sequencing) reflecting unconverted and converted cytosines, respectively.
 
 
 To start this example we will need the following packages:
@@ -84,7 +79,7 @@ library(IlluminaHumanMethylation450kmanifest)
 
 It is usually best practice to start the analysis from the raw data, which in the case of the 450K array is a \verb|.IDAT| file.
 
-The raw files are deposited in GEO and can be downloaded by using the \Rfunction{getGEOSuppFiles}. There are two files for each replicate, since the 450k array is a two-color array. The \verb|.IDAT| files are downloaded in compressed format and need to be uncompressed before they are read by the \Rfunction{read.metharray.exp} function.
+The raw files are deposited in GEO and can be downloaded by using the `getGEOSuppFiles`. There are two files for each replicate, since the 450k array is a two-color array. The \verb|.IDAT| files are downloaded in compressed format and need to be uncompressed before they are read by the `read.metharray.exp` function.
 
 
 ```{r getData1,eval=FALSE}
@@ -101,7 +96,7 @@ The \verb|.IDAT| files can now be read:
 rgSet <- read.metharray.exp("GSE63179/idat")
 ```
 
-To access phenotype data we use the \Rfunction{pData} function. The phenotype data is not yet available from the \Robject{rgSet}.
+To access phenotype data we use the `pData` function. The phenotype data is not yet available from the `rgSet`.
 ```{r,eval=FALSE}
 pData(rgSet)
 ```
@@ -136,9 +131,9 @@ pData(rgSet) <- as(pD,"DataFrame")
 rgSet
 ```
 
-The \Robject{rgSet} is an object from \Rclass{RGChannelSet} class used for two color data (green and red channels). The input in the \Rfunction{MLML} function are matrices with methylated and unmethylated information from each conversion method. We can use the \Rclass{MethylSet} class, which contains the methylated and unmethylated signals. The most basic way to construct a \Rclass{MethylSet} is  using the function \Rfunction{preprocessRaw}. 
+The `rgSet` is an object from `RGChannelSet` class used for two color data (green and red channels). The input in the `MLML` function are matrices with methylated and unmethylated information from each conversion method. We can use the `MethylSet` class, which contains the methylated and unmethylated signals. The most basic way to construct a `MethylSet` is  using the function `preprocessRaw`. 
 
-Here we chose the function \Rfunction{preprocessNoob} [@noob] for background correction, dye bias normalization and construction of the \Rclass{MethylSet}. We encourage the user to consider other normalization methods such as SWAN [@Maksimovic2012], BMIQ [@Teschendorff2012], RCP [@rcp], Funnorm [@funnorm], and others, as well as combination of some of these methods, as suggested by @Liu2016.
+Here we chose the function `preprocessNoob` [@noob] for background correction, dye bias normalization and construction of the `MethylSet`. We encourage the user to consider other normalization methods such as SWAN [@Maksimovic2012], BMIQ [@Teschendorff2012], RCP [@rcp], Funnorm [@funnorm], and others, as well as combination of some of these methods, as suggested by @Liu2016.
 
 The BS replicates are in columns 1, 3, 5, and 6 (information from `pD$title`). The remaining columns are from the oxBS treated replicates.
 
@@ -151,7 +146,7 @@ MSet.noob <- preprocessNoob(rgSet=rgSet)
 ```
 
 
-After the preprocessing steps we can use \Rfunction{MLML} from the \CRANpkg{MLML2R} package.
+After the preprocessing steps we can use `MLML` from the `MLML2R` package.
 
 
 ```{r,eval=FALSE}
@@ -162,7 +157,7 @@ UChannelOxBS <- getUnmeth(MSet.noob)[,oxBSindex]
 ```
 
 
- When only two methods are available, the default option of \Rfunction{MLML} function returns the exact constrained maximum likelihood estimates  using the the pool-adjacent-violators algorithm (PAVA) [@ayer1955].
+ When only two methods are available, the default option of `MLML` function returns the exact constrained maximum likelihood estimates  using the the pool-adjacent-violators algorithm (PAVA) [@ayer1955].
  
 
 ```{r MLML2Rexact1,eval=FALSE}
@@ -241,8 +236,7 @@ rgSet <- read.metharray.exp("GSE71398/idat")
 ```
 
 
-
-The phenotype data is not yet available from the \Robject{rgSet}.
+The phenotype data is not yet available from the `rgSet`.
 ```{r,eval=FALSE}
 pData(rgSet)
 ```
@@ -292,7 +286,7 @@ qcReport(rgSet, pdf= "qcReport_tab_bs.pdf")
 
 After looking at the quality control report, we notice a problematic sample: GSM1833667. This sample and its corresponding pair in the TAB experiment, GSM1833691, were removed from subsequent analysis.
 
-The input in the \Rfunction{MLML} function accepts as input a \Rclass{MethylSet}, which contains the methylated and unmethylated signals. We used the function \Rfunction{preprocessNoob} [@noob] for background correction, dye bias normalization and construction of the \Rclass{MethylSet}.
+The input in the `MLML` function accepts as input a `MethylSet`, which contains the methylated and unmethylated signals. We used the function `preprocessNoob` [@noob] for background correction, dye bias normalization and construction of the `MethylSet`.
 
 
 
@@ -311,12 +305,12 @@ UChannelTAB <- getUnmeth(MSet.noob)[,TABindex]
 ```
 
 
-We can now use \Rfunction{MLML} from the \CRANpkg{MLML2R} package.
+We can now use `MLML` from the `MLML2R` package.
 
 One needs to carefully check if the columns across the different input matrices represent the same sample. In this example, all matrices have the samples consistently represented in the columns: sample 1 in the first column, sample 2 in the second, and so forth.
 
 
-When any two of the methods are available, the default option of \Rfunction{MLML} function returns the exact constrained maximum likelihood estimates  using the the pool-adjacent-violators algorithm (PAVA) [@ayer1955].
+When any two of the methods are available, the default option of `MLML` function returns the exact constrained maximum likelihood estimates  using the the pool-adjacent-violators algorithm (PAVA) [@ayer1955].
 
 ```{r,eval=FALSE}
 results_exact <- MLML(T.matrix = MChannelBS , U.matrix = UChannelBS,
@@ -416,7 +410,7 @@ phenoLung <- pheno[pheno$tissue=="lung",]
 phenoLung <- phenoLung[order(phenoLung$convMeth,phenoLung$id),]
 ```
 
-Preparing the data for input in the \Rfunction{MLML} function:
+Preparing the data for input in the `MLML` function:
 
 ```{r,echo=TRUE,eval=FALSE}
 ### BS
@@ -474,7 +468,7 @@ aa <-which(tmp1>=10 & tmp2>=10)
 length(aa)
 ```
 
-We can now use \Rfunction{MLML} from the \CRANpkg{MLML2R} package.
+We can now use `MLML` from the `MLML2R` package.
 
 
 ```{r,echo=TRUE,eval=FALSE}
@@ -492,7 +486,7 @@ results_em <- MLML(T.matrix = Tm[aa,],
         iterative = TRUE)
 ```
 
-Comparing the estimates for 5-hmC proportions from iterative and non iterative option from \Rfunction{MLML} function:
+Comparing the estimates for 5-hmC proportions from iterative and non iterative option from `MLML` function:
 ```{r,echo=TRUE,eval=FALSE}
 all.equal(results_exact$hmC,results_em$hmC,scale=1)
 ```
@@ -653,7 +647,7 @@ Maximum likelihood estimate via EM-algorithm approach [@Qu:MLML] is obtained wit
                        iterative=TRUE)
 ```
 
- When only two methods are available, we highly recommend the default option \Rcode{iterative=FALSE} since the difference in the estimates obtained via EM and exact constrained is very small, but the former requires more computational effort:
+ When only two methods are available, we highly recommend the default option `iterative=FALSE` since the difference in the estimates obtained via EM and exact constrained is very small, but the former requires more computational effort:
 
 ```{r}
  all.equal(results_emBO1$hmC,results_exactBO1$hmC,scale=1)
@@ -790,7 +784,7 @@ all.equal(true_parameters_sim2$p_h,results_emOT1$hmC[,1],scale=1)
 
 ### BS, oxBS and TAB methods
 
-When data from the three methods are available, the default otion in the \Rfunction{MLML} function returns the constrained maximum likelihood estimates using an approximated solution for Lagrange multipliers method.
+When data from the three methods are available, the default otion in the `MLML` function returns the constrained maximum likelihood estimates using an approximated solution for Lagrange multipliers method.
 
 
 ```{r}
@@ -815,7 +809,7 @@ Maximum likelihood estimate via EM-algorithm approach [@Qu:MLML] is obtained wit
 ```
 
 
-We recommend the default option \Rcode{iterative=FALSE} since the difference in the estimates obtained via EM and the approximate exact constrained is very small, but the former requires more computational effort:
+We recommend the default option `iterative=FALSE` since the difference in the estimates obtained via EM and the approximate exact constrained is very small, but the former requires more computational effort:
 
 ```{r}
  all.equal(results_emBOT1$hmC,results_exactBOT1$hmC,scale=1)

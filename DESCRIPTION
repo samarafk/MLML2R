@@ -26,7 +26,6 @@ Suggests:
   microbenchmark,
   GEOquery,
   knitr,
-  BiocStyle,
   rmarkdown,
   IlluminaHumanMethylation450kmanifest
 BugReports: https://github.com/samarafk/MLML2R/issues
